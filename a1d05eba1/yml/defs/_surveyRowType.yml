@@ -1,0 +1,75 @@
+type: string
+enum:
+  # 'select_one': 2,
+  # 'select_multiple': 2,
+  # 'select_one_from_file': 2,
+  # 'select_multiple_from_file': 2,
+
+# NOTE: Meta fields (start, end, today, phonenumber, etc)
+# are not found in this because they are pulled out and placed into the
+# "settings.metas" section
+
+- integer                     # Integer (i.e., whole number) input.
+- decimal                     # Decimal input.
+- range                       # Range input (including rating)
+- text                        # Free text response.
+- select_one                  # [options]	Multiple choice question; only one answer can be selected.
+- select_multiple             # [options]	Multiple choice question; multiple answers can be selected.
+- select_one_from_file        # [file]	Multiple choice from file; only one answer can be selected.
+- select_multiple_from_file   # [file]	Multiple choice from file; multiple answers can be selected.
+- rank                        # [options]	Rank question; order a list.
+- note                        # Display a note on the screen, takes no input.
+- geopoint                    # Collect a single GPS coordinate.
+- geotrace                    # Record a line of two or more GPS coordinates.
+- geoshape                    # Record a polygon of multiple GPS coordinates; the last point is the same as the first point.
+
+- date                        # Date input.
+- time                        # Time input.
+- datetime                    # Accepts a date and a time input.
+
+- image                       # Take a picture or upload an image file.
+- audio                       # Take an audio recording or upload an audio file.
+- video                       # Take a video recording or upload a video file.
+- file                        # Generic file input (txt, pdf, xls, xlsx, doc, docx, rtf, zip)
+- barcode                     # Scan a barcode, requires the barcode scanner app to be installed.
+- calculate                   # Perform a calculation; see the Calculation section below.
+- acknowledge                 # Acknowledge prompt that sets value to "OK" if selected.
+- hidden                      # A field with no associated UI element
+- xmlexternal                 # Adds a reference to an external XML data file
+
+
+- begin_group
+- end_group
+
+- begin_repeat
+- end_repeat
+
+# kobo specific types
+- begin_kobomatrix
+- end_kobomatrix
+
+- begin_score
+- score__row
+- end_score
+
+# rank being phased out
+- begin_rank
+- rank__level
+- end_rank
+
+- begin_koborank
+- koborank__level
+- end_koborank
+
+# - filterType
+
+- select_multiple
+- select_multiple_from_file
+- select_one
+- select_one_external
+- select_one_from_file
+
+- osm
+- osm_buildingtags
+
+- xmlexternal

@@ -1,0 +1,4 @@
+# starts with a word character
+# e.g. 'abc.jpg'
+type: string
+pattern: '^\w'

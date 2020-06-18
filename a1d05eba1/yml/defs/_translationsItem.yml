@@ -1,0 +1,22 @@
+# translations: [
+#   - name: null
+#     code: tx0
+#   - name: English
+#     code: en
+#     default: true
+# ]
+type: object
+additionalProperties: false
+required:
+- name
+- code
+properties:
+  name:
+    anyOf:
+    - type: string
+    - type: 'null'
+  code:
+    type: string
+    pattern: "TXCODE_REGEX_SEE_GATHER_SCHEMAS_PY"
+  default:
+    type: boolean

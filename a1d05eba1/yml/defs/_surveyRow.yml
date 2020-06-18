@@ -1,0 +1,84 @@
+#   # beginGroupOrRepeat:
+#   #   properties:
+#   #     type:
+#   #       type: string
+#   #       enum: ['begin_group', 'begin_repeat']
+
+type: object
+additionalProperties: false
+required: ['type']
+properties:
+  type:
+    $ref: '#/$defs/surveyRowType'
+  label:
+    $ref: '#/$defs/translatable'
+  name:
+    type: string
+  params:
+    type: object
+
+  $kuid:
+    type: string
+  $anchor:
+    type: string
+  appearance:
+    type: string
+  audio:
+    $ref: '#/$defs/translatable'
+  # auto_delete:
+  #   type: string
+  bind:
+    oneOf:
+    - type: string
+    - type: object
+  # calculate:
+  #   type: string
+  calculation:
+    type: string
+  choice_filter:
+    type: string
+  compact_tag:
+    type: string
+  constraint:
+    $ref: '#/$defs/xpath'
+  relevant:
+    $ref: '#/$defs/xpath'
+  constraint_message:
+    $ref: '#/$defs/translatable'
+  guidance_hint:
+    $ref: '#/$defs/translatable'
+  hint:
+    $ref: '#/$defs/translatable'
+  image:
+    $ref: '#/$defs/translatableMedia'
+  intent:
+    type: string
+  kobo--rank-constraint-message:
+    type: string
+  kobo--rank-items:
+    type: string
+  kobo--score-choices:
+    type: string
+  kobo--matrix_list:
+    type: string
+  parameters:
+    type: string
+  default:
+    anyOf:
+      - type: string
+      - $ref: '#/$defs/booleanOrXpath'
+  read_only:
+    $ref: '#/$defs/booleanOrXpath'
+  required:
+    $ref: '#/$defs/booleanOrXpath'
+  select_from:
+    type: string
+    pattern: 'CHOICELIST_NAME_REGEX_SEE_GATHER_SCHEMAS_PY'
+  select_from_file:
+    type: string
+  audio:
+    $ref: '#/$defs/translatable'
+  start:
+    type: string
+  $autoname:
+    type: string

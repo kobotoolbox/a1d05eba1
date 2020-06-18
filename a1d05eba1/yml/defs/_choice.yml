@@ -1,0 +1,7 @@
+type: object
+additionalProperties: false
+properties:
+  label:
+    $ref: '#/$defs/translatable'
+  value:
+    type: string

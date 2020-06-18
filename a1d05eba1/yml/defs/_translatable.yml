@@ -1,0 +1,13 @@
+type: object
+$comment: 'Translatable fields have keys {tx0, tx1}'
+additionalProperties: false
+patternProperties:
+  TXCODE_REGEX_SEE_GATHER_SCHEMAS_PY:
+    type: object
+    anyOf:
+    - $ref: '#/$defs/xpath'
+    - type: object
+      additionalProperties: false
+      properties:
+        string:
+          type: string

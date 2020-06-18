@@ -1,0 +1,10 @@
+image:
+- media::image
+- media:image
+- media::img
+audio:
+- media::audio
+select_from:
+- select_from_list_name
+$anchor:
+- $kuid

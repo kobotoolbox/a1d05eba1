@@ -1,0 +1,6 @@
+env
+*.pyc
+dist/
+htmlcov/
+.coverage
+*.egg-info/

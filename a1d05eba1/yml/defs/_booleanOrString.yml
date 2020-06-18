@@ -1,0 +1,13 @@
+anyOf:
+- type: object
+  additionalProperties: false
+  required: ['string']
+  properties:
+    string:
+      type: string
+- type: object
+  additionalProperties: false
+  required: ['boolean']
+  properties:
+    boolean:
+      type: boolean

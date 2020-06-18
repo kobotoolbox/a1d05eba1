@@ -1,0 +1,5 @@
+# required: true
+# required: {xpath evaluated to something}
+anyOf:
+- type: boolean
+- $ref: '#/$defs/xpath'
