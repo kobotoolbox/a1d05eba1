@@ -4,6 +4,13 @@ from a1d05eba1.components.choices import Choice
 
 from a1d05eba1.utils.kfrozendict import kfrozendict
 
+# from kobo.apps.formschema.content.content import Content, Choice
+# from kobo.apps.formschema.content.row import Row
+#
+# # from frozendict import frozendict
+# from kobo.apps.formschema.kfrozendict import kfrozendict
+
+from pprint import pprint
 
 BAREBONES_1 = kfrozendict({
     'schema': '1',
@@ -64,3 +71,22 @@ def test_reverts_select_from_on_export():
     schema = '2'
     assert 'select_from' in row.to_export(schema=schema)
     assert 'select_from_list_name' not in row.to_export(schema=schema)
+    # pprint(row2schema1)
+
+
+# def test_kfrozendict():
+#     examp = kfrozendict({
+#         'haslist': [
+#             kfrozendict({
+#                 'hasint': 123,
+#             })
+#         ],
+#         'hastuple': (
+#             kfrozendict({
+#                 'hasstr': 'xyz',
+#             }),
+#         )
+#     })
+#     unfrozen = kfrozendict.unfreeze(examp)
+#     assert isinstance(unfrozen, dict)
+#     assert unfrozen['hastuple'][0]['hasstr'] == 'xyz'

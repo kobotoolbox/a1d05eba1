@@ -43,6 +43,7 @@ class Settings(SurveyComponentWithDict):
                 save[key] = val
 
         self._d = kfrozendict.freeze(save)
+        self.validated_content = self._d
 
     def to_dict(self, schema):
         if schema == '2':

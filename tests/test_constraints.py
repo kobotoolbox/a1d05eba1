@@ -1,5 +1,8 @@
 from a1d05eba1.content import Content
+# from a1d05eba1.content import Content
 from a1d05eba1.utils.kfrozendict import kfrozendict
+
+# from pprint import pprint
 
 
 CONTENT_1 = {
@@ -34,7 +37,7 @@ def test_import_constraint_with_message_from_1():
 
     result2 = Content(result).export(schema='1')
     row0 = result2['survey'][0]
-    # print(row0)
+    # pprint(row0)
     # {'constraint': '${age} > 0 and ${age} < 120',
     #  'constraint_message': ['that is not a valid age'],
     #  'label': ['label'],

@@ -1,3 +1,6 @@
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
+
 from ..utils.kfrozendict import kfrozendict
 from ..fields import UntranslatedVal, TranslatedVal
 
@@ -21,6 +24,15 @@ class SurveyComponentBase:
         if hasattr(self, 'postload'):
             self.postload(**kwargs)
 
+    # def load(self, **kwargs):
+    #     load_schema_fn = 'load_from_{}'.format(self.content.schema)
+    #     if hasattr(self, load_schema_fn):
+    #         schema_specific_loading_function = getattr(self, load_schema_fn)
+    #         schema_specific_loading_function(**kwargs)
+
+    # def unfrozen(self):
+    #     return kfrozendict.unfreeze(self._insides)
+
     def __repr__(self):
         data_descriptor = self._data_descriptor
         return '<%s%s %s>' % (self.__class__.__name__,
@@ -30,6 +42,44 @@ class SurveyComponentBase:
 
     def __getitem__(self, index):
         return self._insides.__getitem__(index)
+
+        # validate_schema_property = 'v{}_schema'.format(self.content.schema)
+
+        # if self.content.perform_validation:
+        #     self.validate()
+
+    # def validate(self):
+    #     validate_schema_property = 'v{}_schema'.format(self.content.schema)
+    #     hasschema = hasattr(self, validate_schema_property)
+    #
+    #     if hasattr(self, 'v2_schema') and not hasattr(self, 'jsonschema'):
+    #         raise Exception('xxx')
+    #         self.v2_schema = ''
+    #
+    #     if hasattr(self, 'validated_content') and hasschema:
+    #         _cur_content = kfrozendict.unfreeze(self.validated_content)
+    #         schema = getattr(self, validate_schema_property)
+    #         self._validate(_cur_content, schema)
+    #     elif self.content.perform_validation:
+    #         if hasattr(self, '_tuple'):
+    #             for item in self._tuple:
+    #                 item.validate()
+    #         elif hasattr(self, '_d'):
+    #             for (key, val) in self._d.items():
+    #                 val.validate()
+    # def _validate(self, _content, schema, message=''):
+    #     _content = kfrozendict.unfreeze(_content)
+    #     try:
+    #         validate(_content, schema)
+    #     except ValidationError as err:
+    #         msg = '\n'.join([
+    #             '\n',
+    #             message,
+    #             self.content.identifier,
+    #             repr(self),
+    #         ])
+    #         err.message += msg
+    #         raise err
 
 
 class SurveyComponentWithTuple(SurveyComponentBase):

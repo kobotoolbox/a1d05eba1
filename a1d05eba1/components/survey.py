@@ -11,6 +11,11 @@ class Surv(SurveyComponentWithTuple):
                 self.append(
                     Row(content=self.content, row=row)
                 )
+        self.validated_content = self._tuple
+
+    # v1_schema = yparse('''
+    #   type: array
+    # ''')
 
     def get_tx_col_names_for_v1(self):
         txcolnames = set()

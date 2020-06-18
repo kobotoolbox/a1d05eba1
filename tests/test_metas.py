@@ -1,6 +1,8 @@
 from a1d05eba1.content import Content
 from a1d05eba1.utils.kfrozendict import kfrozendict
 
+from pprint import pprint
+
 
 CONTENT = {
     'schema': '1',

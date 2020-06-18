@@ -63,9 +63,62 @@ class TxList(SurveyComponentWithTuple):
         elif self.content.schema == '2':
             self._load_from_new_list(**kwargs)
 
+    # def __index__(self, nn):
+    #     return self._tuple.__index__(nn)
+
+    def validate(self):
+        if hasattr(self, '_tx_strings'):
+            self._validate_tx_names(self._tx_strings)
+        else:
+            # names = [tx.name for tx in self._tuple]
+            codes = [tx.code for tx in self._tuple]
+            self._validate_tx_names(self.get_ordered_names())
+            self._validate_codes(codes)
+
+    def _validate_codes(self, codes):
+        existing_codes = tuple()
+        for code in codes:
+            if code in [None, '']:
+                raise TranslationImportError('Invalid Translation code: {}'.format(code))
+            if code in existing_codes:
+                raise TranslationImportError('Duplicate Tx Code: {}'.format(code))
+            existing_codes = existing_codes + (
+                code,
+            )
+
+    def _validate_tx_names(self, txnames):
+        # tx strings are imported in schema=1 like
+        # ['english', 'german', None]
+        has_null = False
+        existing_tx_names = tuple()
+        if len(txnames) is 0:
+            raise TranslationImportError('At least one translation must exist')
+        null_count = 0
+        for tx in txnames:
+            if tx is None:
+                null_count += 1
+            elif tx == '':
+                raise TranslationImportError('Invalid Translation name: ""')
+            else:
+                if tx in existing_tx_names:
+                    raise TranslationImportError('Duplicate Tx name: {}'.format(tx))
+                existing_tx_names = existing_tx_names + (tx,)
+        if null_count > 1:
+            raise TranslationImportError('Only one "null" translation can exist')
+
+    def get_ordered_names(self):
+        return [tx.name for tx in self._tuple]
+
+    def get_codes(self):
+        return [tx.name for tx in self._tuple]
+
     def to_v1_strings(self):
         return [tx.as_string_or_null() for tx in self._tuple]
 
+    # @property
+    # def default_index(self):
+    #     return self._tuple.index(self.content.default_tx)
+    #
     def reorder(self):
         # put the default translation first
         default_tx = self.content.default_tx

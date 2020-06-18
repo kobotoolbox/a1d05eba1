@@ -62,11 +62,19 @@ ALL_KOBO_TYPES = ['today',
                   'xml-external']
 
 
+
+# import pdb; pdb.set_trace()
+
+# V2_SCHEMA = SCHEMAS['row']
+# _v2keys = set(V2_SCHEMA['properties'].keys())
+
 V2_PROPERTIES = set(SCHEMAS['MAIN']['$defs']['surveyRow']['properties'].keys())
 
 class Row(SurveyComponentWithOrderedDict):
     renames_to_v1 = yload_file('renames/to1/column')
     renames_from_v1 = yload_file('renames/from1/column', invert=True)
+    # v1_schema = V1_SCHEMA
+    # jsonschema = 'row'
 
     def load_from_2(self, **kwargs):
         _r = kfrozendict(kwargs.get('row'))
@@ -96,6 +104,7 @@ class Row(SurveyComponentWithOrderedDict):
 
     def load_from_1(self, **kwargs):
         srow = kfrozendict.freeze(kwargs.get('row'))
+        # self.validated_content = kwargs.get('row')
 
         skip_keys = ConstraintVal.SCHEMA_1_ROW_KEYS + \
             RelevantVal.SCHEMA_1_ROW_KEYS
@@ -137,6 +146,7 @@ class Row(SurveyComponentWithOrderedDict):
             elif schema == '1':
                 for kvs in colval.dict_key_vals_old(renames=self.renames_to_v1):
                     out.append(kvs)
+        # self._validate(cc, self.v2_schema, message='exporting row to schema v2')
         return dict(out)
 
     def get_row_tx_col_names_for_v1(self):

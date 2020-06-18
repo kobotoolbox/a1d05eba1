@@ -1,3 +1,5 @@
+# from .fields import TranslatedVal, UntranslatedVal
+
 import os
 import re
 import json
@@ -18,6 +20,8 @@ from .components import Settings
 from .components import Metas
 
 from jsonschema import Draft6Validator
+
+from pprint import pprint
 
 from .components.base_component import SurveyComponentWithTuple, SurveyComponentWithDict
 
@@ -90,9 +94,12 @@ class Content:
 
         self.data = kfrozendict.freeze(content)
 
+        # print('load ' + self._v)
         if self._v == '1':
+            # print('load s1')
             self.load_content_schema_1()
         elif self._v == '2':
+            # print('load s2')
             self.load_content_schema_2()
 
         if self.generate_anchors:
@@ -109,6 +116,9 @@ class Content:
                     if not has_anchor:
                         _anchor = self.anchor_generator()
                         choice.set_untranslated('$anchor', _anchor)
+
+        # self.ensure_default_language()
+
 
     def anchor_generator(self):
         length = 9
@@ -131,6 +141,12 @@ class Content:
                     dtx_index = names.index(_from_setting)
             if len(self.txs) > 0:
                 self.default_tx = self.txs._tuple[dtx_index]
+
+    def validate(self):
+        self.survey.validate()
+        self.settings.validate()
+        self.txs.validate()
+        self.choices.validate()
 
     def export(self, schema='2'):
         result = None
@@ -155,17 +171,41 @@ class Content:
             result.copy(schema='+'.join(schemas))
         )
 
+    def _saveme(self):
+        # if 'default_language' in self.data['settings']:
+        #     return True
+        return False
+
     @property
     def identifier(self):
         return json.dumps(
             kfrozendict.unfreeze(self.data['settings'])
         )
 
+    # @property
+    # def default_tx(self):
+    #     if not hasattr(self, '_default_tx'):
+    #         if self._default_tx_name is False:
+    #             self._default_tx = self.txs._tuple[0]
+    #             self._default_tx_name = self._default_tx.name
+    #             self._default_tx_index = 0
+    #         else:
+    #             for ii in range(0, len(self.txs._tuple)):
+    #                 tx = self.txs[ii]
+    #                 if tx.name == self._default_tx_name:
+    #                     self._default_tx = tx
+    #                     self._default_tx_index = 0
+    #                     break
+    #     return {'name': self._default_tx.name,
+    #             'index': self._default_tx_index,
+    #             'code': self._default_tx.code}
+
     def value_has_tx_keys(self, val):
         if not isinstance(val, (dict, kfrozendict)):
             return False
         valkeys = set(val.keys())
         _has_tx_keys = len(valkeys) > 0 and valkeys.issubset(self.txs.codes)
+        # import pdb; pdb.set_trace()
         if not _has_tx_keys and 'tx0' in valkeys:
             raise Exception('missing tx key?')
         return _has_tx_keys
@@ -180,19 +220,23 @@ class Content:
         })
 
     def load_content_schema_2(self):
+        # self.txs = TxList(self)
         content = self.data
 
         self.metas = Metas(content=self)
-        self.txs = TxList(content=self)
+        self.txs = TxList(content=self) #.load_from_new_list(content['translations'])
 
         self.ensure_default_language()
 
         _ctmp = content.get('choices', {})
         self.choices = ChoiceLists(content=self)
+        # import pdb; pdb.set_trace()
+        # .load_from_new_obj(_ctmp, content=self)
 
         self.survey = Surv(content=self)
-
+        # self.survey = Surv.load_from_new_survey_arr(content['survey'], content=self)
         self.settings = Settings(content=self)
+
 
     def load_content_schema_1(self):
         content = self.data
@@ -200,9 +244,16 @@ class Content:
             self.data = self.data.copy(choices=[])
 
         _tcols = self.data.get('translated', [])
+        # for tcol in _tcols:
+        #     if ' ' in tcol:
+        #         _tcols = _tcols + (
+        #             tcol.replace(' ', '_'),
+        #         )
         self._translated_columns = _tcols
         self.metas = Metas(content=self)
+        # print(self.data['translations'])
         self.txs = TxList(content=self)
+        # print(self.data['translations'])
         self.ensure_default_language()
         self.choices = ChoiceLists(content=self)
         self.survey = Surv(content=self)

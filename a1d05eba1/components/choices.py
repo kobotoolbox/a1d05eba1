@@ -1,3 +1,4 @@
+from pprint import pprint
 from collections import defaultdict
 
 from ..utils.kfrozendict import kfrozendict
@@ -7,6 +8,8 @@ from ..fields import UntranslatedVal, TranslatedVal
 
 from .base_component import SurveyComponentWithDict
 from .base_component import SurveyComponentWithOrderedDict
+
+from pprint import pprint
 
 
 class Choice(SurveyComponentWithOrderedDict):
