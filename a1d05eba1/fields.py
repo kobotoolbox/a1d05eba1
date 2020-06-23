@@ -1,6 +1,7 @@
 import json
 
 from .utils.kfrozendict import kfrozendict
+from pprint import pprint
 
 
 class RawValue:
@@ -46,6 +47,9 @@ class TranslatedVal:
             self.key,
             self.vals,
         )
+
+    def validate(self):
+        pass
 
     def load_from_new_vals(self, txvals):
         vals = kfrozendict()
@@ -99,6 +103,9 @@ class UntranslatedVal:
             self.val,
         )
 
+    def validate(self):
+        pass
+
     def dict_key_vals_old(self, renames=None):
         if renames is None:
             renames = {}
@@ -120,7 +127,7 @@ class ConstraintMessage(TranslatedVal):
     def load_from_old_vals(self, txvals):
         _data = {}
         if isinstance(txvals, str):
-            raise Exception('do we land here?')
+            raise Exception('ever land here?')
             # if no translation exists, load it in as the defualt tx
             default_index = self.content.txs.default_index
             txstr = txvals

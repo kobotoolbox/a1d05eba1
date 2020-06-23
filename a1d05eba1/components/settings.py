@@ -1,13 +1,14 @@
 from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yparse, yload_file, invert
-from ..gather_schemas import SCHEMAS
+from ..build_schema import MAIN_SCHEMA
+
 
 from .base_component import SurveyComponentWithTuple, SurveyComponentWithDict
 
 
-LOADED_SETTINGS_SCHEMA = SCHEMAS['settings']
+LOADED_SETTINGS_SCHEMA = MAIN_SCHEMA['$defs']['settings']
 
-settings_keys = SCHEMAS['MAIN']['$defs']['settings']['properties'].keys()
+settings_keys = LOADED_SETTINGS_SCHEMA['properties'].keys()
 
 
 class Settings(SurveyComponentWithDict):
@@ -35,7 +36,7 @@ class Settings(SurveyComponentWithDict):
                 val = val.split(' ')
 
             keep_setting = True
-            strip_uk_setts = self.content.strip_unknown_settings
+            strip_uk_setts = self.content.strip_unknown
             if strip_uk_setts and key not in self.known_settings:
                 keep_setting = False
 

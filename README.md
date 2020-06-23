@@ -37,7 +37,7 @@ As such, the code is currently focused on:
 
 ## Viewing the SCHEMA
 
-`NotImplemented` yet. However, `gather_schemas.py` is the current way to build
+`NotImplemented` yet. However, `build_schemas.py` is the current way to build
 the valid json-schema.
 
 ## Changing SCHEMA

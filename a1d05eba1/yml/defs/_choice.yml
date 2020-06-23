@@ -1,7 +1,11 @@
 type: object
 additionalProperties: false
+required: ['value']
 properties:
+  $anchor:
+    type: 'string'
   label:
     $ref: '#/$defs/translatable'
   value:
     type: string
+    minLength: 1

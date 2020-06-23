@@ -1,0 +1,14 @@
+---
+type: object
+additionalProperties: false
+properties:
+  schema:
+    type: string
+  survey:
+    "$ref": "#/$defs/survey"
+  translations:
+    "$ref": "#/$defs/translations"
+  choices:
+    "$ref": "#/$defs/choices"
+  settings:
+    "$ref": "#/$defs/settings"

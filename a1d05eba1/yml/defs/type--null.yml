@@ -1,0 +1,10 @@
+anyOf:
+- type: object
+  required: ['null']
+  maxProperties: 1
+  # {"null":true} allows checking `if (someValue.null) {...}`, etc.
+  properties:
+    "null":
+      type: boolean
+      enum: [true]
+- type: null

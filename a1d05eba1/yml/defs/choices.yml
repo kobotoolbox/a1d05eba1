@@ -1,6 +1,6 @@
 type: object
 patternProperties:
-  CHOICELIST_NAME_REGEX_SEE_GATHER_SCHEMAS_PY:
+  CHOICE_LIST_NAME_REGEX:
     type: array
     items:
       $ref: '#/$defs/choice'

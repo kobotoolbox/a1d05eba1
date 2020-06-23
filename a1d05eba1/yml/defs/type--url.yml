@@ -1,0 +1,6 @@
+type: object
+required: ['url']
+maxProperties: 1
+properties:
+  url:
+    type: string

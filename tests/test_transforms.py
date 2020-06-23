@@ -66,11 +66,11 @@ def test_additional():
                 {'name': 'end', 'type': 'end'},
                 {'$kuid': 'ty7yd67',
                  'label': 'q1',
-                 'required': 'false',
+                 'required': False,
                  'type': 'text'},
                 {'$kuid': 'pm4jk80',
                  'label': 'q2',
-                 'required': 'false',
+                 'required': False,
                  'type': 'integer'}]}
     content = Content(cc)
     result = content.export(schema='1')
@@ -81,7 +81,7 @@ def test_additional():
     result = content.export(schema='2')
     assert len(result['translations']) == 1
     assert result['translations'] == [{'$anchor': 'tx0', 'default': True,
-                                       'name': None}]
+                                       'name': ''}]
 
 
 def test_colons_forward():

@@ -17,8 +17,6 @@ from .components import TxList, Translation
 from .components import Settings
 from .components import Metas
 
-from jsonschema import Draft6Validator
-
 from .components.base_component import SurveyComponentWithTuple, SurveyComponentWithDict
 
 from .transformations import TRANSFORMERS
@@ -35,7 +33,7 @@ SCHEMA_ALIASES = {
 }
 SCHEMA_ALIASES_REVERSE = dict([(v, k) for (k, v) in SCHEMA_ALIASES.items()])
 
-def parse_schema(schema):
+def unpack_schema_string(schema):
     schema = SCHEMA_ALIASES.get(schema, schema)
     [schema, *transformations] = [ss.strip()
                                   for ss in re.split(r'\++', schema)]
@@ -58,7 +56,8 @@ class Content:
                  perform_validation=False,
                  generate_anchors=False,
                  anchor_generator=False,
-                 strip_unknown_settings=False):
+                 strip_unknown=False,
+                 ):
         content = kfrozendict.freeze(content)
         self._translated_columns = None
         self.perform_renames = True
@@ -68,7 +67,8 @@ class Content:
         if anchor_generator:
             self.anchor_generator = anchor_generator
 
-        self.strip_unknown_settings = strip_unknown_settings
+        self.strip_unknown = strip_unknown
+
         self.perform_validation = perform_validation
 
         self.default_tx = False
@@ -79,7 +79,7 @@ class Content:
             raise ValueError('content.schema not found')
 
 
-        (schema, transformations) = parse_schema(schema)
+        (schema, transformations) = unpack_schema_string(schema)
 
         if len(transformations) > 0:
             for transformation in transformations:
@@ -110,6 +110,12 @@ class Content:
                         _anchor = self.anchor_generator()
                         choice.set_untranslated('$anchor', _anchor)
 
+        if self.perform_validation:
+            self._validate_export()
+
+    def _validate_export(self):
+        validate(self.export(schema='2'), JSONSCHEMA)
+
     def anchor_generator(self):
         length = 9
         alphabet = string.ascii_lowercase + string.digits
@@ -118,8 +124,6 @@ class Content:
         ] + [
             random.choice(alphabet) for _ in range(length - 1)
         ])
-
-
 
     def ensure_default_language(self):
         _from_setting = self.data['settings'].get('default_language')
@@ -136,7 +140,7 @@ class Content:
         result = None
 
         # completed_transformations = []
-        (schema, transformations) = parse_schema(schema)
+        (schema, transformations) = unpack_schema_string(schema)
 
         if schema == '1':
             result = self.to_v1_structure()
@@ -191,8 +195,8 @@ class Content:
         self.choices = ChoiceLists(content=self)
 
         self.survey = Surv(content=self)
-
         self.settings = Settings(content=self)
+
 
     def load_content_schema_1(self):
         content = self.data

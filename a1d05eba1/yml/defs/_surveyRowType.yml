@@ -53,13 +53,12 @@ enum:
 - end_score
 
 # rank being phased out
+- begin_koborank
 - begin_rank
 - rank__level
-- end_rank
-
-- begin_koborank
 - koborank__level
 - end_koborank
+- end_rank
 
 # - filterType
 

@@ -2,11 +2,14 @@ from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yparse, yload_file, invert
 
 from ..fields import TranslatedVal, UntranslatedVal, ConstraintVal, RelevantVal
-from ..gather_schemas import SCHEMAS
 
 from .base_component import SurveyComponentWithTuple
 from .base_component import SurveyComponentWithDict
 from .base_component import SurveyComponentWithOrderedDict
+
+from ..build_schema import MAIN_SCHEMA
+
+V2_PROPERTIES = set(MAIN_SCHEMA['$defs']['surveyRow']['properties'].keys())
 
 ALL_KOBO_TYPES = ['today',
                   'audit',
@@ -61,8 +64,6 @@ ALL_KOBO_TYPES = ['today',
                   'time',
                   'xml-external']
 
-
-V2_PROPERTIES = set(SCHEMAS['MAIN']['$defs']['surveyRow']['properties'].keys())
 
 class Row(SurveyComponentWithOrderedDict):
     renames_to_v1 = yload_file('renames/to1/column')

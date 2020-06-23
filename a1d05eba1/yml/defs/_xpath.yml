@@ -1,4 +1,11 @@
 anyOf:
+# `string` is the legacy string representation of a label-or-xpath-structure
+# in XLSForm which would compile:
+#     "Your name is ${yourname}!"
+# to
+#     <label>Your name is <output value="/data/yourname"/>!</label>
+- $ref: '#/$defs/type--string'
+
 # `compile` is a representation of a label-or-xpath-structure which represents
 # a string or references to other nodes in the instance.
 # An example might compile:
@@ -13,21 +20,9 @@ anyOf:
       type: array
       items:
         anyOf:
-        - type: string
+        - $ref: '#/$defs/type--string'
         - type: object
           additionalProperties: false
           properties:
             $path:
               type: string
-
-# `string` is the legacy string representation of a label-or-xpath-structure
-# in XLSForm which would compile:
-#     Your name is ${yourname}!
-# to
-#     <label>Your name is <output value="/data/yourname"/>!</label>
-- type: object
-  additionalProperties: false
-  required: ['string']
-  properties:
-    string:
-      type: string

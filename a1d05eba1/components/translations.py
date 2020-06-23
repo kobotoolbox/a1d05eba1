@@ -44,9 +44,12 @@ class Translation:
         return out
 
     def as_object(self, is_default=False):
-        # assert self.code == self.anchor
+        _name = self.name
+        if _name is None:
+            _name = ''
+
         obj = {
-            'name': self.name,
+            'name': _name,
             '$anchor': self.anchor,
         }
         if self.locale:

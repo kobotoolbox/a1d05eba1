@@ -1,0 +1,8 @@
+anyOf:
+- type: object
+  required: ['string']
+  maxProperties: 1
+  properties:
+    string:
+      type: string
+- type: string

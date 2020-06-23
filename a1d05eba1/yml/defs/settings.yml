@@ -1,15 +1,17 @@
 type: object
 additionalProperties: false
 properties:
-  meta:
+  metas:
     $ref: '#/$defs/settingsMetas'
   identifier:
     type: string
-  $uid:
-    type: string
+  # $uid:
+  #   type: string
   title:
     type: string
   version:
+    type: string
+  instance_name:
     type: string
   notes:
     type: string
@@ -22,40 +24,40 @@ properties:
       - pages
       - no-text-transform
   submission_url:
-    type: string
-  'form_typename':
-    type: string
-  'url':
-    type: string
-  'form_name':
-    type: string
-  'formid':
-    type: string
-  'form_version':
-    type: string
-  'form id':
-    type: string
-  'form_idv10':
-    type: string
-  'form_ID':
-    type: string
-  'from_title':
-    type: string
-  'default_langauge':
-    type: string
-  'id':
-    type: string
-  'language':
-    type: string
-  'default':
-    type: string
-  'id_name':
-    type: string
-  'id_title':
-    type: string
-  'paper_version':
-    type: string
-  'First_form':
-    type: string
-  'allow_import':
-    type: string
+    $ref: '#/$defs/type--url'
+  # 'form_typename':
+  #   type: string
+  # 'url':
+  #   type: string
+  # 'form_name':
+  #   type: string
+  # 'formid':
+  #   type: string
+  # 'form_version':
+  #   type: string
+  # 'form id':
+  #   type: string
+  # 'form_idv10':
+  #   type: string
+  # 'form_ID':
+  #   type: string
+  # 'from_title':
+  #   type: string
+  # 'default_langauge':
+  #   type: string
+  # 'id':
+  #   type: string
+  # 'language':
+  #   type: string
+  # 'default':
+  #   type: string
+  # 'id_name':
+  #   type: string
+  # 'id_title':
+  #   type: string
+  # 'paper_version':
+  #   type: string
+  # 'First_form':
+  #   type: string
+  # 'allow_import':
+  #   type: string

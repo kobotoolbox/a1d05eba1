@@ -15,6 +15,12 @@ class kfrozendict(Mapping):
     def copy(self, **add_or_replace):
         return self.__class__(self, **add_or_replace)
 
+    def add(self, **kwargs):
+        raise Exception('just use copy')
+        # print('just use copy()')
+        # alias for copy()
+        return self.copy(**kwargs)
+
     def popout(self, key):
         val = None
         keyvals = []
@@ -69,11 +75,14 @@ class kfrozendict(Mapping):
             return list([
                 kls.unfreeze(ival) for ival in val
             ])
+        # elif isinstance(val, dict):
+        #     import pdb; pdb.set_trace()
         else:
             return val
 
     @classmethod
     def freeze(kls, val):
+        # print('kls', val)
         if isinstance(val, (kls, dict)):
             return kls([
                 (ikey, kls.freeze(ival))

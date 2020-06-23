@@ -1,0 +1,8 @@
+anyOf:
+- type: object
+  required: ['boolean']
+  maxProperties: 1
+  properties:
+    boolean:
+      type: boolean
+- type: boolean

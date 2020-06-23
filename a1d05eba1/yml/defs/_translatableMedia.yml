@@ -1,7 +1,7 @@
 type: object
 patternProperties:
-  TXCODE_REGEX_SEE_GATHER_SCHEMAS_PY:
+  TXCODE_REGEX:
     type: object
-    oneOf:
-    - $ref: '#/$defs/webUrl'
-    - $ref: '#/$defs/fileCode'
+    anyOf:
+    - $ref: '#/$defs/type--filecode'
+    - $ref: '#/$defs/type--url'

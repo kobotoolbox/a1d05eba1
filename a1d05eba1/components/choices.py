@@ -4,9 +4,12 @@ from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yparse, yload_file, invert
 
 from ..fields import UntranslatedVal, TranslatedVal
+from ..build_schema import MAIN_SCHEMA
 
 from .base_component import SurveyComponentWithDict
 from .base_component import SurveyComponentWithOrderedDict
+
+CHOICE_PROPERTIES = MAIN_SCHEMA['$defs']['choice']['properties'].keys()
 
 
 class Choice(SurveyComponentWithOrderedDict):
@@ -39,6 +42,8 @@ class Choice(SurveyComponentWithOrderedDict):
                 original = key
                 key = self.renames_from_v1[key]
 
+            if self.content.strip_unknown and key not in CHOICE_PROPERTIES:
+                continue
             if key in self.content._translated_columns:
                 self.set_translated(key, val, original=original)
             else:
@@ -47,6 +52,9 @@ class Choice(SurveyComponentWithOrderedDict):
     def load_from_new_dict(self, item, list_name):
         self.list_name = list_name
         for (key, val) in item.items():
+            if self.content.strip_unknown and key not in CHOICE_PROPERTIES:
+                continue
+
             _is_d = isinstance(val, (dict, kfrozendict))
             if _is_d and self.content.value_has_tx_keys(val):
                 self.set_translated(key, val)

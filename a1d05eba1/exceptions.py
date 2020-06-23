@@ -4,3 +4,6 @@ class SchemaError(Exception):
 
 class TranslationImportError(Exception):
     pass
+
+class SchemaRefError(ImportError):
+    pass

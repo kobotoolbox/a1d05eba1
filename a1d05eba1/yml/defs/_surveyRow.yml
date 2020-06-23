@@ -6,66 +6,70 @@
 
 type: object
 additionalProperties: false
-required: ['type']
+required:
+- 'type'
+# - '$anchor'
 properties:
   type:
     $ref: '#/$defs/surveyRowType'
-  label:
-    $ref: '#/$defs/translatable'
   name:
     type: string
   params:
     type: object
 
-  $kuid:
-    type: string
   $anchor:
     type: string
   appearance:
     type: string
-  audio:
-    $ref: '#/$defs/translatable'
+
   # auto_delete:
   #   type: string
   bind:
-    oneOf:
-    - type: string
-    - type: object
-  # calculate:
-  #   type: string
+    $ref: '#/$defs/type--string'
   calculation:
-    type: string
+    $ref: '#/$defs/type--string'
   choice_filter:
-    type: string
+    $ref: '#/$defs/type--string'
   compact_tag:
-    type: string
+    $ref: '#/$defs/type--string'
   constraint:
-    $ref: '#/$defs/xpath'
+    type: object
+    properties:
+      message:
+        $ref: '#/$defs/translatable'
   relevant:
     $ref: '#/$defs/xpath'
-  constraint_message:
-    $ref: '#/$defs/translatable'
-  guidance_hint:
+
+  label:
     $ref: '#/$defs/translatable'
   hint:
     $ref: '#/$defs/translatable'
+  guidance_hint:
+    $ref: '#/$defs/translatable'
+  constraint_message:
+    $ref: '#/$defs/translatable'
+
   image:
     $ref: '#/$defs/translatableMedia'
+  audio:
+    $ref: '#/$defs/translatableMedia'
+  video:
+    $ref: '#/$defs/translatableMedia'
+
   intent:
     type: string
   kobo--rank-constraint-message:
-    type: string
-  kobo--rank-items:
     type: string
   kobo--score-choices:
     type: string
   kobo--matrix_list:
     type: string
-  parameters:
-    type: string
+  # parameters:
+  # !!renamed to "params"
+  #   type: string
   default:
     anyOf:
-      - type: string
+      - $ref: '#/$defs/type--string'
       - $ref: '#/$defs/booleanOrXpath'
   read_only:
     $ref: '#/$defs/booleanOrXpath'
@@ -73,12 +77,9 @@ properties:
     $ref: '#/$defs/booleanOrXpath'
   select_from:
     type: string
-    pattern: 'CHOICELIST_NAME_REGEX_SEE_GATHER_SCHEMAS_PY'
+    pattern: 'CHOICE_LIST_NAME_REGEX'
+  kobo--rank-items:
+    type: string
+    pattern: 'CHOICE_LIST_NAME_REGEX'
   select_from_file:
-    type: string
-  audio:
-    $ref: '#/$defs/translatable'
-  start:
-    type: string
-  $autoname:
     type: string

@@ -1,3 +1,0 @@
-type: string
-# uri-template?
-pattern: '^http(s)?:\/\/'

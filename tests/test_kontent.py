@@ -7,6 +7,7 @@ CONTENT_1 = {
         {'type': 'select_one',
             'select_from_list_name': 'xlistnamex',
             'name': 'q1',
+            '$anchor': 'xxxxxxx',
             'label': [
                 'label'
             ]
@@ -52,17 +53,17 @@ CONTENT_2 = {
     ],
     'choices': {
         'xlistnamex': [
-            {'name': 'r1', 'label': {
+            {'value': 'r1', 'label': {
             'tx0': {
                 'string': 'r1',
             }
             }},
-            {'name': 'r2', 'label': {
+            {'value': 'r2', 'label': {
             'tx0': {
                 'string': 'r2',
             }
             }},
-            {'name': 'r3', 'label': {
+            {'value': 'r3', 'label': {
             'tx0': {
                 'string': 'r3',
             }
@@ -95,7 +96,7 @@ def test_one2two():
 
     tx1 = result['translations'][0]
     assert isinstance(tx1, dict)
-    assert tx1 == {'$anchor':'tx0', 'name': None, 'default': True}
+    assert tx1 == {'$anchor':'tx0', 'name': '', 'default': True}
     assert isinstance(result['choices'], dict)
     assert len(result['choices'].keys()) > 0
 
@@ -116,9 +117,7 @@ def test_generate_anchors():
                 result = Content(content,
                                  generate_anchors=_gen
                                  ).export(schema=cs)
-                if not _gen:
-                    assert akey not in result['survey'][0]
-                else:
+                if _gen:
                     (row0, choice0) = get_row0s(result)
                     assert akey in row0
                     assert akey in choice0

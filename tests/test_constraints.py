@@ -19,6 +19,7 @@ def test_import_constraint_with_message_from_1():
     result = Content({**CONTENT_1, 'survey': [
         {'type': 'integer',
             'name': 'age',
+            '$anchor': 'age',
             'label': ['label'],
             'constraint': '${age} > 0 and ${age} < 120',
             'constraint_message': ['that is not a valid age']}
@@ -34,7 +35,6 @@ def test_import_constraint_with_message_from_1():
 
     result2 = Content(result).export(schema='1')
     row0 = result2['survey'][0]
-    # print(row0)
     # {'constraint': '${age} > 0 and ${age} < 120',
     #  'constraint_message': ['that is not a valid age'],
     #  'label': ['label'],
