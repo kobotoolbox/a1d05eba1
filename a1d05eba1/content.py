@@ -46,6 +46,26 @@ METAS = yload_file('defs/_settingsMetas')
 
 DEPTH = 0
 
+
+def _unpack_v1_settings(_dsetts=None):
+    # pulls first item from an array, defaults to an empty object
+    if _dsetts is None:
+        return {}
+    if isinstance(_dsetts, (list, tuple)):
+        if len(_dsetts) > 0:
+            return _unpack_v1_settings(_dsetts[0])
+        else:
+            return {}
+    return _dsetts
+
+
+def _sans_empty_values(obj):
+    # remove keys with 'None' as a value in the returned dict
+    for delete_key in [k for (k, v) in obj.items() if v is None]:
+        del obj[delete_key]
+    return obj
+
+
 class Content:
     # is this the right place for these properties? 🤔
     META_TYPES = set(METAS['properties'].keys())
@@ -56,6 +76,7 @@ class Content:
                  perform_validation=False,
                  generate_anchors=False,
                  anchor_generator=False,
+                 exports_include_defaults=False,
                  strip_unknown=False,
                  ):
         content = kfrozendict.freeze(content)
@@ -67,6 +88,7 @@ class Content:
         if anchor_generator:
             self.anchor_generator = anchor_generator
 
+        self.remove_nulls = not exports_include_defaults
         self.strip_unknown = strip_unknown
 
         self.perform_validation = perform_validation
@@ -126,7 +148,7 @@ class Content:
         ])
 
     def ensure_default_language(self):
-        _from_setting = self.data['settings'].get('default_language')
+        _from_setting = self._data_settings.get('default_language')
         if not self.default_tx:
             dtx_index = 0
             if _from_setting:
@@ -159,12 +181,6 @@ class Content:
             result.copy(schema='+'.join(schemas))
         )
 
-    @property
-    def identifier(self):
-        return json.dumps(
-            kfrozendict.unfreeze(self.data['settings'])
-        )
-
     def value_has_tx_keys(self, val):
         if not isinstance(val, (dict, kfrozendict)):
             return False
@@ -175,16 +191,17 @@ class Content:
         return _has_tx_keys
 
     def to_structure(self, schema='2'):
-        return kfrozendict.unfreeze({
+        return _sans_empty_values(kfrozendict.unfreeze({
             'schema': schema,
             'translations': self.txs.to_list(schema=schema),
             'survey': self.survey.to_list(schema=schema),
             'choices': self.choices.to_dict(schema=schema),
             'settings': self.settings.to_dict(schema=schema),
-        })
+        }))
 
     def load_content_schema_2(self):
         content = self.data
+        self._data_settings = self.data.get('settings', {})
 
         self.metas = Metas(content=self)
         self.txs = TxList(content=self)
@@ -200,6 +217,8 @@ class Content:
 
     def load_content_schema_1(self):
         content = self.data
+        self._data_settings = _unpack_v1_settings(self.data.get('settings'))
+
         if 'choices' not in content:
             self.data = self.data.copy(choices=[])
 

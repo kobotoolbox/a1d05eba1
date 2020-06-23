@@ -15,15 +15,12 @@ class Settings(SurveyComponentWithDict):
     settings_renames_from_1 = yload_file('renames/from1/settings', invert=True)
     settings_renames_to_1 = yload_file('renames/to1/settings')
 
-    jsonschema = 'settings'
-
     known_settings = set(settings_keys)
 
     def load(self):
-        # self._d = kfrozendict()
         SKIP_SETTINGS = ['metas', 'default_language']
         save = {}
-        for (key, val) in self.content.data['settings'].items():
+        for (key, val) in self.content._data_settings.items():
             if key in SKIP_SETTINGS:
                 continue
 
@@ -50,6 +47,8 @@ class Settings(SurveyComponentWithDict):
             out = kfrozendict.unfreeze(self._d)
             if self.content.metas.any():
                 out['metas'] = self.content.metas.to_dict()
+            if len(out) == 0 and self.content.remove_nulls:
+                return None
             return out
         elif schema == '1':
             out = []
