@@ -193,3 +193,12 @@ def test_rename_kuid_to_anchor():
     # and rename it back to '$kuid' when saved as schema='1'
     exp2 = Content(exp).export(schema='1')
     assert '$kuid' in exp2['survey'][0]
+
+
+def test_kfrozendict():
+    kf1_0 = kfrozendict(abc=123)
+    kf1_1 = kfrozendict(abc=123)
+    kf2 = kfrozendict(abc=456)
+    assert kf1_0 == kf1_1
+    assert hash(kf1_0) == hash(kf1_1)
+    assert repr(kf1_0) == '''<kfrozendict {'abc': 123}>'''

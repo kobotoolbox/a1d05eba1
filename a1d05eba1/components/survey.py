@@ -1,4 +1,4 @@
-from ..utils.yparse import yparse, yload_file, invert
+from ..utils.yparse import yload_file
 
 from .base_component import SurveyComponentWithTuple, SurveyComponentWithDict
 from .row import Row

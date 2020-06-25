@@ -15,12 +15,6 @@ class kfrozendict(Mapping):
     def copy(self, **add_or_replace):
         return self.__class__(self, **add_or_replace)
 
-    def add(self, **kwargs):
-        raise Exception('just use copy')
-        # print('just use copy()')
-        # alias for copy()
-        return self.copy(**kwargs)
-
     def popout(self, key):
         val = None
         keyvals = []

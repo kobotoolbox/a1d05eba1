@@ -7,7 +7,7 @@ import random
 from jsonschema import validate
 
 from .utils.kfrozendict import kfrozendict
-from .utils.yparse import yparse, yload_file, invert, yload_definition
+from .utils.yparse import yload_file
 
 from .exceptions import SchemaError
 

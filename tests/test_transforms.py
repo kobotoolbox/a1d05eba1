@@ -136,3 +136,11 @@ def test_1_plus_colons():
     result = content.export(schema='1')
     row0 = result['survey'][0]
     assert row0['label'] == ['The patient', 'Le patient']
+
+def test_noop():
+    content = Content({
+        'schema': '1+',
+        'survey': [],
+        'translated': [],
+        'settings': {}
+    }).export(schema='1+')

@@ -1,5 +1,5 @@
 from ..utils.kfrozendict import kfrozendict
-from ..utils.yparse import yparse, yload_file, invert
+from ..utils.yparse import yload_file
 from ..build_schema import MAIN_SCHEMA
 
 
