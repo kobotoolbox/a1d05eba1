@@ -1,7 +1,16 @@
 from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yparse, yload_file, invert
 
-from ..fields import TranslatedVal, UntranslatedVal, ConstraintVal, RelevantVal
+from ..fields import TranslatedVal, UntranslatedVal
+
+# ROW_SPECIAL_FIELDS includes ChoiceFilter, RelevantVal, and ConstraintVal
+from ..special_fields import (
+    ConstraintVal,
+    ROW_SPECIAL_FIELDS,
+    SPECIAL_KEYS,
+)
+
+
 
 from .base_component import SurveyComponentWithTuple
 from .base_component import SurveyComponentWithDict
@@ -71,25 +80,30 @@ class Row(SurveyComponentWithOrderedDict):
 
     def load_from_2(self, **kwargs):
         _r = kfrozendict(kwargs.get('row'))
+        _additionals = {}
 
-        skip_keys = ConstraintVal.SCHEMA_2_ROW_KEYS + \
-            RelevantVal.SCHEMA_2_ROW_KEYS
+        skip_keys = SPECIAL_KEYS['2']
 
         for (key, val) in _r.items():
             if key in skip_keys:
                 continue
-            elif self.content.value_has_tx_keys(val):
+            if key not in V2_PROPERTIES:
+                _additionals[key] = val
+                continue
+
+            if self.content.value_has_tx_keys(val):
                 self.set_translated(key, val)
             else:
                 self.set_untranslated(key, val)
 
-        for _constraint in ConstraintVal.pull_from_row(_r, self.content):
-            assert _constraint.key == 'constraint'
-            self.set('constraint', _constraint)
+        for Field in ROW_SPECIAL_FIELDS:
+            if not Field.in_row(_r, schema=self.content.schema):
+                continue
 
-        for _relevant in RelevantVal.pull_from_row(_r, self.content):
-            assert _relevant.key == 'relevant'
-            self.set('relevant', _relevant)
+            for sfield in Field.pull_from_row(_r, self.content):
+                self.set(Field.EXPORT_KEY, sfield)
+
+        self._additionals = kfrozendict.freeze(_additionals)
 
     def append(self, val):
         key = val.key
@@ -98,8 +112,10 @@ class Row(SurveyComponentWithOrderedDict):
     def load_from_1(self, **kwargs):
         srow = kfrozendict.freeze(kwargs.get('row'))
 
-        skip_keys = ConstraintVal.SCHEMA_1_ROW_KEYS + \
-            RelevantVal.SCHEMA_1_ROW_KEYS
+
+        skip_keys = SPECIAL_KEYS['1']
+
+        _additionals = {}
 
         for (key, val) in srow.items():
             if key in skip_keys:
@@ -116,6 +132,7 @@ class Row(SurveyComponentWithOrderedDict):
             # remove columns that are not recognized in the schema
             # (note: this may be aggressive)
             if key not in V2_PROPERTIES:
+                _additionals[key] = val
                 continue
 
             if original in self.content._translated_columns:
@@ -123,12 +140,14 @@ class Row(SurveyComponentWithOrderedDict):
             else:
                 col = UntranslatedVal(self.content, key, val, original=original)
             self.set(col.key, col)
+        self._additionals = kfrozendict.freeze(_additionals)
 
-        for _constraint in ConstraintVal.pull_from_row(srow, self.content):
-            self.set(_constraint.key, _constraint)
+        for Field in ROW_SPECIAL_FIELDS:
+            if not Field.in_row(srow, schema=self.content.schema):
+                continue
 
-        for _relevant in RelevantVal.pull_from_row(srow, self.content):
-            self.set(_relevant.key, _relevant)
+            for sfield in Field.pull_from_row(srow, self.content):
+                self.set(Field.EXPORT_KEY, sfield)
 
     def to_export(self, schema='2'):
         out = []

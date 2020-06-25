@@ -4,6 +4,8 @@ required: ['value']
 properties:
   $anchor:
     type: 'string'
+  filters:
+    type: 'object'
   label:
     $ref: '#/$defs/translatable'
   value:

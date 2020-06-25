@@ -5,6 +5,8 @@ from ..fields import UntranslatedVal, TranslatedVal
 class SurveyComponentBase:
     def __init__(self, *args, **kwargs):
         self.content = kwargs.pop('content')
+        # tbd how we use this
+        self._additionals = kfrozendict()
         super().__init__()
 
         if hasattr(self, 'preload'):

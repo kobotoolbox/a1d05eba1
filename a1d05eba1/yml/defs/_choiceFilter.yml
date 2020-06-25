@@ -1,0 +1,7 @@
+type: object
+anyOf:
+- additionalProperties: false
+  required: ['raw']
+  properties:
+    'raw':
+      type: 'string'

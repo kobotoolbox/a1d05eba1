@@ -13,8 +13,6 @@ CHOICE_PROPERTIES = MAIN_SCHEMA['$defs']['choice']['properties'].keys()
 
 
 class Choice(SurveyComponentWithOrderedDict):
-    jsonschema = 'choice'
-
     def load(self, item, **kwargs):
         if self.content.schema == '1':
             self.load_from_old_arr(item, **kwargs)
@@ -32,7 +30,7 @@ class Choice(SurveyComponentWithOrderedDict):
 
     def load_from_old_arr(self, item, list_name):
         self.list_name = list_name
-
+        _additionals = {}
         for (key, val) in item.items():
             original = False
             if key in self.choice_specific_renames_from_v1:
@@ -42,16 +40,22 @@ class Choice(SurveyComponentWithOrderedDict):
                 original = key
                 key = self.renames_from_v1[key]
 
-            if self.content.strip_unknown and key not in CHOICE_PROPERTIES:
+            if key not in CHOICE_PROPERTIES:
+                _additionals[key] = val
                 continue
             if key in self.content._translated_columns:
                 self.set_translated(key, val, original=original)
             else:
                 self.set_untranslated(key, val, original=original)
+        self._additionals = kfrozendict.freeze(_additionals)
 
     def load_from_new_dict(self, item, list_name):
         self.list_name = list_name
+        _filters = False
         for (key, val) in item.items():
+            if key == 'filters':
+                _filters = val
+
             if self.content.strip_unknown and key not in CHOICE_PROPERTIES:
                 continue
 
@@ -61,10 +65,17 @@ class Choice(SurveyComponentWithOrderedDict):
             else:
                 self.set_untranslated(key, val)
 
+        if _filters:
+            self._additionals = _filters
+
     def to_dict(self):
         out = []
         for val in self:
             out.append(val.dict_key_vals_new())
+        if len(self._additionals) > 0:
+            out.append(
+                ('filters', self._additionals),
+            )
         return dict(out)
 
     def to_old_dict(self, list_name=None):
@@ -73,6 +84,11 @@ class Choice(SurveyComponentWithOrderedDict):
             dict_out.append(
                 ('list_name', list_name),
             )
+        if len(self._additionals) > 0:
+            for (key, val) in self._additionals.items():
+                dict_out.append(
+                    (key, val)
+                )
         for val in self:
             for (okey, oval) in val.dict_key_vals_old():
                 if okey in self.choice_renames_to_v1:

@@ -1,5 +1,6 @@
 import os
 import yaml
+from types import SimpleNamespace
 
 from .exceptions import SchemaRefError
 
@@ -31,7 +32,7 @@ def _load_path(fpath):
 
 BASE_SCHEMA = _load_path(os.path.join(YML_DIR, 'schema.yml'))
 
-def _collect_refs(obj):
+def _collect_refs(obj, parent_key=''):
     '''
     iterate through a jsonschema object or list and yield
         'xyz'
@@ -43,10 +44,12 @@ def _collect_refs(obj):
 
     if isinstance(obj, dict):
         if '$ref' in obj:
-            yield unpeel(obj['$ref'])
+            if parent_key != 'properties':
+                # $ref is a property, not a reference to a def
+                yield unpeel(obj['$ref'])
         else:
-            for item in obj.values():
-                for unpeeled in _collect_refs(item):
+            for (key, item) in obj.items():
+                for unpeeled in _collect_refs(item, parent_key=key):
                     yield unpeeled
     elif isinstance(obj, list):
         for item in obj:
@@ -80,3 +83,12 @@ def build_schema(base_schema=None):
             **base_schema}
 
 MAIN_SCHEMA = build_schema()
+JSONSCHEMA = MAIN_SCHEMA
+
+from jsonschema import Draft7Validator
+Draft7Validator.check_schema(MAIN_SCHEMA)
+
+defs = SimpleNamespace()
+for (key, val) in JSONSCHEMA['$defs'].items():
+    Draft7Validator.check_schema(val)
+    setattr(defs, key.replace('type--', 'type_'), val)

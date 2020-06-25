@@ -4,6 +4,7 @@ import json
 import string
 import random
 
+from jsonschema import validate
 
 from .utils.kfrozendict import kfrozendict
 from .utils.yparse import yparse, yload_file, invert, yload_definition
@@ -18,6 +19,7 @@ from .components import Settings
 from .components import Metas
 
 from .components.base_component import SurveyComponentWithTuple, SurveyComponentWithDict
+from .build_schema import JSONSCHEMA
 
 from .transformations import TRANSFORMERS
 

@@ -91,8 +91,7 @@ def test_one2two():
     label = result['survey'][0]['label']
     assert isinstance(label, dict)
     assert set(label.keys()) == set(['tx0'])
-    assert isinstance(label['tx0'], dict)
-    assert set(label['tx0'].keys()) == set(['string'])
+    assert isinstance(label['tx0'], str)
 
     tx1 = result['translations'][0]
     assert isinstance(tx1, dict)

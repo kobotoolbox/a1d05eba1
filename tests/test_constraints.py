@@ -30,7 +30,7 @@ def test_import_constraint_with_message_from_1():
 
     assert constraint1 == {
             'string': '${age} > 0 and ${age} < 120',
-            'message': {'mytx': {'string': 'that is not a valid age'}},
+            'message': {'mytx': 'that is not a valid age'},
     }
 
     result2 = Content(result).export(schema='1')

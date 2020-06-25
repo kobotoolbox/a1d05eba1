@@ -19,7 +19,7 @@ class Metas(SurveyComponentWithDict):
                 self._any = True
             self._d = kfrozendict.freeze(metas)
         else:
-            _settings = self.content.data['settings']
+            _settings = self.content._data_settings
             metas = _settings.get('metas', {})
             if len(metas) > 0:
                 self._any = True

@@ -62,7 +62,7 @@ properties:
     type: string
   kobo--score-choices:
     type: string
-  kobo--matrix_list:
+  'kobo--matrix_list':
     type: string
   # parameters:
   # !!renamed to "params"
@@ -78,7 +78,9 @@ properties:
   select_from:
     type: string
     pattern: 'CHOICE_LIST_NAME_REGEX'
-  kobo--rank-items:
+  choice_filter:
+    $ref: '#/$defs/choiceFilter'
+  'kobo--rank-items':
     type: string
     pattern: 'CHOICE_LIST_NAME_REGEX'
   select_from_file:
