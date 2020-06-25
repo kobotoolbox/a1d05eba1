@@ -16,6 +16,10 @@ properties:
     type: string
   params:
     type: object
+    additionalProperties: false
+    patternProperties:
+      '.+':
+        type: 'string'
 
   $anchor:
     type: string
