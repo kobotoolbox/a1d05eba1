@@ -27,6 +27,7 @@ class Translation:
         self.locale = locale
 
     def load_string(self, name):
+        self._initial_name = name
         mtch = re.match('(.*)\\s+\\((.*)\\)\\s*', name)
         if mtch:
             [_name, locale] = mtch.groups()
@@ -79,11 +80,21 @@ class TxList(SurveyComponentWithTuple):
 
     def _load_from_strings(self):
         self._tx_strings = self.content.data.get('translations', [])
+        tx_name_lookup = {}
         for (index, txname) in enumerate(self._tx_strings):
             assert txname is None or isinstance(txname, str)
             tx = Translation(name=txname, _tx_index=index)
             if txname is not None:
                 tx.load_string(txname)
+            if tx.name in tx_name_lookup:
+                errmsg = '{} "{}" and "{}"'.format(
+                    'Inconsistent translation columns:',
+                    tx_name_lookup[tx.name]._initial_name,
+                    tx._initial_name,
+                )
+                raise ValueError(errmsg)
+            tx_name_lookup[tx.name] = tx
+
             self._tuple = self._tuple + (
                 tx,
             )
