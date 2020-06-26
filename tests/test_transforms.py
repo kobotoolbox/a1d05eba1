@@ -137,6 +137,25 @@ def test_1_plus_colons():
     row0 = result['survey'][0]
     assert row0['label'] == ['The patient', 'Le patient']
 
+def test_alternative_colon_configs():
+    content = Content({
+        'schema': '1+::',
+        'survey': [
+            {'type': 'text',
+                'name': 'book',
+                'label: English': 'The patient',
+                'label:French': 'Le patient',
+            },
+        ],
+        'translated': [
+            'label'
+        ],
+        'settings': {},
+    })
+    txs = content.export(schema='2')['translations']
+    txnames = [tx['name'] for tx in txs]
+    assert txnames == ['English', 'French']
+
 def test_noop():
     content = Content({
         'schema': '1+',

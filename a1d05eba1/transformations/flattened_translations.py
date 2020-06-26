@@ -7,7 +7,6 @@ from ..utils.yparse import yload_file
 NULL_TRANSLATION = 'NULL_TRANSLATION'
 
 
-
 TRANSLATABLE_COLS = yload_file('renames/from1/translatable-columns')
 
 
@@ -58,7 +57,7 @@ def inspect_content_translations(content):
     ctx = SimpleNamespace(NULL_TRANSLATION=NULL_TRANSLATION)
     translatable_col_match = []
     for txable in TRANSLATABLE_COLS:
-        translatable_col_match.append(['^%s::(.*)$' % txable, txable])
+        translatable_col_match.append(['^%s::?([^:].*)$' % txable, txable])
 
     ctx.tx_colnames = {}
     ctx.translations = []
@@ -77,6 +76,7 @@ def inspect_content_translations(content):
                 mtch = re.match(rxp, colname)
                 if mtch:
                     [lang] = mtch.groups()
+                    lang =  lang.strip()
                     if lang not in ctx.translations:
                         ctx.translations.append(lang)
                     _index = ctx.translations.index(lang)
