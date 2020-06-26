@@ -12,6 +12,8 @@ CONTENT_1_NO_SETTINGS = {
           'label': ['abc'],
           },
       ],
+     'translations': [''],
+     'translated': ['label'],
 }
 
 CONTENT_1S = [

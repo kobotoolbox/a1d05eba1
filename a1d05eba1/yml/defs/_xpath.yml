@@ -14,6 +14,13 @@ anyOf:
 #     <label>Your name is <output value="/data/yourname"/>!</label>
 - type: object
   additionalProperties: false
+  required: ['raw']
+  properties:
+    raw:
+      type: string
+
+- type: object
+  additionalProperties: false
   required: ['compile']
   properties:
     compile:

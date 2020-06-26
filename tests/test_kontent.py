@@ -24,7 +24,7 @@ CONTENT_1 = {
     'translated': [
         'label'
     ],
-    'settings': {'id_string': 'example',},
+    'settings': {'identifier': 'example',},
     'schema': '1',
 }
 
@@ -35,38 +35,28 @@ CONTENT_2 = {
             'select_from': 'xlistnamex',
             'name': 'q1',
             'label': {
-                'tx0': {
-                    'string': 'mylabel'
-                },
+                'tx0': 'mylabel',
             },
         },
         {'type': 'text',
             'name': 'show_if_q1_empty',
             'label': {
-                'tx0': {
-                    'string': 'reason q1 is empty?',
-                }
+                'tx0': 'reason q1 is empty?',
             },
             'relevant': {
-                'string': '${q1} = \'\'',
+                'raw': '${q1} = \'\'',
             }}
     ],
     'choices': {
         'xlistnamex': [
             {'value': 'r1', 'label': {
-            'tx0': {
-                'string': 'r1',
-            }
+             'tx0': 'r1',
             }},
             {'value': 'r2', 'label': {
-            'tx0': {
-                'string': 'r2',
-            }
+             'tx0': 'r2',
             }},
             {'value': 'r3', 'label': {
-            'tx0': {
-                'string': 'r3',
-            }
+             'tx0': 'r3',
             }},
         ],
     },
@@ -78,7 +68,7 @@ CONTENT_2 = {
         }
     ],
     'settings': {
-        'id_string': 'example',
+        'identifier': 'example',
     },
     'schema': '2',
 }

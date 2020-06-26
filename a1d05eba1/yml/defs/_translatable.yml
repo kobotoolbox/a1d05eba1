@@ -6,3 +6,4 @@ patternProperties:
     anyOf:
     - $ref: '#/$defs/xpath'
     - $ref: '#/$defs/type--string'
+    - $ref: '#/$defs/type--null'

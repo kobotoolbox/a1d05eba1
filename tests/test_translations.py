@@ -114,14 +114,14 @@ def test_reorder_translations():
             {'type': 'text',
                 'name': 'q1',
                 'label': {
-                    'en': {'string': 'en q1'},
-                    'fr': {'string': 'fr q1'}
+                    'en': 'en q1',
+                    'fr': 'fr q1',
                 }},
             {'type': 'text',
                 'name': 'q2',
                 'label': {
-                    'en': {'string': 'en q2'},
-                    'fr': {'string': 'fr q2'}
+                    'en': 'en q2',
+                    'fr': 'fr q2',
                 }}
         ],
         'translations': [
@@ -141,23 +141,3 @@ def test_reorder_translations():
     cc.txs.reorder()
     anchors_1 = [c.anchor for c in cc.txs]
     assert anchors_1 == ['fr', 'en']
-
-def test_aliases():
-    cc = Content({'schema': '2',
-        'settings': {},
-        'survey': [],
-        'translations': [
-        {'name': 't1',
-            'code': 't1'}
-    ]})
-    assert cc.export(schema='2')['translations'][0] == {'name': 't1', 'default': True, '$anchor': 't1'}
-
-    cc = Content({'schema': '2',
-        'settings': {},
-        'survey': [],
-        'translations': [
-        {'name': 't1',
-            'uicode': 'en',
-            'code': 't1'}
-    ]})
-    assert cc.export(schema='2')['translations'][0] == {'name': 't1', 'default': True, '$anchor': 't1', 'locale': 'en'}
