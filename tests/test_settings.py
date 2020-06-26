@@ -48,3 +48,22 @@ def test_one2two():
         content = Content(cc, exports_include_defaults=False)
         rr = content.export(schema='2')
         assert 'settings' in rr
+
+
+PUBLIC_KEY_LINES = [
+    'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyS/Dv8BKjM1K8ieLGg1E',
+    'kWFcdVtMe2wRkdrtudg0dcuo/ucIQh6j7LJ6BdnWIndFhrF70BipWg2jXXsS6soR',
+    'Wlm/Nd7uHeZDwxg6anSSjDlSNngPN8hVPkvx3ammVLA3mugnmGLl6whGcqI3MUOo',
+    'YUSaImiZY8XLJ7HqEfh7lX9txuNXOWVM0jQD250RDH6eKdTbt2lDUsXhQi4JFrc8',
+    'KMMGQcKEQYICtQIXSCA1GFAKzc8BVDd+deRCIPj5OPNFnvu3IyrFyJsRbpdey498',
+    'nGQFUkg+xnNdtu8yCdYELA9BN3o7SKOeTcxXtvL9JatMIFB3f0CaswMkF/0uu4aS',
+    '6QIDAQAB']
+
+def test_settings_public_key():
+    C1 = {**CONTENT_1_NO_SETTINGS, 'settings': [
+        {'public_key': '\n'.join(PUBLIC_KEY_LINES)}
+    ]}
+    rr = Content(C1).export(schema='2')
+    # assert len(rr['settings']['public_key'].split('\n')) == 1
+    rr = Content(rr, perform_validation=True).export(schema='1')
+    assert len(rr['settings']['public_key'].split('\n')) == 7

@@ -2,13 +2,20 @@ from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yload_file
 from ..build_schema import MAIN_SCHEMA
 
-
 from .base_component import SurveyComponentWithTuple, SurveyComponentWithDict
 
+settings_keys = MAIN_SCHEMA['$defs']['settings']['properties'].keys()
 
-LOADED_SETTINGS_SCHEMA = MAIN_SCHEMA['$defs']['settings']
 
-settings_keys = LOADED_SETTINGS_SCHEMA['properties'].keys()
+_standardize_public_key = lambda pk: ''.join(pk.split('\n'))
+
+def _split_pubkey_to_64char_lines(pubkey, chars=64):
+    out = ''
+    while len(pubkey) > chars:
+        line = pubkey[0:chars]
+        pubkey = pubkey[chars:]
+        out += line + '\n'
+    return out + pubkey
 
 
 class Settings(SurveyComponentWithDict):
@@ -40,11 +47,17 @@ class Settings(SurveyComponentWithDict):
             if keep_setting:
                 save[key] = val
 
+        self._pubkey = save.pop('public_key', None)
+        if self._pubkey:
+            self._pubkey = _standardize_public_key(self._pubkey)
+
         self._d = kfrozendict.freeze(save)
 
     def to_dict(self, schema):
         if schema == '2':
             out = kfrozendict.unfreeze(self._d)
+            if self._pubkey:
+                out['public_key'] = self._pubkey
             if self.content.metas.any():
                 out['metas'] = self.content.metas.to_dict()
             if len(out) == 0 and self.content.remove_nulls:
@@ -52,6 +65,10 @@ class Settings(SurveyComponentWithDict):
             return out
         elif schema == '1':
             out = []
+            if self._pubkey:
+                out.append(
+                    ('public_key', _split_pubkey_to_64char_lines(self._pubkey))
+                )
             if self.content.default_tx != False:
                 dtxname = self.content.default_tx.as_string_or_null()
                 out.append(

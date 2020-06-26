@@ -13,6 +13,14 @@ properties:
     type: string
   instance_name:
     type: string
+  public_key:
+    anyOf:
+    - type: string
+      pattern: "^[^\n]+$"
+    - type: 'object'
+      properties:
+        '$ref':
+          type: 'string'
   notes:
     type: string
   style:
