@@ -25,6 +25,18 @@ properties:
     type: string
   appearance:
     type: string
+    enum:
+    - field-list
+    - horizontal-compact
+    - label
+    - rating                      # type: range
+    - likert
+    - list-nolabel
+    - minimal
+    - multiline
+    - no-calendar
+    - month-year
+    - year
 
   # auto_delete:
   #   type: string
