@@ -31,7 +31,11 @@ SCHEMAS = [
 SCHEMA_ALIASES = {
     '1+::': '1+flattened_translations',
     '1::': '1+flattened_translations',
-    'xlsform': '1+flattened_translations',
+    'xlsform': '+'.join([
+        '1',
+        'flattened_translations',
+        'xlsform_aliases',
+    ]),
 }
 SCHEMA_ALIASES_REVERSE = dict([(v, k) for (k, v) in SCHEMA_ALIASES.items()])
 
@@ -81,6 +85,8 @@ class Content:
                  exports_include_defaults=False,
                  strip_unknown=False,
                  ):
+        if content['schema'] == '2':
+            validate(content, JSONSCHEMA)
         content = kfrozendict.freeze(content)
         self._translated_columns = None
         self.perform_renames = True

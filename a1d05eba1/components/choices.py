@@ -115,7 +115,9 @@ class ChoiceLists(SurveyComponentWithDict):
     def load_from_1(self):
         self.source = self.content.data.get('choices', [])
         for item in self.source:
-            (list_item, list_name) = item.popout('list_name')
+            list_name_key = 'list name' if 'list name' in item else 'list_name'
+            (list_item, list_name) = item.popout(list_name_key)
+
             self._append_choice_to_list(list_name,
                 Choice(content=self.content,
                        item=list_item,

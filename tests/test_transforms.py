@@ -156,6 +156,21 @@ def test_alternative_colon_configs():
     txnames = [tx['name'] for tx in txs]
     assert txnames == ['English', 'French']
 
+def test_split_types():
+    content = Content({
+        'schema': '1+xlsform_aliases',
+        'survey': [
+            {
+                'type': 'select_one dog',
+            }
+        ]
+    })
+    row0 = content.export(schema='1')['survey'][0]
+    assert row0['type'] == 'select_one'
+    assert row0['select_from_list_name'] == 'dog'
+    row0 = content.export(schema='1+xlsform_aliases')['survey'][0]
+    assert row0['type'] == 'select_one dog'
+
 def test_noop():
     content = Content({
         'schema': '1+',
