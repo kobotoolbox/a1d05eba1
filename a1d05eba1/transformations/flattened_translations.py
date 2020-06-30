@@ -15,7 +15,7 @@ def expand_it(row, updates, translated, translations):
         (row, vals) = row.popout(col)
         if vals:
             for (tx, val) in zip(translations, vals):
-                if tx is None:
+                if tx in [None, '']:
                     newcolname = col
                 else:
                     newcolname = '::'.join([col, tx])
@@ -57,7 +57,7 @@ def inspect_content_translations(content):
     ctx = SimpleNamespace(NULL_TRANSLATION=NULL_TRANSLATION)
     translatable_col_match = []
     for txable in TRANSLATABLE_COLS:
-        translatable_col_match.append(['^%s::?([^:].*)$' % txable, txable])
+        translatable_col_match.append(['^%s::?([^:]*)$' % txable, txable])
 
     ctx.tx_colnames = {}
     ctx.translations = []
@@ -77,6 +77,8 @@ def inspect_content_translations(content):
                 if mtch:
                     [lang] = mtch.groups()
                     lang =  lang.strip()
+                    if lang == '':
+                        lang = NULL_TRANSLATION
                     if lang not in ctx.translations:
                         ctx.translations.append(lang)
                     _index = ctx.translations.index(lang)

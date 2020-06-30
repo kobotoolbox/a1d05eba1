@@ -58,6 +58,29 @@ def test_reverser():
     assert content['translations'] == [None, 'English']
     assert content['translated'] == ['label']
 
+def test_reverser_weird_col():
+    cc = {'survey':[{'label::':'aa'}, {'label': 'bb'}]}
+    ctx = inspect_content_translations(cc)
+    assert 'label' in ctx.translated
+    cc = kfrozendict.freeze(cc)
+    mut = mutate_content(cc, ctx)
+    row0 = mut['survey'][0]
+    row1 = mut['survey'][1]
+    # row1 and row0 should evaluate to the same translation
+    assert row0['label'] == ['aa']
+    assert row1['label'] == ['bb']
+
+def test_colons_forward_empty_tx():
+    cc = {'schema': '2',
+         'survey': [{'$anchor': 'kd1btqqgz',
+                     'label': {'tx0': 'state'},
+                     'name': 'state',
+                     'select_from': 'states',
+                     'type': 'select_one'}],
+         'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]}
+    result = Content(cc).export(schema='xlsform')
+    row0 = result['survey'][0]
+    assert 'label' in row0
 
 def test_additional():
     cc = {'schema': '1::',
