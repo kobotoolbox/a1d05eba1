@@ -19,9 +19,16 @@ setuptools.setup(
         'yml/*/*.yml',
         'yml/*/*/*.yml',
     ]},
+    entry_points={
+        'console_scripts': [
+            'a1d05eba1=a1d05eba1.scripts.entry:main'
+        ]
+    },
     install_requires=[
+        'oyaml==0.9',
         'pytest==5.4.3',
         'frozendict==1.2',
+        'jsonschema==3.2.0',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
