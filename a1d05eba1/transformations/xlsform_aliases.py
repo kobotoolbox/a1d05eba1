@@ -30,15 +30,15 @@ def rw__each_row(row):
     if _type in XLSFORM_RENAMES:
         _type = XLSFORM_RENAMES[_type]
         return row.copy(type=_type)
-    for s_alias in [
-        'select_one ',
-        'select_multiple ',
-        'select_one_from_file ',
-        'select_multiple_from_file ',
-        ]:
-        if s_alias in _type:
+    for s_alias in ['select_one',
+                    'select_multiple',
+                    'select_one_from_file',
+                    'select_multiple_from_file',
+                    ]:
+        s_alias_spaced = '{} '.format(s_alias)
+        if s_alias_spaced in _type:
             changes = {'type': s_alias.strip(),
-                'select_from_list_name': _type.replace(s_alias, '')
+                'select_from_list_name': _type.replace(s_alias, '').strip(),
             }
             return row.copy(**changes)
     return row.copy(type=_type)
