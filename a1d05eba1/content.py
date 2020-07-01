@@ -29,11 +29,11 @@ SCHEMAS = [
 ]
 
 SCHEMA_ALIASES = {
-    '1+::': '1+flattened_translations',
-    '1::': '1+flattened_translations',
+    '1+::': '1+xlsform_translations',
+    '1::': '1+xlsform_translations',
     'xlsform': '+'.join([
         '1',
-        'flattened_translations',
+        'xlsform_translations',
         'xlsform_aliases',
     ]),
 }

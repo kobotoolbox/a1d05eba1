@@ -3,7 +3,7 @@ from a1d05eba1.content import Content
 # from a1d05eba1.choices import Choice
 
 from a1d05eba1.utils.kfrozendict import kfrozendict
-from a1d05eba1.transformations.flattened_translations import (
+from a1d05eba1.transformations.xlsform_translations import (
     rw,
     fw,
     inspect_content_translations,
