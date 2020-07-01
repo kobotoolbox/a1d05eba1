@@ -9,6 +9,7 @@ from .base_component import SurveyComponentWithTuple, SurveyComponentWithDict
 
 
 LETTERS = string.ascii_lowercase + string.digits
+NULL_TRANSLATION = 'NULL_TRANSLATION'
 
 
 class Translation:
@@ -18,7 +19,8 @@ class Translation:
             _tx_index=None):
 
         self.name = name
-
+        if name in ['', None]:
+            self.name = NULL_TRANSLATION
         if anchor is None and _tx_index is None:
             raise ValueError('Translation needs "$anchor"')
         elif anchor is None:
@@ -37,7 +39,7 @@ class Translation:
 
     def as_string_or_null(self):
         # for exporting to schema='1'
-        if self.name is None:
+        if self.name is NULL_TRANSLATION:
             return None
         out = self.name
         if self.locale:
@@ -45,14 +47,8 @@ class Translation:
         return out
 
     def as_object(self, is_default=False):
-        _name = self.name
-        if _name is None:
-            _name = ''
-
-        obj = {
-            'name': _name,
-            '$anchor': self.anchor,
-        }
+        obj = {'$anchor': self.anchor,}
+        obj['name'] = '' if self.name is NULL_TRANSLATION else self.name
         if self.locale:
             obj['locale'] = self.locale
         if is_default:
