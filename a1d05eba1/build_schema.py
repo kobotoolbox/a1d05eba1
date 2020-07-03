@@ -1,6 +1,5 @@
 import os
 import yaml
-from types import SimpleNamespace
 
 from .exceptions import SchemaRefError
 
@@ -88,7 +87,22 @@ JSONSCHEMA = MAIN_SCHEMA
 from jsonschema import Draft7Validator
 Draft7Validator.check_schema(MAIN_SCHEMA)
 
-defs = SimpleNamespace()
+_defs = {}
 for (key, val) in JSONSCHEMA['$defs'].items():
     Draft7Validator.check_schema(val)
-    setattr(defs, key.replace('type--', 'type_'), val)
+    _defs[key] = val
+
+_individual_defs = {}
+def schema_for_def(defname):
+    if defname not in _individual_defs:
+        _subdefs = {}
+        def append_ref_and_subrefs(xdef, key):
+            if key:
+                _subdefs[key] = xdef
+            for ref in _collect_refs(xdef):
+                if ref not in _subdefs:
+                    append_ref_and_subrefs(_defs[ref], ref)
+        _def = _defs[defname]
+        append_ref_and_subrefs(_def, key=False)
+        _individual_defs[defname] = {**_def, '$defs': _subdefs}
+    return _individual_defs[defname]
