@@ -99,7 +99,7 @@ class TxList(SurveyComponentWithTuple):
             self._tuple[0].is_default = True
 
     def _load_from_new_list(self):
-        array_of_txs = self.content.data.get('translations')
+        array_of_txs = self.content.data.get('translations', [])
         for (index, tx) in enumerate(array_of_txs):
             if 'uicode' in tx:
                 (tx, locale) = tx.popout('uicode')

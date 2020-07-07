@@ -6,9 +6,11 @@ CONTENT = {
     'schema': '1',
     'survey': [
         {'type': 'start',
+            '$anchor': '$start',
             'name': 'start',
         },
         {'type': 'end',
+            '$anchor': '$end',
             'name': 'end',
         },
     ],
@@ -21,7 +23,6 @@ CONTENT = {
     'settings': {},
 }
 
-
 def test_extract_metas_properly():
     # just converts back and forth and back and forth
     # verifies settings.metas is correct
@@ -30,6 +31,7 @@ def test_extract_metas_properly():
     assert len(result_2['survey']) == 0
     assert 'settings' in result_2
     assert 'metas' in result_2['settings']
+    assert result_2['settings']['metas'] == {'start': True, 'end': True}
 
     result_21 = Content(result_2).export(schema='1')
     assert len(result_21['survey']) == 2

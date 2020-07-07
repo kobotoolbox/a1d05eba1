@@ -5,8 +5,6 @@ from types import SimpleNamespace
 from ..utils.yparse import yload_file
 
 NULL_TRANSLATION = 'NULL_TRANSLATION'
-
-
 TRANSLATABLE_COLS = yload_file('renames/from1/translatable-columns')
 
 
@@ -90,14 +88,18 @@ def inspect_content_translations(content):
     ctx.tx_count = len(ctx.translations)
     return ctx
 
+
 def mutate_content(content, context):
     def mutate_row(row):
+        label = row.get('label')
+        if isinstance(label, (list, tuple)):
+            raise ValueError('must be not a list')
         overrides = {}
         dests = {}
         for key in row.keys():
             if key in context.tx_colnames:
                 (row, val) = row.popout(key)
-                [destination, lang, index] = context.tx_colnames[key]
+                (destination, lang, index) = context.tx_colnames[key]
                 if destination not in dests:
                     dests[destination] = [None] * context.tx_count
                 dests[destination][index] = val
@@ -113,7 +115,7 @@ def mutate_content(content, context):
     translations = []
     for tx in context.translations:
         translations.append(
-            None
+            NULL_TRANSLATION
             if tx == context.NULL_TRANSLATION
             else tx
         )

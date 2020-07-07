@@ -34,12 +34,14 @@ CONTENT_2 = {
         {'type': 'select_one',
             'select_from': 'xlistnamex',
             'name': 'q1',
+            '$anchor': 'xxxxxxb',
             'label': {
                 'tx0': 'mylabel',
             },
         },
         {'type': 'text',
             'name': 'show_if_q1_empty',
+            '$anchor': 'xxxxxxc',
             'label': {
                 'tx0': 'reason q1 is empty?',
             },
@@ -51,13 +53,19 @@ CONTENT_2 = {
         'xlistnamex': [
             {'value': 'r1', 'label': {
              'tx0': 'r1',
-            }},
+            },
+            '$anchor': 'xxxxxxd',
+            },
             {'value': 'r2', 'label': {
              'tx0': 'r2',
-            }},
+            },
+            '$anchor': 'xxxxxxe',
+            },
             {'value': 'r3', 'label': {
              'tx0': 'r3',
-            }},
+            },
+            '$anchor': 'xxxxxxf',
+            },
         ],
     },
     'translations': [
@@ -88,45 +96,6 @@ def test_one2two():
     assert tx1 == {'$anchor':'tx0', 'name': '', 'default': True}
     assert isinstance(result['choices'], dict)
     assert len(result['choices'].keys()) > 0
-
-
-def test_generate_anchors():
-    def get_row0s(surv):
-        row0 = surv['survey'][0]
-        if isinstance(surv['choices'], list):
-            return (row0, surv['choices'][0])
-        return (row0, surv['choices']['xlistnamex'][0])
-
-    for _gen in [True, False]:
-        # generate_anchors=True/False
-        for content in [CONTENT_1, CONTENT_2]:
-            # content.export(schema='1'/'2')
-            for cs in ['1', '2']:
-                akey = '$anchor' if (cs == '2') else '$kuid'
-                result = Content(content,
-                                 generate_anchors=_gen
-                                 ).export(schema=cs)
-                if _gen:
-                    (row0, choice0) = get_row0s(result)
-                    assert akey in row0
-                    assert akey in choice0
-                    asval1 = row0[akey]
-                    acval1 = choice0[akey]
-                    for cs2 in ['1', '2']:
-                        # ensure anchor is preserved on second pass
-                        result_x = Content(result,
-                                           generate_anchors=True
-                                           ).export(schema=cs2)
-                        akey = '$anchor' if (cs2 == '2') else '$kuid'
-                        (row0, choice0) = get_row0s(result_x)
-
-                        # survey[n]['$anchor'] does not get changed on pass 2
-                        asval2 = row0[akey]
-                        assert asval1 == asval2
-
-                        # choices[...]['$anchor'] does not get changed on pass 2
-                        acval2 = choice0[akey]
-                        assert acval1 == acval2
 
 
 def test_one2one():
@@ -168,7 +137,7 @@ def test_two2two():
 
 def test_rename_kuid_to_anchor():
     cc = Content({
-        'schema': '1',
+        'schema': '1+kuid_anchor_key',
         'survey': [
             {'type': 'text',
                 'label': ['asdf'],
@@ -181,7 +150,7 @@ def test_rename_kuid_to_anchor():
     exp = cc.export(schema='2')
     assert '$anchor' in exp['survey'][0]
     # and rename it back to '$kuid' when saved as schema='1'
-    exp2 = Content(exp).export(schema='1')
+    exp2 = Content(exp).export(schema='1+kuid_anchor_key')
     assert '$kuid' in exp2['survey'][0]
 
 

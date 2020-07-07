@@ -9,8 +9,21 @@ properties:
   #   type: string
   title:
     type: string
+  root:
+    type: string
+  namespaces:
+    type: object
   version:
     type: string
+  delimiter:
+    type: string
+  prefix:
+    type: string
+  auto_send:
+    type: boolean
+  auto_delete:
+    type: boolean
+
   instance_name:
     type: string
   public_key:

@@ -23,6 +23,9 @@ enum:
 - geotrace                    # Record a line of two or more GPS coordinates.
 - geoshape                    # Record a polygon of multiple GPS coordinates; the last point is the same as the first point.
 
+- osm
+- xml-external
+- audit
 - date                        # Date input.
 - time                        # Time input.
 - datetime                    # Accepts a date and a time input.

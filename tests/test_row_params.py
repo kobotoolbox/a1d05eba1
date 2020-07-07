@@ -22,12 +22,13 @@ def test_parameters():
     '''
     basic = {**BASIC_1, 'survey': [
             {'type': 'text',
+                '$anchor': 'xx',
                 'parameters': 'start=0 end=15 step=1'}
         ]}
 
     basic_2 = {**BASIC_2, 'survey': [
             {'type': 'text',
-                # '$anchor': 'xx',
+                '$anchor': 'xx',
                 'params': {'start': '0', 'end': '15', 'step': '5'}}
         ]}
 

@@ -9,6 +9,7 @@ CONTENT_1_NO_SETTINGS = {
     'survey': [
         {'type': 'text',
           'name': 'v1',
+          '$anchor': 'x',
           'label': ['abc'],
           },
       ],
@@ -35,20 +36,19 @@ CONTENT_1S_WITH_SETTINGS = [
 
 def test_one2two():
     for cc in CONTENT_1S:
-        content = Content(cc, exports_include_defaults=True)
-        rr = content.export(schema='2')
+        content = Content(cc)
+        rr = content.export(schema='2', remove_nulls=False)
         assert 'settings' in rr
-        content = Content(cc, exports_include_defaults=False)
-        rr = content.export(schema='2')
+        rr = content.export(schema='2', remove_nulls=True)
         assert 'settings' not in rr
 
     for cc in CONTENT_1S_WITH_SETTINGS:
         # don't delete valid settings
-        content = Content(cc, exports_include_defaults=True)
-        rr = content.export(schema='2')
+        content = Content(cc)
+        rr = content.export(schema='2', remove_nulls=False)
         assert 'settings' in rr
-        content = Content(cc, exports_include_defaults=False)
-        rr = content.export(schema='2')
+        content = Content(cc)
+        rr = content.export(schema='2', remove_nulls=True)
         assert 'settings' in rr
 
 

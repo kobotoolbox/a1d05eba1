@@ -12,6 +12,7 @@ from a1d05eba1.transformations.xlsform_translations import (
 
 from a1d05eba1.transformations import flatten_survey_by_anchor
 
+NULL_TRANSLATION = 'NULL_TRANSLATION'
 
 S1 = kfrozendict.freeze({
     'survey': [
@@ -55,7 +56,7 @@ def test_reverser():
     assert 'label::English' not in row0
     assert row0['label'] == ['abc', 'xyz']
 
-    assert content['translations'] == [None, 'English']
+    assert content['translations'] == [NULL_TRANSLATION, 'English']
     assert content['translated'] == ['label']
 
 def test_reverser_weird_col():
@@ -87,11 +88,11 @@ def test_additional():
      'settings': [{'default_language': None}],
      'survey': [{'name': 'start', 'type': 'start'},
                 {'name': 'end', 'type': 'end'},
-                {'$kuid': 'ty7yd67',
+                {'$anchor': 'ty7yd67',
                  'label': 'q1',
                  'required': False,
                  'type': 'text'},
-                {'$kuid': 'pm4jk80',
+                {'$anchor': 'pm4jk80',
                  'label': 'q2',
                  'required': False,
                  'type': 'integer'}]}
@@ -111,9 +112,10 @@ def test_colons_forward():
     result = Content({
         'schema': '1',
         'survey': [
-            {'type': 'text', 'name': 'q1', 'label': ['t1lab', 't2lab']},
+            {'type': 'text', 'name': 'q1', '$anchor': 'q1', 'label': ['t1lab', 't2lab']},
             {'type': 'select_one',
                 'name': 'q2',
+                '$anchor': 'q2',
                 'select_from_list_name': 'xyz',
                 'label': ['s1lab', 's2lab'],
                 'hint': ['q2hintt1', 'q2hintt2'],
@@ -147,6 +149,7 @@ def test_1_plus_colons():
         'survey': [
             {'type': 'text',
                 'name': 'book',
+                '$anchor': 'book',
                 'label::English': 'The patient',
                 'label::French': 'Le patient',
             },
@@ -166,6 +169,7 @@ def test_alternative_colon_configs():
         'survey': [
             {'type': 'text',
                 'name': 'book',
+                '$anchor': 'book',
                 'label: English': 'The patient',
                 'label:French': 'Le patient',
             },
@@ -185,6 +189,7 @@ def test_split_types():
         'survey': [
             {
                 'type': 'select_one dog',
+                '$anchor': 'q1',
             }
         ]
     })
@@ -201,3 +206,47 @@ def test_noop():
         'translated': [],
         'settings': {}
     }).export(schema='1+')
+
+
+GRP_S1 = kfrozendict.freeze({
+    'survey': [{'type': 'begin_group', '$anchor': 'grp_a'},
+                {'type': 'note', '$anchor': 'note_a'},
+                {'type': 'begin_group', '$anchor': 'grp_b'},
+                {'type': 'text', '$anchor': 'text_b'},
+                {'type': 'end_group', '$anchor': '/grp_b'},
+                {'type': 'integer', '$anchor': 'int_a'},
+                {'type': 'begin_group', '$anchor': 'grp_c'},
+                {'type': 'text', '$anchor': 'text_c'},
+                {'type': 'end_group', '$anchor': '/grp_c'},
+                {'type': 'end_group', '$anchor': '/grp_a'},
+                {'type': 'integer', '$anchor': 'int_z'},
+                ]
+})
+
+
+def test_remove_empties():
+    for schema in ['xlsform', '1+remove_empty_rows']:
+        cc = Content({
+            'schema': schema,
+            'survey': [
+                {'type': 'text', '$anchor': 'anchor'},
+                {},
+                {'type': 'text', '$anchor': 'anchor2'},
+                {},
+                {'type': 'text', '$anchor': 'anchor3'},
+            ],
+            'choices': [
+                {'list_name': 'aa',
+                    '$anchor': 'a4',
+                    'value': 'aaa'},
+                {'list_name': 'aa',
+                    '$anchor': 'a5',
+                    'value': 'aab'},
+                {'list_name': 'aa',
+                    '$anchor': 'a6',
+                    'value': 'aac'},
+            ]
+        })
+        result = cc.export(schema='1')
+        assert len(result['survey']) == 3
+        assert len(result['choices']) == 3

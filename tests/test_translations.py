@@ -7,6 +7,7 @@ from pprint import pprint
 CONTENT_1 = {
     'survey': [
         {'type': 'text',
+            '$anchor': 'x',
             'name': 'book',
             'label': ['The patient']
         },
@@ -88,6 +89,7 @@ def test_one2two():
         'survey': [
             {
                 'type': 'text',
+                '$anchor': 'q1',
                 'label': ['enlabelle'],
             }
         ],
@@ -113,11 +115,13 @@ def test_reorder_translations():
         'survey': [
             {'type': 'text',
                 'name': 'q1',
+                '$anchor': 'x',
                 'label': {
                     'en': 'en q1',
                     'fr': 'fr q1',
                 }},
             {'type': 'text',
+                '$anchor': 'y',
                 'name': 'q2',
                 'label': {
                     'en': 'en q2',

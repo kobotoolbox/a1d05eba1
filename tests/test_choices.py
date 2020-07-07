@@ -10,17 +10,19 @@ import json
 
 
 CONTENT_1 = {
-    'schema': '1',
+    'schema': '1+kuid_anchor_key',
     'survey': [
         {'type': 'select_one',
           'label': ['Select state'],
           'select_from_list_name': 'states',
+          '$anchor': 'aa',
           'name': 'state',
           },
         {'type': 'select_one',
           'label': ['Select county'],
           'select_from_list_name': 'counties',
           'name': 'county',
+          '$anchor': 'ab',
           'choice_filter': 'state=${state}',
           },
       ],

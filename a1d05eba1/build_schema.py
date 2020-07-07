@@ -1,5 +1,15 @@
+'''
+this module compiles the jsonschema from the YML files with BASE_SCHEMA
+as the root, and finds any sections referenced in the format
+    "$ref": "#/$defs/section-name"
+and collects those and loads those sections into the "defs" of the document
+which is accessible as the property "MAIN_JSONSCHEMA"
+'''
+
 import os
 import yaml
+
+from jsonschema import Draft7Validator
 
 from .exceptions import SchemaRefError
 
@@ -43,8 +53,8 @@ def _collect_refs(obj, parent_key=''):
 
     if isinstance(obj, dict):
         if '$ref' in obj:
+            # if parent_key == 'properties' then $ref itself is a property
             if parent_key != 'properties':
-                # $ref is a property, not a reference to a def
                 yield unpeel(obj['$ref'])
         else:
             for (key, item) in obj.items():
@@ -81,20 +91,18 @@ def build_schema(base_schema=None):
     return {'$defs': loaded,
             **base_schema}
 
-MAIN_SCHEMA = build_schema()
-JSONSCHEMA = MAIN_SCHEMA
+MAIN_JSONSCHEMA = build_schema()
 
-from jsonschema import Draft7Validator
-Draft7Validator.check_schema(MAIN_SCHEMA)
+Draft7Validator.check_schema(MAIN_JSONSCHEMA)
 
 _defs = {}
-for (key, val) in JSONSCHEMA['$defs'].items():
+for (key, val) in MAIN_JSONSCHEMA['$defs'].items():
     Draft7Validator.check_schema(val)
     _defs[key] = val
 
-_individual_defs = {}
+__cached_defs = {}
 def schema_for_def(defname):
-    if defname not in _individual_defs:
+    if defname not in __cached_defs:
         _subdefs = {}
         def append_ref_and_subrefs(xdef, key):
             if key:
@@ -104,5 +112,5 @@ def schema_for_def(defname):
                     append_ref_and_subrefs(_defs[ref], ref)
         _def = _defs[defname]
         append_ref_and_subrefs(_def, key=False)
-        _individual_defs[defname] = {**_def, '$defs': _subdefs}
-    return _individual_defs[defname]
+        __cached_defs[defname] = {**_def, '$defs': _subdefs}
+    return __cached_defs[defname]

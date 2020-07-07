@@ -1,7 +1,6 @@
 import json
 
 from .utils.kfrozendict import kfrozendict
-from pprint import pprint
 
 
 class RawValue:
@@ -44,15 +43,10 @@ class TranslatedVal:
             self.vals,
         )
 
-    def validate(self):
-        pass
-
     def load_from_new_vals(self, txvals):
         vals = kfrozendict()
-        for (txanchor, val) in txvals.items():
-            appendr = {}
-            appendr[txanchor] = RawValue(self, val)
-            vals = vals.copy(**appendr)
+        for (tx_anchor, val) in txvals.items():
+            vals = vals.copy(**{tx_anchor: RawValue(self, val)})
         return vals
 
     def load_from_old_vals(self, txvals):
@@ -70,8 +64,8 @@ class TranslatedVal:
         _oldvals = {}
         dvals = dict(self.vals)
         for tx in self.content.txs:
-            anchor = tx.anchor
-            _oldvals[anchor] = dvals[tx.anchor].to_dict()
+            tx_anchor = tx.anchor
+            _oldvals[tx_anchor] = dvals[tx_anchor].to_dict()
         # assert json.dumps(dvals, sort_keys=True) == json.dumps(_oldvals, sort_keys=True)
         return (self.key, _oldvals)
 
@@ -98,9 +92,6 @@ class UntranslatedVal:
             self.key,
             self.val,
         )
-
-    def validate(self):
-        pass
 
     def dict_key_vals_old(self, renames=None):
         if renames is None:

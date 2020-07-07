@@ -19,8 +19,10 @@ properties:
     additionalProperties: false
     patternProperties:
       '.+':
-        type: 'string'
-
+        anyOf:
+        - type: number
+        - type: string
+        - type: boolean
   $anchor:
     type: string
   appearance:
@@ -41,7 +43,8 @@ properties:
   # auto_delete:
   #   type: string
   bind:
-    $ref: '#/$defs/type--string'
+    type: object
+    # $ref: '#/$defs/type--string'
   calculation:
     $ref: '#/$defs/type--string'
   choice_filter:
@@ -62,8 +65,8 @@ properties:
     $ref: '#/$defs/translatable'
   guidance_hint:
     $ref: '#/$defs/translatable'
-  constraint_message:
-    $ref: '#/$defs/translatable'
+  # constraint_message:
+  #   $ref: '#/$defs/translatable'
 
   image:
     $ref: '#/$defs/translatableMedia'
@@ -100,4 +103,7 @@ properties:
     type: string
     pattern: 'CHOICE_LIST_NAME_REGEX'
   select_from_file:
+    type: string
+  # hmm how to implement?
+  select_from_external:
     type: string

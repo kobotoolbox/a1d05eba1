@@ -12,6 +12,9 @@ class SurveyComponentBase:
         if hasattr(self, 'preload'):
             self.preload(**kwargs)
 
+        if hasattr(self, 'adjust_kwargs'):
+            kwargs = self.adjust_kwargs(kwargs)
+
         if hasattr(self, 'load'):
             self.load(**kwargs)
 

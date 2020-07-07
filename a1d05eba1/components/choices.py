@@ -4,12 +4,12 @@ from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yload_file
 
 from ..fields import UntranslatedVal, TranslatedVal
-from ..build_schema import MAIN_SCHEMA
+from ..build_schema import MAIN_JSONSCHEMA
 
 from .base_component import SurveyComponentWithDict
 from .base_component import SurveyComponentWithOrderedDict
 
-CHOICE_PROPERTIES = MAIN_SCHEMA['$defs']['choice']['properties'].keys()
+CHOICE_PROPERTIES = MAIN_JSONSCHEMA['$defs']['choice']['properties'].keys()
 
 
 class Choice(SurveyComponentWithOrderedDict):

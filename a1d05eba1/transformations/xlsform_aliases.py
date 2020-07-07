@@ -1,5 +1,4 @@
 from ..utils.yparse import yload_file
-# from ..utils.yparse import yload_file
 
 XLSFORM_RENAMES = yload_file('renames/from1/xlsformTypes', invert=True)
 

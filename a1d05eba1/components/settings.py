@@ -1,10 +1,10 @@
 from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yload_file
-from ..build_schema import MAIN_SCHEMA
+from ..build_schema import MAIN_JSONSCHEMA
 
 from .base_component import SurveyComponentWithTuple, SurveyComponentWithDict
 
-settings_keys = MAIN_SCHEMA['$defs']['settings']['properties'].keys()
+settings_keys = MAIN_JSONSCHEMA['$defs']['settings']['properties'].keys()
 
 
 _standardize_public_key = lambda pk: ''.join(pk.split('\n'))
@@ -60,7 +60,7 @@ class Settings(SurveyComponentWithDict):
                 out['public_key'] = self._pubkey
             if self.content.metas.any():
                 out['metas'] = self.content.metas.to_dict()
-            if len(out) == 0 and self.content.remove_nulls:
+            if len(out) == 0 and self.content.export_params.remove_nulls:
                 return None
             return out
         elif schema == '1':
