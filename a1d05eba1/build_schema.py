@@ -22,9 +22,9 @@ defpath = lambda defid: os.path.join(YML_DIR, 'defs', defid + '.yml')
 def _load_path(fpath):
     with open(fpath, 'r') as ff:
         yaml_in = ff.read()
-    for (val, rep_with) in YAML_CONSTANTS:
-        if val in yaml_in:
-            yaml_in = yaml_in.replace(val, rep_with)
+    for (yval, rep_with) in YAML_CONSTANTS:
+        if yval in yaml_in:
+            yaml_in = yaml_in.replace(yval, rep_with)
     return yaml.full_load(yaml_in)
 
 BASE_SCHEMA = _load_path(os.path.join(YML_DIR, 'schema.yml'))

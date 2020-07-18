@@ -45,7 +45,7 @@ class ReplaceTruthyStrings(Transformer):
                 val = val.lower()
                 if val in FALSEY_VALS:
                     return row.copy(**{key: False})
-                elif val in TRUTHY_VALS:
+                if val in TRUTHY_VALS:
                     return row.copy(**{key: True})
         return row
 

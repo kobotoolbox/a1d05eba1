@@ -55,13 +55,15 @@ def load_meta(key, val):
         return Meta(key=key, name=key, tags=())
     elif isinstance(val, (dict, kfrozendict)):
         return Meta(key=key, **val)
+    raise ValueError('Unhandled Meta')
 
 from ..special_fields.tags import _expand_tags
 
 class Metas(SurveyComponentWithDict):
+    _metas = ()
+
     def load(self):
-        self._metas = []
-        if self.content.schema == '1':
+        if self.content._v == '1':
             _existing_metas = self.content.data.get('metas', {})
             metas = {}
             if _existing_metas:
@@ -84,7 +86,7 @@ class Metas(SurveyComponentWithDict):
                     val = val.copy(tags=_expand_tags(hxl=_hxl, tags=_tags))
             _meta = load_meta(key, val)
             if _meta:
-                self._metas.append(_meta)
+                self._metas = self._metas + (_meta,)
 
     def items(self):
         return self._metas

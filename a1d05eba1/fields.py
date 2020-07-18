@@ -4,16 +4,11 @@ from .utils.kfrozendict import kfrozendict
 class RawValue:
     def __init__(self, txv, value):
         self.txv = txv
-        self.value = self._load_value(value)
-
-    def _load_value(self, value):
-        if isinstance(value, str):
-            return value
-        elif isinstance(value, (dict, kfrozendict)):
+        if isinstance(value, (dict, kfrozendict)):
             if 'string' in value:
-                return value['string']
+                self.value = value['string']
         else:
-            return value
+            self.value = value
 
     def to_string(self):
         return self.value

@@ -27,8 +27,9 @@ def fw(content):
     (content, survey) = content.popout('survey')
     (content, choices) = content.popout('choices')
     replacements = {}
+
     def pull_array_to_defs(_survey):
-        if len(_survey) is 0:
+        if len(_survey) == 0:
             return {'$start': None}
         anchor1 = _survey[0][ANCHOR_KEY]
         defs = {'$start': anchor1}
@@ -37,7 +38,7 @@ def fw(content):
             (row, anchor) = row.popout(ANCHOR_KEY)
             if 'rows' in row:
                 raise NotImplementedError()
-            if _next != False:
+            if _next:
                 row = row.copy(**{'$next': _next})
             _next = anchor
             defs[anchor] = row

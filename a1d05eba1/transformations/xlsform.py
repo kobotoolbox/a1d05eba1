@@ -14,8 +14,7 @@ from . import xlsform_replace_truthy_strings
 TRANSFORMER = TransformerList([
     xlsform_initial_renames,    # 'list name' becomes 'list_name'
     remove_empty_rows,          # rows without required columns get removed
-    xlsform_unwrap_settings_from_list,
-                                # content.settings is a dict
+    xlsform_unwrap_settings_from_list, # content.settings is a dict
     # ensure proper structure:
     validators.settings_not_list,
 

@@ -8,6 +8,8 @@ from .base_component import SurveyComponentWithOrderedDict
 
 
 class Choice(SurveyComponentWithOrderedDict):
+    list_name = None
+
     def load(self, item, **kwargs):
         if self.content.schema == '1':
             self.load_from_old_arr(item, **kwargs)
