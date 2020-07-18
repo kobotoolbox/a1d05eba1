@@ -1,11 +1,31 @@
+'''
+xlsform_translations:
+
+parse the columns like "label::English" and construct a structure with
+all the "label" values in one array
+'''
+
 import re
 from collections import defaultdict
 from types import SimpleNamespace
 
 from ..utils.yparse import yload_file
 
+from ..schema_properties import (
+    TRANSLATABLE_SURVEY_COLS,
+    TRANSLATABLE_CHOICES_COLS,
+)
+
+from .transformer import Transformer
+
 NULL_TRANSLATION = 'NULL_TRANSLATION'
-TRANSLATABLE_COLS = yload_file('renames/from1/translatable-columns')
+TRANSLATABLE_V1_COLS = yload_file('renames/from1/translatable-columns')
+
+TRANSLATABLE_COLS = set(
+    TRANSLATABLE_V1_COLS + \
+    TRANSLATABLE_SURVEY_COLS + \
+    TRANSLATABLE_CHOICES_COLS
+)
 
 
 def expand_it(row, updates, translated, translations):
@@ -13,42 +33,14 @@ def expand_it(row, updates, translated, translations):
         (row, vals) = row.popout(col)
         if vals:
             for (tx, val) in zip(translations, vals):
+                if val is None:
+                    continue
                 if tx in [None, '']:
                     newcolname = col
                 else:
                     newcolname = '::'.join([col, tx])
                 updates[newcolname] = val
     return row
-
-def fw(content):
-    assert content['schema'].startswith('1')
-    (content, translations) = content.popout('translations')
-    (content, translated) = content.popout('translated')
-    (content, survey_in) = content.popout('survey')
-    content_updates = {'survey': []}
-    for row in survey_in:
-        row_updates = {}
-        if 'select_from_list_name' in row:
-            (row, list_name) = row.popout('select_from_list_name')
-            row_updates['type'] = ' '.join([row['type'], list_name])
-        row = expand_it(row,
-                        updates=row_updates,
-                        translated=translated,
-                        translations=translations,
-                        )
-        content_updates['survey'].append(row.copy(**row_updates))
-
-    (content, choices) = content.popout('choices')
-    content_updates['choices'] = []
-    for cx in choices:
-        choice_updates = {}
-        cx = expand_it(cx,
-                       updates=choice_updates,
-                       translated=translated,
-                       translations=translations,
-                       )
-        content_updates['choices'].append(cx.copy(**choice_updates))
-    return content.copy_in(**content_updates)
 
 
 def inspect_content_translations(content):
@@ -66,7 +58,8 @@ def inspect_content_translations(content):
             if col in row:
                 if NULL_TRANSLATION not in ctx.translations:
                     ctx.translations.append(NULL_TRANSLATION)
-                ctx.tx_colnames[col] = [col, NULL_TRANSLATION, 0]
+                _index = ctx.translations.index(NULL_TRANSLATION)
+                ctx.tx_colnames[col] = [col, NULL_TRANSLATION, _index]
                 # if col not in ctx.translated:
                 ctx.translated = ctx.translated.union([col])
         for colname in row.keys():
@@ -125,16 +118,43 @@ def mutate_content(content, context):
       'translated': translated,
       'schema': '1',
     }
-    settings = content.get('settings', {})
-    if isinstance(settings, (list, tuple)):
-        if len(settings) > 0:
-            settings = settings[0]
-        else:
-            settings = {}
-    changes['settings'] = settings
     return content.copy(**changes)
 
 
-def rw(content):
-    context = inspect_content_translations(content)
-    return mutate_content(content, context)
+class XlsformTranslations(Transformer):
+    def fw(self, content):
+        assert content['schema'].startswith('1')
+        (content, translations) = content.popout('translations')
+        (content, translated) = content.popout('translated')
+        (content, survey_in) = content.popout('survey')
+        content_updates = {'survey': []}
+        for row in survey_in:
+            row_updates = {}
+            if 'select_from_list_name' in row:
+                (row, list_name) = row.popout('select_from_list_name')
+                row_updates['type'] = ' '.join([row['type'], list_name])
+            row = expand_it(row,
+                            updates=row_updates,
+                            translated=translated,
+                            translations=translations,
+                            )
+            content_updates['survey'].append(row.copy(**row_updates))
+
+        (content, choices) = content.popout('choices')
+        content_updates['choices'] = []
+        for cx in choices:
+            choice_updates = {}
+            cx = expand_it(cx,
+                           updates=choice_updates,
+                           translated=translated,
+                           translations=translations,
+                           )
+            content_updates['choices'].append(cx.copy(**choice_updates))
+        return content.copy_in(**content_updates)
+
+
+    def rw(self, content):
+        context = inspect_content_translations(content)
+        return mutate_content(content, context)
+
+TRANSFORMER = XlsformTranslations()

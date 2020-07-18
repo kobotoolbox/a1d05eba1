@@ -52,7 +52,10 @@ class TranslatedVal:
     def load_from_old_vals(self, txvals):
         vals = tuple()
         if isinstance(txvals, str):
-            raise ValueError('expecting "{}" to be a list'.format(txvals))
+            _arr = [None] * len(self.content.txs)
+            _dtx_index = self.content.txs.index(self.content.default_tx)
+            _arr[_dtx_index] = txvals
+            txvals = _arr
         assert len(txvals) == len(self.content.txs)
         for (tx, val) in zip(self.content.txs, txvals):
             vals = vals + (
@@ -65,8 +68,9 @@ class TranslatedVal:
         dvals = dict(self.vals)
         for tx in self.content.txs:
             tx_anchor = tx.anchor
-            _oldvals[tx_anchor] = dvals[tx_anchor].to_dict()
-        # assert json.dumps(dvals, sort_keys=True) == json.dumps(_oldvals, sort_keys=True)
+            value = dvals[tx_anchor].to_dict()
+            if value is not None:
+                _oldvals[tx_anchor] = value
         return (self.key, _oldvals)
 
     def dict_key_vals_old(self, renames=None):
@@ -75,7 +79,8 @@ class TranslatedVal:
         _oldvals = []
         dd = dict(self.vals)
         for tx in self.content.txs:
-            _oldvals.append(dd[tx.anchor].to_string())
+            value = dd[tx.anchor].to_string()
+            _oldvals.append(value)
         key = self.key
         if key in renames:
             key = renames[key]

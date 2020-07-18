@@ -1,25 +1,23 @@
 '''
-Requires: content.schema == '1'
+remove_empty_rows:
 
-Reverse function, aka "rw":
+requires: content.schema == '1'
+
+remove rows which have no meaning.
+in the "survey" sheet, that means any row without a "type" value.
+in the "choices" sheet, this is any row with a "list_name" value.
+
+
+rw:
 ---------------------------
-* Iterates through "survey" and "choices" sheets to remove empty or invalid rows
-(i.e. rows with no "type" column)
+    * Iterates through "survey" and "choices" sheets to remove empty or invalid rows
+    (i.e. rows with no "type" column)
 
-* Preserves rows which may be ruled invalid later on (e.g. unknown type)
-
-Forward function run on export
-------------------------------
-
-* forward function (run on "export") has no effect
-
+    * Preserves rows which may be ruled invalid later on (e.g. unknown type)
 '''
 
-ASSERT_CONTENT_SCHEMA = '1'
+from .transformer import Transformer
 
-
-def fw(content):
-    pass
 
 def remove_empties_from_list(surv_in, required_key='type'):
     surv_out = tuple()
@@ -32,10 +30,16 @@ def remove_empties_from_list(surv_in, required_key='type'):
     return surv_out
 
 
-def rw(content):
-    assert content['schema'] == '1'
-    updates = {
-        'survey': remove_empties_from_list(content['survey']),
-        'choices': remove_empties_from_list(content['choices'], required_key='list_name'),
-    }
-    return content.copy(**updates)
+class RemoveEmpties(Transformer):
+    # ASSERT_CONTENT_SCHEMA = '1'
+
+    def rw(self, content):
+        assert content['schema'] == '1'
+        choices = content.get('choices', [])
+        updates = {
+            'survey': remove_empties_from_list(content['survey']),
+            'choices': remove_empties_from_list(choices, required_key='list_name'),
+        }
+        return content.copy(**updates)
+
+TRANSFORMER = RemoveEmpties()

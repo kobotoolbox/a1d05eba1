@@ -10,7 +10,7 @@ import json
 
 
 CONTENT_1 = {
-    'schema': '1+kuid_anchor_key',
+    'schema': '1',
     'survey': [
         {'type': 'select_one',
           'label': ['Select state'],
@@ -92,7 +92,9 @@ CONTENT_2 = {'schema': '2',
 
 
 def test_one2two():
-    result = Content(CONTENT_1, perform_validation=True).export(schema='2')
+    result = Content(CONTENT_1,
+                     perform_validation=True,
+                     ).export(schema='2')
     cxs = result.get('choices')
     states = cxs.get('states')
     (st0, st1) = states

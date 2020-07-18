@@ -1,10 +1,8 @@
 from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yload_file
-from ..build_schema import MAIN_JSONSCHEMA
+from ..schema_properties import SETTINGS_PROPERTIES
 
 from .base_component import SurveyComponentWithTuple, SurveyComponentWithDict
-
-settings_keys = MAIN_JSONSCHEMA['$defs']['settings']['properties'].keys()
 
 
 _standardize_public_key = lambda pk: ''.join(pk.split('\n'))
@@ -21,8 +19,6 @@ def _split_pubkey_to_64char_lines(pubkey, chars=64):
 class Settings(SurveyComponentWithDict):
     settings_renames_from_1 = yload_file('renames/from1/settings', invert=True)
     settings_renames_to_1 = yload_file('renames/to1/settings')
-
-    known_settings = set(settings_keys)
 
     def load(self):
         SKIP_SETTINGS = ['metas', 'default_language']
@@ -41,7 +37,7 @@ class Settings(SurveyComponentWithDict):
 
             keep_setting = True
             strip_uk_setts = self.content.strip_unknown
-            if strip_uk_setts and key not in self.known_settings:
+            if strip_uk_setts and key not in SETTINGS_PROPERTIES:
                 keep_setting = False
 
             if keep_setting:
@@ -55,10 +51,11 @@ class Settings(SurveyComponentWithDict):
 
     def to_dict(self, schema):
         if schema == '2':
+            _include_empty_metas = (not self.content.export_params.remove_nulls)
             out = kfrozendict.unfreeze(self._d)
             if self._pubkey:
                 out['public_key'] = self._pubkey
-            if self.content.metas.any():
+            if self.content.metas.any() or _include_empty_metas:
                 out['metas'] = self.content.metas.to_dict()
             if len(out) == 0 and self.content.export_params.remove_nulls:
                 return None

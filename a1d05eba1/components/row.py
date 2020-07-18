@@ -3,10 +3,9 @@ from ..utils.yparse import yload_file
 
 from ..fields import TranslatedVal, UntranslatedVal
 
-# ROW_SPECIAL_FIELDS includes ChoiceFilter, RelevantVal, and ConstraintVal
 from ..special_fields import (
     ConstraintVal,
-    ROW_SPECIAL_FIELDS,
+    ROW_SPECIAL_FIELDS, # <-- ChoiceFilter, RelevantVal, and ConstraintVal
     SPECIAL_KEYS,
     TypeField,
 )
@@ -15,14 +14,20 @@ from .base_component import SurveyComponentWithTuple
 from .base_component import SurveyComponentWithDict
 from .base_component import SurveyComponentWithOrderedDict
 
-from ..build_schema import MAIN_JSONSCHEMA
+from ..schema_properties import ROW_PROPERTIES
+from ..schema_properties import TRANSLATABLE_SURVEY_COLS
 
-V2_PROPERTIES = set(MAIN_JSONSCHEMA['$defs']['surveyRow']['properties'].keys())
+# from ..build_schema import schema_for_def
+# from jsonschema import validate
+# ROW_SCHEMA = schema_for_def('surveyRow')
 
 
 class Parented:
+    '''
+    a superclass of a survey "row" that exists as a child of either the survey
+    or a group within the survey.
+    '''
     _parent = False
-    # is_end is only true if it's a end_group or end_repeat, etc.
     is_end = False
 
     def set_parent(self, parent):
@@ -79,12 +84,13 @@ class Row(SurveyComponentWithOrderedDict, Parented):
 
     def load_from_1(self, **kwargs):
         srow = kfrozendict.freeze(kwargs.get('row'))
-
+        if '$kuid' in srow:
+            raise ValueError('unexpected value: $kuid')
         if '$anchor' in srow:
             (srow, anchor) = srow.popout('$anchor')
             self._anchor = anchor
 
-        if self._anchor is None:
+        if self._anchor in (None, False):
             raise ValueError('No "$anchor" value found for row')
 
         skip_keys = SPECIAL_KEYS['1']
@@ -97,10 +103,6 @@ class Row(SurveyComponentWithOrderedDict, Parented):
             original = key
             if self.content.perform_renames and key in self.renames_from_v1:
                 newkey = self.renames_from_v1[key]
-                if key in self.content._translated_columns:
-                    self.content._translated_columns = (
-                        newkey,
-                    ) + self.content._translated_columns
                 key = newkey
 
             # remove columns that are not recognized in the schema
@@ -113,7 +115,11 @@ class Row(SurveyComponentWithOrderedDict, Parented):
                 self.type = val
                 self.typefield = TypeField(self.content, val)
                 col = self.typefield
-            elif original in self.content._translated_columns:
+            elif original in self.content._tx_columns:
+                col = TranslatedVal(self.content, key, val, original=original)
+            elif key in TRANSLATABLE_SURVEY_COLS:
+                # same as previous condition, but when a column *should* be txd
+                # but was not marked as translatable
                 col = TranslatedVal(self.content, key, val, original=original)
             else:
                 col = UntranslatedVal(self.content, key, val, original=original)
@@ -134,7 +140,7 @@ class Row(SurveyComponentWithOrderedDict, Parented):
             if not isinstance(item, TypeField):
                 yield item
 
-    def to_flat_export(self, schema='2'):
+    def flat_export(self, schema='2'):
         type_val = self.typefield.val
         if hasattr(self.typefield, 'flat_val'):
             type_val = self.typefield.flat_val
@@ -149,44 +155,27 @@ class Row(SurveyComponentWithOrderedDict, Parented):
             elif schema == '1':
                 for kvs in colval.dict_key_vals_old(renames=self.renames_to_v1):
                     out.append(kvs)
-        return dict(out)
+        outbound = dict(out)
+        # validate(outbound, ROW_SCHEMA)
+        return outbound
 
-    def oy_unflat_export(self, schema='2'):
-        def ouz_values(xrow):
-            zout = [
-                ('type', xrow.typefield.val),
+    def nested_export(self, schema='2'):
+        if not self.is_end:
+            out = [
+                ('type', self.typefield.val),
                 ('$anchor', self._anchor),
             ]
-            for colval in xrow.non_type_fields:
-                zout.append(colval.dict_key_vals_new())
-            if len(xrow.rows) > 0:
+            for colval in self.non_type_fields:
+                out.append(colval.dict_key_vals_new())
+            if len(self.rows) > 0:
                 subrows = []
-                for sbrow in xrow.rows:
-                    for deets in sbrow.oy_unflat_export(schema=schema):
+                for sbrow in self.rows:
+                    for deets in sbrow.nested_export(schema=schema):
                         subrows.append(deets)
-                zout.append(
+                out.append(
                     ('rows', subrows)
                 )
-            return dict(zout)
-        if not self.is_end:
-            yield ouz_values(self)
-
-    def to_unflat_export(self, schema='2'):
-        if schema == '1':
-            raise ValueError('cannot export to an unflattened schema=1')
-
-        def out_values(xrow):
-            zout = [
-                ('type', xrow.typefield.val),
-            ]
-            for colval in xrow.non_type_fields:
-                zout.append(colval.dict_key_vals_new())
-            subrows = []
-            zout.append(
-                ('rows', ['123'])
-            )
-            return dict(zout)
-        return out_values(self)
+            yield dict(out)
 
     def get_row_tx_col_names_for_v1(self):
         cols = []
@@ -212,20 +201,18 @@ class OpeningRow(Row):
             kwargs['row'] = row
         return kwargs
 
+
 class ClosingRow(Parented):
     '''
     ClosingRow is only exported on "flat" exports
     '''
     is_end = True
 
-    def oy_unflat_export(self, **kwargs):
+    def nested_export(self, **kwargs):
         if kwargs.get('include_group_ends'):
             yield self
 
-    def to_unflat_export(self, **kwargs):
-        return self.to_flat_export(schema='2')
-
-    def to_flat_export(self, schema='2'):
+    def flat_export(self, schema='2'):
         return {'type': self.type, '$anchor': self.compiled_anchor()}
 
     @property

@@ -101,15 +101,6 @@ class TxList(SurveyComponentWithTuple):
     def _load_from_new_list(self):
         array_of_txs = self.content.data.get('translations', [])
         for (index, tx) in enumerate(array_of_txs):
-            if 'uicode' in tx:
-                (tx, locale) = tx.popout('uicode')
-                tx = tx.copy(locale=locale)
-            if 'code' in tx:
-                (tx, code) = tx.popout('code')
-                tx = tx.copy(**{
-                    '$anchor': code
-                })
-            #     raise Exception('no code')
             defaultval = False
             if 'default' in tx:
                 (tx, defaultval) = tx.popout('default')
@@ -126,10 +117,6 @@ class TxList(SurveyComponentWithTuple):
             self._tuple = self._tuple + (
                 cur_translation,
             )
-
-    @property
-    def codes(self):
-        return [tx.anchor for tx in self._tuple]
 
     def to_list(self, schema):
         objs = []

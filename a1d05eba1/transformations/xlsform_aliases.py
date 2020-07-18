@@ -1,7 +1,16 @@
+'''
+xlsform_aliases:
+
+iterate through the survey, choices, and settings sheets to replace known
+aliases with their proper value.
+
+aliases are pulled from 'yml/renames/from1'
+'''
+
 from ..utils.yparse import yload_file
+from ..schema_properties import SELECT_X_TYPES
 
 XLSFORM_RENAMES = yload_file('renames/from1/xlsformTypes', invert=True)
-
 
 
 def fw(content):
@@ -29,11 +38,7 @@ def rw__each_row(row):
     if _type in XLSFORM_RENAMES:
         _type = XLSFORM_RENAMES[_type]
         return row.copy(type=_type)
-    for s_alias in ['select_one',
-                    'select_multiple',
-                    'select_one_from_file',
-                    'select_multiple_from_file',
-                    ]:
+    for s_alias in SELECT_X_TYPES:
         s_alias_spaced = '{} '.format(s_alias)
         if s_alias_spaced in _type:
             changes = {'type': s_alias.strip(),

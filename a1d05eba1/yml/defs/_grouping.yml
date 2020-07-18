@@ -11,6 +11,8 @@ properties:
     - repeat
   $anchor:
     type: string
+  appearance:
+    type: string
   rows:
     type: array
     items:

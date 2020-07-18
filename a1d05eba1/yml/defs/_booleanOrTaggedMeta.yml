@@ -1,0 +1,12 @@
+anyOf:
+- $ref: '#/$defs/type--string'
+- $ref: '#/$defs/type--boolean'
+- type: object
+  additionalProperties: false
+  properties:
+    name:
+      $ref: '#/$defs/nameString'
+    tags:
+      type: array
+      items:
+        type: string

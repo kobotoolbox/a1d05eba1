@@ -1,16 +1,19 @@
+import pytest
+
 from a1d05eba1.content import Content
-# from a1d05eba1.row import Row
-# from a1d05eba1.choices import Choice
 
 from a1d05eba1.utils.kfrozendict import kfrozendict
 from a1d05eba1.transformations.xlsform_translations import (
-    rw,
-    fw,
+    XlsformTranslations,
     inspect_content_translations,
     mutate_content,
 )
 
 from a1d05eba1.transformations import flatten_survey_by_anchor
+from a1d05eba1.exceptions import StructureError
+from a1d05eba1.exceptions import UnclosedGroupError
+from a1d05eba1.exceptions import MismatchedBeginEndGroupError
+
 
 NULL_TRANSLATION = 'NULL_TRANSLATION'
 
@@ -84,7 +87,7 @@ def test_colons_forward_empty_tx():
     assert 'label' in row0
 
 def test_additional():
-    cc = {'schema': '1::',
+    cc = {'schema': '1+xlsform',
      'settings': [{'default_language': None}],
      'survey': [{'name': 'start', 'type': 'start'},
                 {'name': 'end', 'type': 'end'},
@@ -145,7 +148,7 @@ def test_colons_forward():
 def test_1_plus_colons():
     content = Content({
         # '1+xx' equivalent to 'xlsform'
-        'schema': '1+::',
+        'schema': '1+xlsform',
         'survey': [
             {'type': 'text',
                 'name': 'book',
@@ -165,7 +168,7 @@ def test_1_plus_colons():
 
 def test_alternative_colon_configs():
     content = Content({
-        'schema': '1+::',
+        'schema': '1+xlsform',
         'survey': [
             {'type': 'text',
                 'name': 'book',
@@ -200,12 +203,13 @@ def test_split_types():
     assert row0['type'] == 'select_one dog'
 
 def test_noop():
-    content = Content({
-        'schema': '1+',
+    result = Content({
+        'schema': '1+noop',
         'survey': [],
         'translated': [],
         'settings': {}
     }).export(schema='1+')
+    assert result
 
 
 GRP_S1 = kfrozendict.freeze({
@@ -250,3 +254,91 @@ def test_remove_empties():
         result = cc.export(schema='1')
         assert len(result['survey']) == 3
         assert len(result['choices']) == 3
+
+def test_transformation_validations():
+    with pytest.raises(StructureError):
+        cc = Content({
+            'schema': '1+validate_choices_not_list',
+            'survey': [
+                {'type': 'text', '$anchor': 'x'}
+            ],
+            'choices': [
+                {'list_name': 'xx', 'value': 'l1v1', 'label': 'label 1'},
+                {'list_name': 'xx', 'value': 'l1v2', 'label': 'label 2'},
+            ]
+        })
+
+
+def test_create_single_translation():
+    cc = Content({
+        'schema': '1+xlsform_translations',
+        'survey': [
+            {'type': 'text', '$anchor': 'x', 'label': 'q1'},
+        ],
+        'choices': [
+            {'list_name': 'xx', 'value': 'l1v1', '$anchor': 'y', 'label': 'label 1'},
+            {'list_name': 'xx', 'value': 'l1v2', '$anchor': 'z', 'label': 'label 2'},
+        ],
+    })
+    result = cc.export(schema='2')
+    assert len(result['translations']) == 1
+    result = cc.export(schema='1')
+    assert result['translated'] == ['label']
+
+
+def test_unique_anchors():
+    with pytest.raises(StructureError):
+        cc = Content({
+            'schema': '2+validate_unique_anchors',
+            'survey': [{'$anchor': 'x', 'label': {'tx0': 'q1'}, 'type': 'text'}],
+            'choices': {'xx': [{'$anchor': 'x',
+                             'label': {'tx0': 'label 1'},
+                             'value': 'l1v1'}]},
+            'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]
+         })
+
+def test_validates_choices_not_list():
+    with pytest.raises(StructureError):
+        cc = Content({
+            'schema': '2+validate_choices_not_list',
+            'survey': [{'$anchor': 'x', 'label': {'tx0': 'q1'}, 'type': 'text'}],
+            'choices': [{'$anchor': 'y',
+                             'label': {'tx0': 'label 1'},
+                             'list_name': 'xx',
+                             'value': 'l1v1'}],
+            'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]
+         })
+
+def test_validates_settings_not_list():
+    with pytest.raises(StructureError):
+        cc = Content({
+            'schema': '2+validate_settings_not_list',
+            'survey': [{'$anchor': 'x', 'label': {'tx0': 'q1'}, 'type': 'text'}],
+            'settings': [{'title': 'form title'}],
+            'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]
+         })
+
+
+def test_unmatched_group_1():
+    with pytest.raises(StructureError):
+        cc = Content({
+            'schema': '2',
+            'survey': [
+                {'$anchor': 'a', 'type': 'begin_group'},
+                {'$anchor': 'b', 'type': 'text'},
+            ],
+            'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]
+         })
+
+def test_unmatched_group_2():
+    with pytest.raises(StructureError):
+        cc = Content({
+            'schema': '2',
+            'survey': [
+                {'$anchor': 'a', 'type': 'begin_group'},
+                {'$anchor': 'b', 'type': 'text'},
+                {'$anchor': 'c', 'type': 'end_group'},
+                {'$anchor': 'd', 'type': 'end_group'},
+            ],
+            'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]
+         })

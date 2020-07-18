@@ -1,8 +1,20 @@
 begin_group:
 - 'begin group'
+- 'begin  group'
 end_group:
 - 'end group'
+- 'end  group'
 begin_repeat:
 - 'begin repeat'
+- 'begin  repeat'
+# ancient...
+- 'begin lgroup'
 end_repeat:
 - 'end repeat'
+- 'end  repeat'
+# ancient...
+- 'end looped group'
+geopoint:
+- 'gps'
+image:
+- 'photo'

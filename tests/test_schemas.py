@@ -32,6 +32,8 @@ def test_row_schema():
         'xpath',
         'choiceFilter',
         'booleanOrXpath',
+        'nameString',
+        'notFalseyBooleanString',
         'surveyRowType',
         'translatableMedia',
         'type--boolean',
@@ -44,7 +46,8 @@ def test_row_schema():
 def test_settings_schema():
     schema = schema_for_def('settings')
     assert set(schema['$defs'].keys()) == set([
-        'booleanOrString',
+        'booleanOrTaggedMeta',
+        'nameString',
         'settingsMetas',
         'type--boolean',
         'type--string',

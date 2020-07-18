@@ -1,7 +1,7 @@
 type: object
 patternProperties:
   TXCODE_REGEX:
-    type: object
     anyOf:
+    - $ref: '#/$defs/type--string'
     - $ref: '#/$defs/type--filecode'
     - $ref: '#/$defs/type--url'

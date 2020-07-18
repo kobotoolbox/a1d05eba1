@@ -59,7 +59,7 @@ def test_surv_equiv_transforms():
         assert row5._parent == row1
         assert row6._parent == row0
 
-        assert row4.to_flat_export() == {'$anchor': '/g3', 'type': 'end_group'}
+        assert row4.flat_export() == {'$anchor': '/g3', 'type': 'end_group'}
 
         [row0] = cc.survey.rows
         assert row0.type == 'group'

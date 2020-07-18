@@ -137,7 +137,7 @@ def test_two2two():
 
 def test_rename_kuid_to_anchor():
     cc = Content({
-        'schema': '1+kuid_anchor_key',
+        'schema': '1+koboxlsform',
         'survey': [
             {'type': 'text',
                 'label': ['asdf'],
@@ -150,7 +150,7 @@ def test_rename_kuid_to_anchor():
     exp = cc.export(schema='2')
     assert '$anchor' in exp['survey'][0]
     # and rename it back to '$kuid' when saved as schema='1'
-    exp2 = Content(exp).export(schema='1+kuid_anchor_key')
+    exp2 = Content(exp).export(schema='1+koboxlsform')
     assert '$kuid' in exp2['survey'][0]
 
 
@@ -161,3 +161,27 @@ def test_kfrozendict():
     assert kf1_0 == kf1_1
     assert hash(kf1_0) == hash(kf1_1)
     assert repr(kf1_0) == '''<kfrozendict {'abc': 123}>'''
+
+def test_kfrozendict_utility_methods():
+    is_frozen = lambda dd: isinstance(dd, kfrozendict)
+    is_not_frozen = lambda dd: isinstance(dd, dict)
+
+    ex1 = kfrozendict(abc=123)
+    ex1_unfrozen = ex1.unfreeze()
+    assert is_not_frozen(ex1_unfrozen)
+
+    ex1_unfrozen2 = kfrozendict.unfreeze(ex1)
+    assert is_not_frozen(ex1_unfrozen2)
+
+    ex2 = kfrozendict.freeze({'abc': 123})
+    assert is_frozen(ex2)
+
+    ex3 = kfrozendict({'abc': {'def': {'ghi': 999}}})
+    assert is_not_frozen(ex3['abc'])
+    assert is_not_frozen(ex3['abc']['def'])
+    assert ex3['abc']['def']['ghi'] == 999
+
+    ex3f = ex3.freeze()
+    assert is_frozen(ex3f['abc'])
+    assert is_frozen(ex3f['abc']['def'])
+    assert ex3f['abc']['def']['ghi'] == 999

@@ -15,8 +15,20 @@ class kfrozendict(Mapping):
     def copy(self, **add_or_replace):
         return self.__class__(self, **add_or_replace)
 
-    def popout(self, key):
-        val = None
+    def renamed(self, from_key, to_key):
+        if from_key not in self:
+            return self
+        keyvals = []
+        for (ikey, ival) in self.items():
+            if ikey == from_key:
+                ikey = to_key
+            keyvals.append(
+                (ikey, ival)
+            )
+        return self.__class__(dict(keyvals))
+
+    def popout(self, key, _default=None):
+        val = _default
         keyvals = []
         for (ikey, ival) in self.items():
             if ikey == key:
@@ -25,6 +37,7 @@ class kfrozendict(Mapping):
                 keyvals.append(
                     (ikey, ival)
                 )
+
         return (
             self.__class__(dict(keyvals)),
             val,
@@ -55,36 +68,37 @@ class kfrozendict(Mapping):
 
     def copy_in(self, **kwargs):
         for (k, val) in kwargs.items():
-            kwargs[k] = kfrozendict.freeze(val)
+            kwargs[k] = deepfreeze(val)
         return self.copy(**kwargs)
 
-    @classmethod
-    def unfreeze(kls, val):
-        if isinstance(val, (kls, dict)):
-            return dict([
-                (ikey, kls.unfreeze(ival))
-                for (ikey, ival) in val.items()
-            ])
-        elif isinstance(val, (list, tuple)):
-            return list([
-                kls.unfreeze(ival) for ival in val
-            ])
-        # elif isinstance(val, dict):
-        #     import pdb; pdb.set_trace()
-        else:
-            return val
+    def unfreeze(self):
+        return unfreeze(self)
 
-    @classmethod
-    def freeze(kls, val):
-        # print('kls', val)
-        if isinstance(val, (kls, dict)):
-            return kls([
-                (ikey, kls.freeze(ival))
-                for (ikey, ival) in val.items()
-            ])
-        elif isinstance(val, (list, tuple)):
-            return tuple([
-                kls.freeze(ival) for ival in val
-            ])
-        else:
-            return val
+    def freeze(self):
+        return deepfreeze(self)
+
+def unfreeze(val):
+    if isinstance(val, (kfrozendict, dict)):
+        return dict([
+            (ikey, unfreeze(ival))
+            for (ikey, ival) in val.items()
+        ])
+    elif isinstance(val, (list, tuple)):
+        return list([
+            unfreeze(ival) for ival in val
+        ])
+    else:
+        return val
+
+def deepfreeze(val):
+    if isinstance(val, (kfrozendict, dict)):
+        return kfrozendict([
+            (ikey, deepfreeze(ival))
+            for (ikey, ival) in val.items()
+        ])
+    elif isinstance(val, (list, tuple)):
+        return tuple([
+            deepfreeze(ival) for ival in val
+        ])
+    else:
+        return val

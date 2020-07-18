@@ -49,12 +49,12 @@ def test_reverts_certain_names_on_export():
     })
 
     schema = '1'
-    assert 'image' not in row.to_flat_export(schema=schema)
-    assert 'media::image' in row.to_flat_export(schema=schema)
+    assert 'image' not in row.flat_export(schema=schema)
+    assert 'media::image' in row.flat_export(schema=schema)
 
     schema = '2'
-    assert 'image' in row.to_flat_export(schema=schema)
-    assert 'media::image' not in row.to_flat_export(schema=schema)
+    assert 'image' in row.flat_export(schema=schema)
+    assert 'media::image' not in row.flat_export(schema=schema)
 
 
 def test_reverts_select_from_on_export():
@@ -67,13 +67,13 @@ def test_reverts_select_from_on_export():
     })
 
     schema = '1'
-    assert 'select_from' not in row.to_flat_export(schema=schema)
-    assert 'select_from_list_name' in row.to_flat_export(schema=schema)
+    assert 'select_from' not in row.flat_export(schema=schema)
+    assert 'select_from_list_name' in row.flat_export(schema=schema)
 
 
     schema = '2'
-    assert 'select_from' in row.to_flat_export(schema=schema)
-    assert 'select_from_list_name' not in row.to_flat_export(schema=schema)
+    assert 'select_from' in row.flat_export(schema=schema)
+    assert 'select_from_list_name' not in row.flat_export(schema=schema)
     # pprint(row2schema1)
 
 

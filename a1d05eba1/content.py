@@ -24,8 +24,10 @@ from .components.base_component import SurveyComponentWithTuple, SurveyComponent
 from .build_schema import MAIN_JSONSCHEMA
 
 from .transformations import TRANSFORMERS
+from .transformations.transformer import TransformerList
 from .transformations import ALIASES as TRANSFORMER_ALIASES
-from .transformations.deepnest_groups import fw as parse_groups
+
+from .schema_properties import TRANSLATABLE_SURVEY_COLS
 
 FLAT_DEFAULT = True
 METAS = yload_file('defs/_settingsMetas')
@@ -34,7 +36,6 @@ SCHEMAS = [
     '1',
     '2',
 ]
-
 
 def unpack_schema_string(schema):
     '''
@@ -53,27 +54,33 @@ def unpack_schema_string(schema):
     return (schema, transformations)
 
 
-def _unpack_v1_settings(_dsetts=None):
-    # pulls first item from an array, defaults to an empty object
-    if _dsetts is None:
-        return {}
-    if isinstance(_dsetts, (list, tuple)):
-        if len(_dsetts) > 0:
-            return _unpack_v1_settings(_dsetts[0])
-        else:
-            return {}
-    return _dsetts
-
-
 def _sans_empty_values(obj):
     # remove keys with 'None' as a value in the returned dict
     for delete_key in [k for (k, v) in obj.items() if v is None]:
         del obj[delete_key]
     return obj
 
+DEFAULT_TRANSFORMERS = {
+    '1': ['xlsform_unwrap_settings_from_list',
+          'xlsform_choices',
+          ]
+}
+
 
 class Content:
     META_TYPES = set(METAS['properties'].keys())
+
+    @property
+    def _tx_columns(self):
+        txc = []
+        for col in self._known_columns:
+            if col in TRANSLATABLE_SURVEY_COLS:
+                txc.append(col)
+        return txc
+
+    def add_col(self, colname, sheet):
+        if colname not in self._known_columns:
+            self._known_columns = self._known_columns + (colname,)
 
     def __init__(self,
                  content,
@@ -81,12 +88,14 @@ class Content:
                  exports_include_defaults=False,
                  strip_unknown=False,
                  ):
+
+        self._known_columns = tuple()
+
         if content['schema'] == '2' and perform_validation:
             validate(content, MAIN_JSONSCHEMA)
 
         content = kfrozendict.freeze(content)
 
-        self._translated_columns = None
         self.perform_renames = True
         self.perform_transformations = True
 
@@ -111,8 +120,17 @@ class Content:
         transformations.reverse()
         content = content.copy(schema=schema)
 
-        for transformation in transformations:
-            content = TRANSFORMERS[transformation].rw(content)
+        transformer_list = TransformerList([
+            TRANSFORMERS[tname]
+            for tname in transformations
+        ])
+
+        # this will add some transformations onto the list
+        # mainly to migrate stuff like choice-lists away from schema:'1'
+        for transformer_name in DEFAULT_TRANSFORMERS.get(schema, []):
+            transformer_list.ensure(TRANSFORMERS[transformer_name])
+
+        content = transformer_list.rw(content)
 
         self._v = schema
         self.schema = self._v
@@ -141,9 +159,9 @@ class Content:
             if len(self.txs) > 0:
                 self.default_tx = self.txs._tuple[dtx_index]
 
-    def export(self, schema='2', flat=FLAT_DEFAULT, remove_nulls=True):
+    def export(self, schema='2', flat=FLAT_DEFAULT, remove_nulls=False,
+               immutable=False):
         self.export_params = SimpleNamespace(remove_nulls=remove_nulls)
-        # self.export_params.remove_nulls = remove_nulls
         result = None
         designated_schema = schema
         # schema string is in the format:
@@ -160,11 +178,17 @@ class Content:
         result = kfrozendict.freeze(result)
         schemas = [schema]
         for transformation in transformations:
-            _t_result = TRANSFORMERS[transformation].fw(result)
+            transformer = TRANSFORMERS[transformation]
+            if hasattr(transformer, 'TRANSFORMER'):
+                transformer = transformer.TRANSFORMER
+            _t_result = transformer.fw(result)
             if _t_result is not None:
                 result = _t_result
                 schemas.append(transformation)
 
+        result = result.copy(schema='+'.join(schemas))
+        if immutable:
+            return result
         return kfrozendict.unfreeze(
             result.copy(schema='+'.join(schemas))
         )
@@ -197,15 +221,6 @@ class Content:
             )
         )
 
-    def value_has_tx_keys(self, val):
-        if not isinstance(val, (dict, kfrozendict)):
-            return False
-        valkeys = set(val.keys())
-        _has_tx_keys = len(valkeys) > 0 and valkeys.issubset(self.txs.codes)
-        if not _has_tx_keys and 'tx0' in valkeys:
-            raise Exception('missing tx key?')
-        return _has_tx_keys
-
     def to_structure(self, schema='2', flat=FLAT_DEFAULT):
         return _sans_empty_values(kfrozendict.unfreeze({
             'schema': schema,
@@ -232,14 +247,8 @@ class Content:
 
 
     def load_content_schema_1(self):
-        content = self.data
-        self._data_settings = _unpack_v1_settings(self.data.get('settings'))
+        self._data_settings = self.data.get('settings')
 
-        if 'choices' not in content:
-            self.data = self.data.copy(choices=[])
-
-        _tcols = self.data.get('translated', [])
-        self._translated_columns = _tcols
         self.metas = Metas(content=self)
         self.txs = TxList(content=self)
         self.ensure_default_language()
@@ -248,12 +257,9 @@ class Content:
         self.settings = Settings(content=self)
 
     def to_v1_structure(self):
-        colnames = self.survey.get_tx_col_names_for_v1().union(
-            self.choices.get_tx_col_names_for_v1()
-        )
         return kfrozendict.unfreeze({
             'schema': '1',
-            'translated': sorted(colnames),
+            'translated': sorted(self._tx_columns),
             'translations': self.txs.to_v1_strings(),
             'survey': self.survey.to_list(schema='1', flat=FLAT_DEFAULT),
             'choices': self.choices.to_old_arr(),

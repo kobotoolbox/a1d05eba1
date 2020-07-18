@@ -4,12 +4,11 @@ from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yload_file
 
 from ..fields import UntranslatedVal, TranslatedVal
-from ..build_schema import MAIN_JSONSCHEMA
+
+from ..schema_properties import CHOICE_PROPERTIES, TRANSLATABLE_CHOICES_COLS
 
 from .base_component import SurveyComponentWithDict
 from .base_component import SurveyComponentWithOrderedDict
-
-CHOICE_PROPERTIES = MAIN_JSONSCHEMA['$defs']['choice']['properties'].keys()
 
 
 class Choice(SurveyComponentWithOrderedDict):
@@ -22,10 +21,8 @@ class Choice(SurveyComponentWithOrderedDict):
     choice_renames_to_v1 = yload_file('renames/to1/choice-column')
 
     renames_from_v1 = yload_file('renames/from1/column',
-                                 # dir=('renames', 'from1'),
                                  invert=True)
     choice_specific_renames_from_v1 = yload_file('renames/from1/choice-column',
-                                                 # dir=('renames', 'from1'),
                                                  invert=True)
 
     def load_from_old_arr(self, item, list_name):
@@ -39,14 +36,14 @@ class Choice(SurveyComponentWithOrderedDict):
             elif key in self.renames_from_v1:
                 original = key
                 key = self.renames_from_v1[key]
-
             if key not in CHOICE_PROPERTIES:
                 _additionals[key] = val
                 continue
-            if key in self.content._translated_columns:
+            if key in TRANSLATABLE_CHOICES_COLS:
                 self.set_translated(key, val, original=original)
             else:
                 self.set_untranslated(key, val, original=original)
+            self.content.add_col(key, 'choices')
         self._additionals = kfrozendict.freeze(_additionals)
 
     def load_from_new_dict(self, item, list_name):
@@ -59,11 +56,11 @@ class Choice(SurveyComponentWithOrderedDict):
             if self.content.strip_unknown and key not in CHOICE_PROPERTIES:
                 continue
 
-            _is_d = isinstance(val, (dict, kfrozendict))
-            if _is_d and self.content.value_has_tx_keys(val):
+            if key in TRANSLATABLE_CHOICES_COLS:
                 self.set_translated(key, val)
             else:
                 self.set_untranslated(key, val)
+            self.content.add_col(key, 'choices')
 
         if _filters:
             self._additionals = _filters
@@ -112,19 +109,7 @@ class ChoiceLists(SurveyComponentWithDict):
         cur = cur + (choice,)
         self._d[list_name] = cur
 
-    def load_from_1(self):
-        self.source = self.content.data.get('choices', [])
-        for item in self.source:
-            list_name_key = 'list name' if 'list name' in item else 'list_name'
-            (list_item, list_name) = item.popout(list_name_key)
-
-            self._append_choice_to_list(list_name,
-                Choice(content=self.content,
-                       item=list_item,
-                       list_name=list_name)
-                )
-
-    def load_from_2(self):
+    def load(self):
         self.source = self.content.data.get('choices', {})
         for (list_name, choices) in self.source.items():
             for choice in choices:
@@ -133,26 +118,6 @@ class ChoiceLists(SurveyComponentWithDict):
                            item=choice,
                            list_name=list_name)
                     )
-
-    def to_old_dict(self):
-        out = {}
-        for (key, vals) in self.items():
-            out[key] = []
-            for val in vals:
-                out[key].append(val.to_old_dict())
-        return out
-
-    def get_tx_col_names_for_v1(self):
-        '''
-        goes into the 'translated': [] array
-        '''
-        colnames = set()
-        for (key, vals) in self._d.items():
-            for choice in vals:
-                for col in choice:
-                    if isinstance(col, TranslatedVal):
-                        colnames.update([col.key])
-        return colnames
 
     def to_old_arr(self):
         out = []
@@ -166,5 +131,7 @@ class ChoiceLists(SurveyComponentWithDict):
         for (key, vals) in self._d.items():
             out[key] = []
             for val in vals:
-                out[key].append(val.to_dict())
+                out[key].append(
+                    val.to_dict()
+                )
         return out

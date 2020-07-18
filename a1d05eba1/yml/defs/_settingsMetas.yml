@@ -3,31 +3,31 @@ additionalProperties: false
 properties:
 
   start:
-    $ref: '#/$defs/booleanOrString'
+    $ref: '#/$defs/booleanOrTaggedMeta'
 
   end:
-    $ref: '#/$defs/booleanOrString'
+    $ref: '#/$defs/booleanOrTaggedMeta'
 
   today:
-    $ref: '#/$defs/booleanOrString'
+    $ref: '#/$defs/booleanOrTaggedMeta'
 
   deviceid:
-    $ref: '#/$defs/booleanOrString'
+    $ref: '#/$defs/booleanOrTaggedMeta'
 
   subscriberid:
-    $ref: '#/$defs/booleanOrString'
+    $ref: '#/$defs/booleanOrTaggedMeta'
 
   simserial:
-    $ref: '#/$defs/booleanOrString'
+    $ref: '#/$defs/booleanOrTaggedMeta'
 
   phonenumber:
-    $ref: '#/$defs/booleanOrString'
+    $ref: '#/$defs/booleanOrTaggedMeta'
 
   username:
-    $ref: '#/$defs/booleanOrString'
+    $ref: '#/$defs/booleanOrTaggedMeta'
 
   email:
-    $ref: '#/$defs/booleanOrString'
+    $ref: '#/$defs/booleanOrTaggedMeta'
 
   audit:
-    $ref: '#/$defs/booleanOrString'
+    $ref: '#/$defs/booleanOrTaggedMeta'

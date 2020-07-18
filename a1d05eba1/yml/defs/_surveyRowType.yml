@@ -13,10 +13,14 @@ enum:
 - decimal                     # Decimal input.
 - range                       # Range input (including rating)
 - text                        # Free text response.
+
+# xlsform_aliases.py splits "select_one xyz" for these select_x types
 - select_one                  # [options]	Multiple choice question; only one answer can be selected.
 - select_multiple             # [options]	Multiple choice question; multiple answers can be selected.
 - select_one_from_file        # [file]	Multiple choice from file; only one answer can be selected.
 - select_multiple_from_file   # [file]	Multiple choice from file; multiple answers can be selected.
+- select_one_external
+
 - rank                        # [options]	Rank question; order a list.
 - note                        # Display a note on the screen, takes no input.
 - geopoint                    # Collect a single GPS coordinate.
@@ -41,9 +45,11 @@ enum:
 - xmlexternal                 # Adds a reference to an external XML data file
 
 
+# - group (found in 'grouping')
 - begin_group
 - end_group
 
+# - repeat (found in 'grouping')
 - begin_repeat
 - end_repeat
 
@@ -64,12 +70,6 @@ enum:
 - end_rank
 
 # - filterType
-
-- select_multiple
-- select_multiple_from_file
-- select_one
-- select_one_external
-- select_one_from_file
 
 - osm
 - osm_buildingtags

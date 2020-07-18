@@ -13,7 +13,7 @@ properties:
   type:
     $ref: '#/$defs/surveyRowType'
   name:
-    type: string
+    $ref: '#/$defs/nameString'
   params:
     type: object
     additionalProperties: false
@@ -23,6 +23,11 @@ properties:
         - type: number
         - type: string
         - type: boolean
+  tags:
+    type: array
+    items:
+      type: string
+
   $anchor:
     type: string
   appearance:
@@ -40,11 +45,16 @@ properties:
     - month-year
     - year
 
+    # kobo literacy field
+    - literacy
+
   # auto_delete:
   #   type: string
   bind:
     type: object
-    # $ref: '#/$defs/type--string'
+  body_kb_flash:
+    type: string
+
   calculation:
     $ref: '#/$defs/type--string'
   choice_filter:
@@ -77,19 +87,19 @@ properties:
 
   intent:
     type: string
-  kobo--rank-constraint-message:
+
+  'kobo--rank-constraint-message':
     type: string
-  kobo--score-choices:
+  'kobo--score-choices':
     type: string
   'kobo--matrix_list':
     type: string
-  # parameters:
-  # !!renamed to "params"
-  #   type: string
+
+  # parameters:                          !! renamed to "params"
   default:
     anyOf:
-      - $ref: '#/$defs/type--string'
-      - $ref: '#/$defs/booleanOrXpath'
+    - $ref: '#/$defs/type--string'
+    - $ref: '#/$defs/booleanOrXpath'
   read_only:
     $ref: '#/$defs/booleanOrXpath'
   required:

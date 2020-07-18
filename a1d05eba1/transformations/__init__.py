@@ -1,29 +1,28 @@
 from . import flatten_survey_by_anchor
 from . import xlsform_translations
 from . import noop
+from . import validators
 from . import xlsform_aliases
+from . import xlsform_choices
 from . import remove_empty_rows
-from . import kuid_anchor_key
+from . import xlsform_add_anchors
 
+from . import kobo_rename_kuid_to_anchor
+from . import koboxlsform
+from . import xlsform
+from . import formpack
+from . import xlsform_unwrap_settings_from_list
 
-class Transformer:
-    def __init__(self, module):
-        self.module = module
-
-    def fw(self, content):
-        _tcontent = self.module.fw(content)
-        if _tcontent is None:
-            return content
-        return _tcontent
-
-    def rw(self, content):
-        _tcontent = self.module.rw(content)
-        if _tcontent is None:
-            return content
-        return _tcontent
+# from . import formpack_prep
 
 
 TRANSFORMERS = {
+    'validate_choices_not_list': validators.choices_not_list,
+    'validate_unique_anchors': validators.unique_anchors,
+    'validate_settings_not_list': validators.settings_not_list,
+    'validate_has_translations': validators.has_translations,
+
+
     # convert arrays to objects with a "$start" value and "$next" values
     # to clean up diffs on small changes to large surveys
     'flatten_survey_by_anchor': flatten_survey_by_anchor,
@@ -31,33 +30,26 @@ TRANSFORMERS = {
 
     # convert columns like 'label::english': 'x' to 'label': ['x']
     'xlsform_translations': xlsform_translations,
+    # 'formpack_prep': formpack_prep,
 
     # type: 'select_one listname' split into 2
     # type: 'rank listname' split into 2
     'xlsform_aliases': xlsform_aliases,
+    'xlsform_choices': xlsform_choices,
+    'xlsform_add_anchors': xlsform_add_anchors,
+    'xlsform_unwrap_settings_from_list': xlsform_unwrap_settings_from_list,
 
-    'kuid_anchor_key': kuid_anchor_key,
-    'remove_empty_rows': Transformer(remove_empty_rows),
-
+    'kobo_rename_kuid_to_anchor': kobo_rename_kuid_to_anchor,
+    'formpack': formpack,
+    'koboxlsform': koboxlsform,
+    'xlsform': xlsform,
+    'remove_empty_rows': remove_empty_rows,
     'noop': noop,
     '': noop,
 }
 
 
 ALIASES = {
-    '1::': '1+xlsform_translations',
-    '1+::': '1+xlsform_translations',
-    'xlsform': '+'.join([
-        '1',
-        'xlsform_aliases',
-        'xlsform_translations',
-        'remove_empty_rows',
-    ]),
-    'koboxlsform': '+'.join([
-        '1',
-        'xlsform_aliases',
-        'xlsform_translations',
-        'kuid_anchor_key',
-        'remove_empty_rows',
-    ]),
+    'xlsform': '1+xlsform',
+    'koboxlsform': '1+koboxlsform',
 }

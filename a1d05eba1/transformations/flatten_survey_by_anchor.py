@@ -35,6 +35,8 @@ def fw(content):
         _next = False
         for row in _survey[::-1]:
             (row, anchor) = row.popout(ANCHOR_KEY)
+            if 'rows' in row:
+                raise NotImplementedError()
             if _next != False:
                 row = row.copy(**{'$next': _next})
             _next = anchor
