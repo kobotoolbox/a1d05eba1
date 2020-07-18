@@ -32,4 +32,5 @@ def test_metas_and_settings():
         ],
     })
     result = cc.export(schema='2')
-    assert 'metas' in result['settings']
+    assert 'metas' not in result['settings']
+    assert 'metas' in result

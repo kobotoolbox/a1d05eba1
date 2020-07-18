@@ -15,18 +15,6 @@ from .exceptions import SchemaRefError
 
 from .YAML_CONSTANTS import YAML_CONSTANTS
 
-BASE_SCHEMA = {
-    'type': 'object',
-    'additionalProperties': False,
-    'properties': {
-        'schema': { 'type': 'string' },
-        'survey':  { '$ref': '#/$defs/survey' },
-        'translations': {'$ref': '#/$defs/translations' },
-        'choices': { '$ref': '#/$defs/choices' },
-        'settings': {'$ref': '#/$defs/settings'},
-    },
-}
-
 project_path = os.path.dirname(os.path.realpath(__file__))
 YML_DIR = os.path.join(project_path, 'yml')
 defpath = lambda defid: os.path.join(YML_DIR, 'defs', defid + '.yml')

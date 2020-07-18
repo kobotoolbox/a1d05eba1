@@ -62,7 +62,7 @@ class Metas(SurveyComponentWithDict):
     def load(self):
         self._metas = []
         if self.content.schema == '1':
-            _existing_metas = self.content._data_settings.get('metas', None)
+            _existing_metas = self.content.data.get('metas', {})
             metas = {}
             if _existing_metas:
                 metas.update(_existing_metas)
@@ -72,8 +72,8 @@ class Metas(SurveyComponentWithDict):
                     metas[_type] = kfrozendict(row)
             self._load_metas(metas)
         else:
-            _settings = self.content._data_settings
-            self._load_metas(_settings.get('metas', {}))
+            _metas = self.content.data.get('metas', {})
+            self._load_metas(_metas)
 
     def _load_metas(self, metas):
         for (key, val) in metas.items():
@@ -103,7 +103,7 @@ class Metas(SurveyComponentWithDict):
             if val is not False:
                 yield (key, val)
 
-    def to_dict(self):
+    def to_dict(self, schema='2'):
         out = {}
         for meta in self._metas:
             (key, value) = meta.to_settings_metas_key_values()

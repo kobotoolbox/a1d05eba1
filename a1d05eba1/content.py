@@ -228,6 +228,7 @@ class Content:
             'survey': self.survey.to_list(schema=schema, flat=flat),
             'choices': self.choices.to_dict(schema=schema),
             'settings': self.settings.to_dict(schema=schema),
+            'metas': self.metas.to_dict(schema=schema),
         }))
 
     def load_content_schema_2(self):

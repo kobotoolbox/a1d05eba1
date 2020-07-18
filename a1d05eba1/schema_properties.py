@@ -23,7 +23,7 @@ TRANSLATABLE_CHOICES_COLS = list(_get_translatable_props('choice'))
 ROW_PROPERTIES = _props_set_for('surveyRow')
 CHOICE_PROPERTIES = _props_set_for('choice')
 SETTINGS_PROPERTIES = _props_set_for('settings')
-SETTINGS_METAS = _props_set_for('settingsMetas')
+META_PROPERTIES = _props_set_for('settingsMetas')
 
 GROUPABLE_TYPES = _props_for('grouping')['type']['enum']
 

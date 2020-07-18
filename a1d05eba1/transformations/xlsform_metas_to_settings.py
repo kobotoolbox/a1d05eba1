@@ -10,7 +10,7 @@ from ..utils.kfrozendict import kfrozendict
 from .transformer import Transformer
 
 
-from ..schema_properties import SETTINGS_METAS
+from ..schema_properties import META_PROPERTIES
 
 XLSFORM_RENAMED_METAS = yload_file('renames/from1/metas', invert=True)
 
@@ -20,7 +20,6 @@ class MetasToSettings(Transformer):
         updates = {}
         survey = tuple()
         metas = tuple()
-        settings = content['settings']
         for row in content.get('survey', []):
             (row, is_meta) = self.rw__each_row_extract_metas(row)
 
@@ -35,7 +34,7 @@ class MetasToSettings(Transformer):
             for meta in metas:
                 (meta, _type) = meta.popout('type')
                 metas_dict[_type] = meta
-            updates['settings'] = settings.copy(metas=kfrozendict(metas_dict))
+            updates['metas'] = metas_dict
 
         return content.copy(**updates)
 
@@ -45,7 +44,7 @@ class MetasToSettings(Transformer):
         if _type in XLSFORM_RENAMED_METAS:
             _type = XLSFORM_RENAMED_METAS[_type]
             row = row.copy(type=_type)
-        if _type in SETTINGS_METAS:
+        if _type in META_PROPERTIES:
             is_meta = True
         return (row, is_meta)
 

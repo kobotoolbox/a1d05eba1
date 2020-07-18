@@ -51,12 +51,9 @@ class Settings(SurveyComponentWithDict):
 
     def to_dict(self, schema):
         if schema == '2':
-            _include_empty_metas = (not self.content.export_params.remove_nulls)
             out = kfrozendict.unfreeze(self._d)
             if self._pubkey:
                 out['public_key'] = self._pubkey
-            if self.content.metas.any() or _include_empty_metas:
-                out['metas'] = self.content.metas.to_dict()
             if len(out) == 0 and self.content.export_params.remove_nulls:
                 return None
             return out
