@@ -9,7 +9,6 @@ from types import SimpleNamespace
 from jsonschema import validate
 
 from .utils.kfrozendict import kfrozendict
-from .utils.yparse import yload_file
 
 from .exceptions import SchemaError
 
@@ -30,7 +29,7 @@ from .transformations import ALIASES as TRANSFORMER_ALIASES
 from .schema_properties import TRANSLATABLE_SURVEY_COLS
 
 FLAT_DEFAULT = True
-METAS = yload_file('defs/_settingsMetas')
+METAS = MAIN_JSONSCHEMA['$defs']['metas']
 
 SCHEMAS = [
     '1',

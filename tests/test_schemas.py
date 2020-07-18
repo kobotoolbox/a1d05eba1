@@ -46,11 +46,6 @@ def test_row_schema():
 def test_settings_schema():
     schema = schema_for_def('settings')
     assert set(schema['$defs'].keys()) == set([
-        'booleanOrTaggedMeta',
-        'nameString',
-        'settingsMetas',
-        'type--boolean',
-        'type--string',
         'type--url',
     ])
 

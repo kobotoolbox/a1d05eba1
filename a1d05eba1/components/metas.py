@@ -16,7 +16,7 @@ class Meta:
     def tag_string(self):
         return ''
 
-    def to_settings_metas_key_values(self):
+    def to_key_values(self):
         # schema='2'
         if len(self.tags) == 0:
             if self.name_specified:
@@ -98,14 +98,9 @@ class Metas(SurveyComponentWithDict):
     def any(self):
         return len(self._metas) > 0
 
-    def _meta_key_values(self):
-        for meta in self._metas:
-            if val is not False:
-                yield (key, val)
-
     def to_dict(self, schema='2'):
         out = {}
         for meta in self._metas:
-            (key, value) = meta.to_settings_metas_key_values()
+            (key, value) = meta.to_key_values()
             out[key] = value
         return out
