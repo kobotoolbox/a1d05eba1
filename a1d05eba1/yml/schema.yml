@@ -15,4 +15,4 @@ properties:
   settings:
     "$ref": "#/$defs/settings"
   metas:
-    type: "object"
+    "$ref": "#/$defs/metas"
