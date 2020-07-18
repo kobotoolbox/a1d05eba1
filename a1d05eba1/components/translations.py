@@ -1,11 +1,7 @@
 import re
 import string
-import random
 
-from ..utils.kfrozendict import kfrozendict
-from ..exceptions import TranslationImportError
-
-from .base_component import SurveyComponentWithTuple, SurveyComponentWithDict
+from .base_component import SurveyComponentWithTuple
 
 
 LETTERS = string.ascii_lowercase + string.digits
@@ -14,9 +10,9 @@ NULL_TRANSLATION = 'NULL_TRANSLATION'
 
 class Translation:
     def __init__(self, name,
-            anchor=None,
-            locale=None,
-            _tx_index=None):
+                 anchor=None,
+                 locale=None,
+                 _tx_index=None):
 
         self.name = name
         if name in ['', None]:

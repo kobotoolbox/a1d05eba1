@@ -2,7 +2,7 @@ from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yload_file
 from ..schema_properties import SETTINGS_PROPERTIES
 
-from .base_component import SurveyComponentWithTuple, SurveyComponentWithDict
+from .base_component import SurveyComponentWithDict
 
 
 _standardize_public_key = lambda pk: ''.join(pk.split('\n'))

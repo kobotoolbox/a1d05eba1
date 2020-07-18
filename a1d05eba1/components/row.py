@@ -10,8 +10,6 @@ from ..special_fields import (
     TypeField,
 )
 
-from .base_component import SurveyComponentWithTuple
-from .base_component import SurveyComponentWithDict
 from .base_component import SurveyComponentWithOrderedDict
 
 from ..schema_properties import ROW_PROPERTIES

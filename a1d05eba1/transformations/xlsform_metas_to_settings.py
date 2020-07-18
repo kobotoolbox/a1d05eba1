@@ -6,7 +6,6 @@ sheet
 '''
 
 from ..utils.yparse import yload_file
-from ..utils.kfrozendict import kfrozendict
 from .transformer import Transformer
 
 

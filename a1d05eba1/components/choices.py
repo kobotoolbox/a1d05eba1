@@ -1,9 +1,5 @@
-from collections import defaultdict
-
 from ..utils.kfrozendict import kfrozendict
 from ..utils.yparse import yload_file
-
-from ..fields import UntranslatedVal, TranslatedVal
 
 from ..schema_properties import CHOICE_PROPERTIES, TRANSLATABLE_CHOICES_COLS
 

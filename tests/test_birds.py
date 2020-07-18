@@ -1,6 +1,4 @@
-import json
 from a1d05eba1.content import Content
-from a1d05eba1.utils.kfrozendict import kfrozendict
 
 
 # BIRDS comes from an example XLSForm "Birds.xlsx"

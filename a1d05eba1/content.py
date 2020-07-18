@@ -1,8 +1,4 @@
-import os
 import re
-import json
-import string
-import random
 
 from types import SimpleNamespace
 
@@ -10,16 +6,13 @@ from jsonschema import validate
 
 from .utils.kfrozendict import kfrozendict
 
-from .exceptions import SchemaError
-
 # components
 from .components import Surv
-from .components import ChoiceLists, Choice
-from .components import TxList, Translation
+from .components import ChoiceLists
+from .components import TxList
 from .components import Settings
 from .components import Metas
 
-from .components.base_component import SurveyComponentWithTuple, SurveyComponentWithDict
 from .build_schema import MAIN_JSONSCHEMA
 
 from .transformations import TRANSFORMERS

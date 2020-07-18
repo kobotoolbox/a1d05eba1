@@ -1,7 +1,4 @@
-from ..utils.yparse import yload_file
-from ..utils.kfrozendict import kfrozendict
-
-from .base_component import SurveyComponentWithTuple, SurveyComponentWithDict
+from .base_component import SurveyComponentWithTuple
 from .row import (
     Row,
     OpeningRow,

@@ -6,7 +6,6 @@ all the "label" values in one array
 '''
 
 import re
-from collections import defaultdict
 from types import SimpleNamespace
 
 from ..utils.yparse import yload_file

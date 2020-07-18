@@ -1,5 +1,3 @@
-import json
-
 from .utils.kfrozendict import kfrozendict
 
 
