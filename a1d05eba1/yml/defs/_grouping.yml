@@ -21,5 +21,10 @@ properties:
     $ref: '#/$defs/translatable'
   hint:
     $ref: '#/$defs/translatable'
-  # guidance_hint:
-  #   $ref: '#/$defs/translatable'
+  guidance_hint:
+    $ref: '#/$defs/translatable'
+
+  repeat_count:
+    anyOf:
+    - type: 'integer'
+    - type: 'string'

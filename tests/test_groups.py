@@ -139,3 +139,20 @@ def test_odd_group_tree():
     })
     result = cc.export(schema='2', flat=False)
     validate(result, MAIN_JSONSCHEMA)
+
+def test_repeats_with_repeat_count():
+    cc = Content({'choices': {},
+                  'schema': '2',
+                  'settings': {'metas': {}},
+                  'survey': [{'type': 'repeat',
+                              '$anchor': 'rr',
+                              'repeat_count': 2,
+                              'label': {'tx0': 'tt'},
+                              'name': 'rr',
+                              'rows': [
+                                {'$anchor': 't1', 'name': 't1', 'type': 'text'}
+                               ],
+                              }],
+                  'translations': [{'$anchor': 'tx0', 'name': ''}]})
+    result = cc.export(schema='2', flat=False)
+    assert 'repeat_count' in result['survey'][0]

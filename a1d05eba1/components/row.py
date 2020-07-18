@@ -32,6 +32,7 @@ class Parented:
 
 
 class Row(SurveyComponentWithOrderedDict, Parented):
+    ALLOWED_PROPERTIES = ROW_PROPERTIES
     renames_to_v1 = yload_file('renames/to1/column')
     renames_from_v1 = yload_file('renames/from1/column', invert=True)
     rows = tuple()
@@ -51,7 +52,7 @@ class Row(SurveyComponentWithOrderedDict, Parented):
         for (key, val) in _r.items():
             if key in skip_keys:
                 continue
-            if key not in V2_PROPERTIES:
+            if key not in self.ALLOWED_PROPERTIES:
                 _additionals[key] = val
                 continue
             if key == 'type':
@@ -60,10 +61,12 @@ class Row(SurveyComponentWithOrderedDict, Parented):
                 self.set('type', self.typefield)
                 continue
 
-            if self.content.value_has_tx_keys(val):
+            # formerly-- self.content.value_has_tx_keys(val)
+            if key in TRANSLATABLE_SURVEY_COLS:
                 self.set_translated(key, val)
             else:
                 self.set_untranslated(key, val)
+            self.content.add_col(key, 'survey')
 
         for Field in ROW_SPECIAL_FIELDS:
             if not Field.in_row(_r, schema=self.content.schema):
@@ -102,7 +105,7 @@ class Row(SurveyComponentWithOrderedDict, Parented):
 
             # remove columns that are not recognized in the schema
             # (note: this may be aggressive)
-            if key not in V2_PROPERTIES:
+            if key not in self.ALLOWED_PROPERTIES:
                 _additionals[key] = val
                 continue
 
@@ -200,6 +203,8 @@ class Row(SurveyComponentWithOrderedDict, Parented):
 
 
 class OpeningRow(Row):
+    ALLOWED_PROPERTIES = ROW_PROPERTIES + ('repeat_count',)
+
     def adjust_kwargs(self, kwargs):
         row = kwargs['row']
         if row['type'].startswith('begin_'):
