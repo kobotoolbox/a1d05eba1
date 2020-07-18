@@ -61,6 +61,7 @@ DEFAULT_TRANSFORMERS = {
 
 class Content:
     META_TYPES = set(METAS['properties'].keys())
+    export_params = None
 
     @property
     def _tx_columns(self):
@@ -160,7 +161,7 @@ class Content:
         (schema, transformations) = unpack_schema_string(designated_schema)
 
         if schema == '1':
-            if flat == False:
+            if not flat:
                 raise ValueError('schema=1, flat=False is not an option')
             result = self.to_v1_structure()
         else:

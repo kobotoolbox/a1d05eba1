@@ -84,9 +84,9 @@ MAIN_JSONSCHEMA = build_schema()
 Draft7Validator.check_schema(MAIN_JSONSCHEMA)
 
 _defs = {}
-for (key, val) in MAIN_JSONSCHEMA['$defs'].items():
+for (ref, val) in MAIN_JSONSCHEMA['$defs'].items():
     Draft7Validator.check_schema(val)
-    _defs[key] = val
+    _defs[ref] = val
 
 __cached_defs = {}
 def schema_for_def(defname):
@@ -95,9 +95,9 @@ def schema_for_def(defname):
         def append_ref_and_subrefs(xdef, key):
             if key:
                 _subdefs[key] = xdef
-            for ref in _collect_refs(xdef):
-                if ref not in _subdefs:
-                    append_ref_and_subrefs(_defs[ref], ref)
+            for _ref in _collect_refs(xdef):
+                if _ref not in _subdefs:
+                    append_ref_and_subrefs(_defs[_ref], _ref)
         _def = _defs[defname]
         append_ref_and_subrefs(_def, key=False)
         __cached_defs[defname] = {**_def, '$defs': _subdefs}

@@ -17,9 +17,8 @@ class RawValue:
         return self.value
 
 class TranslatedVal:
-    def __init__(self, content, key, val, original=None):
+    def __init__(self, content, key, val):
         self.content = content
-        self.original = original
         assert isinstance(key, str)
         self.key = key
         self.load(val)
@@ -80,7 +79,7 @@ class TranslatedVal:
         yield (key, _oldvals)
 
 class UntranslatedVal:
-    def __init__(self, content, key, val, original=None):
+    def __init__(self, content, key, val):
         self.content = content
         self.key = key
         self.val = val

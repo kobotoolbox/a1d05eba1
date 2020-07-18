@@ -114,13 +114,13 @@ class Row(SurveyComponentWithOrderedDict, Parented):
                 self.typefield = TypeField(self.content, val)
                 col = self.typefield
             elif original in self.content._tx_columns:
-                col = TranslatedVal(self.content, key, val, original=original)
+                col = TranslatedVal(self.content, key, val)
             elif key in TRANSLATABLE_SURVEY_COLS:
                 # same as previous condition, but when a column *should* be txd
                 # but was not marked as translatable
-                col = TranslatedVal(self.content, key, val, original=original)
+                col = TranslatedVal(self.content, key, val)
             else:
-                col = UntranslatedVal(self.content, key, val, original=original)
+                col = UntranslatedVal(self.content, key, val)
 
             self.set(col.key, col)
         self._additionals = kfrozendict.freeze(_additionals)
