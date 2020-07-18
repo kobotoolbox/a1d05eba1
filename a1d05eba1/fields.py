@@ -25,9 +25,9 @@ class TranslatedVal:
         self.load(val)
 
     def load(self, val):
-        if self.content._v == '1':
+        if self.content.schema_version == '1':
             self.vals = self.load_from_old_vals(val)
-        elif self.content._v == '2':
+        elif self.content.schema_version == '2':
             self.vals = self.load_from_new_vals(val)
 
     def __repr__(self):

@@ -1,7 +1,7 @@
 '''
 remove_empty_rows:
 
-requires: content.schema == '1'
+requires: content.schema_version == '1'
 
 remove rows which have no meaning.
 in the "survey" sheet, that means any row without a "type" value.

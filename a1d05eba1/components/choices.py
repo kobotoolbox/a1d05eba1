@@ -11,9 +11,9 @@ class Choice(SurveyComponentWithOrderedDict):
     list_name = None
 
     def load(self, item, **kwargs):
-        if self.content.schema == '1':
+        if self.content.schema_version == '1':
             self.load_from_old_arr(item, **kwargs)
-        elif self.content.schema == '2':
+        elif self.content.schema_version == '2':
             self.load_from_new_dict(item, **kwargs)
 
     choice_renames_to_v1 = yload_file('renames/to1/choice-column')

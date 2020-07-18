@@ -63,7 +63,7 @@ class Metas(SurveyComponentWithDict):
     _metas = ()
 
     def load(self):
-        if self.content._v == '1':
+        if self.content.schema_version == '1':
             _existing_metas = self.content.data.get('metas', {})
             metas = {}
             if _existing_metas:

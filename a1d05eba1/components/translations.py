@@ -54,9 +54,9 @@ class Translation:
 
 class TxList(SurveyComponentWithTuple):
     def load(self, **kwargs):
-        if self.content.schema == '1':
+        if self.content.schema_version == '1':
             self._load_from_strings(**kwargs)
-        elif self.content.schema == '2':
+        elif self.content.schema_version == '2':
             self._load_from_new_list(**kwargs)
 
     def to_v1_strings(self):

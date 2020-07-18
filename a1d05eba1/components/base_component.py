@@ -18,7 +18,7 @@ class SurveyComponentBase:
         if hasattr(self, 'load'):
             self.load(**kwargs)
 
-        load_schema_fn = 'load_from_{}'.format(self.content.schema)
+        load_schema_fn = 'load_from_{}'.format(self.content.schema_version)
         if hasattr(self, load_schema_fn):
             schema_specific_loading_function = getattr(self, load_schema_fn)
             schema_specific_loading_function(**kwargs)

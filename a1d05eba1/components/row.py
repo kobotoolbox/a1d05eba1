@@ -72,7 +72,7 @@ class Row(SurveyComponentWithOrderedDict, Parented):
             self.content.add_col(key, 'survey')
 
         for Field in ROW_SPECIAL_FIELDS:
-            if not Field.in_row(_r, schema=self.content.schema):
+            if not Field.in_row(_r, schema=self.content.schema_version):
                 continue
 
             for sfield in Field.pull_from_row(_r, self.content):
@@ -126,7 +126,7 @@ class Row(SurveyComponentWithOrderedDict, Parented):
         self._additionals = kfrozendict.freeze(_additionals)
 
         for Field in ROW_SPECIAL_FIELDS:
-            if not Field.in_row(srow, schema=self.content.schema):
+            if not Field.in_row(srow, schema=self.content.schema_version):
                 continue
 
             for sfield in Field.pull_from_row(srow, self.content):

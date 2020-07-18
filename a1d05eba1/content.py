@@ -124,14 +124,13 @@ class Content:
 
         content = transformer_list.rw(content)
 
-        self._v = schema
-        self.schema = self._v
+        self.schema_version = schema
 
         self.data = kfrozendict.freeze(content)
 
-        if self._v == '1':
+        if self.schema_version == '1':
             self.load_content_schema_1()
-        elif self._v == '2':
+        elif self.schema_version == '2':
             self.load_content_schema_2()
 
         if self.perform_validation:

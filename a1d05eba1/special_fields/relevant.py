@@ -14,7 +14,7 @@ class RelevantVal:
 
     @classmethod
     def pull_from_row(kls, row, content):
-        schema = content.schema
+        schema = content.schema_version
         if 'relevant' in row:
             yield kls(content, row['relevant'])
 

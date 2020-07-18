@@ -36,7 +36,7 @@ class ConstraintVal:
 
     @classmethod
     def pull_from_row(kls, row, content):
-        schema = content.schema
+        schema = content.schema_version
 
         if 'constraint' not in row:
             return

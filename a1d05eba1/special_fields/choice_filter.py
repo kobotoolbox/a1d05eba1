@@ -12,7 +12,7 @@ class ChoiceFilter:
 
     @classmethod
     def pull_from_row(kls, row, content):
-        schema = content.schema
+        schema = content.schema_version
         if schema == '2':
             cfdata = row.get('choice_filter')
             if not cfdata:
