@@ -1,0 +1,24 @@
+not:
+  description: >
+    Some fields like "required", for example are best
+    represented as a boolean (true or false) and this
+    schema prevents these fields from being saved as
+    a boolean-like string
+  type: string
+  enum:
+  - 'true'
+  - 'TRUE'
+  - 'true()'
+  - 'True'
+  - 'TRUE()'
+  - 'false'
+  - 'FALSE'
+  - 'FALSE()'
+  - 'false()'
+  - 'False'
+  - 'YES'
+  - 'Yes'
+  - 'yes'
+  - 'NO'
+  - 'No'
+  - 'no'

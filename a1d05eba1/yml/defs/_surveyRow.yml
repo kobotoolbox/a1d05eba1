@@ -93,7 +93,9 @@ properties:
   read_only:
     $ref: '#/$defs/booleanOrXpath'
   required:
-    $ref: '#/$defs/booleanOrXpath'
+    allOf:
+    - $ref: '#/$defs/booleanOrXpath'
+    - $ref: '#/$defs/notFalseyBooleanString'
   select_from:
     type: string
     pattern: 'CHOICE_LIST_NAME_REGEX'
