@@ -67,8 +67,7 @@ class TxList(SurveyComponentWithTuple):
         default_tx = self.content.default_tx
         if default_tx and len(self._tuple) > 0:
             others = (tx for tx in self._tuple if tx is not default_tx)
-            self._tuple = (default_tx,
-                           *others)
+            self._tuple = (default_tx,) + tuple(others)
 
     def _load_from_strings(self):
         self._tx_strings = self.content.data.get('translations', [])

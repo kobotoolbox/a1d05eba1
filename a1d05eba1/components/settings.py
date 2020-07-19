@@ -1,4 +1,5 @@
 from ..utils.kfrozendict import kfrozendict
+from ..utils.kfrozendict import deepfreeze
 from ..utils.yparse import yload_file
 from ..schema_properties import SETTINGS_PROPERTIES
 
@@ -47,14 +48,14 @@ class Settings(SurveyComponentWithDict):
         if self._pubkey:
             self._pubkey = _standardize_public_key(self._pubkey)
 
-        self._d = kfrozendict.freeze(save)
+        self._d = deepfreeze(save)
 
     def to_dict(self, schema):
         if schema == '2':
             out = kfrozendict.unfreeze(self._d)
             if self._pubkey:
                 out['public_key'] = self._pubkey
-            if len(out) == 0 and self.content.export_params.remove_nulls:
+            if len(out) == 0 and self.content.export_params['remove_nulls']:
                 return None
             return out
         elif schema == '1':

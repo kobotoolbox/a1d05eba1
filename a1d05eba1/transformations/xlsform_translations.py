@@ -101,7 +101,7 @@ def mutate_content(content, context):
     for sheet_name in ['survey', 'choices']:
         sheet = tuple()
         for row in content.get(sheet_name, []):
-            sheet = (*sheet, mutate_row(row),)
+            sheet = sheet + (mutate_row(row),)
         content = content.copy(**{sheet_name: sheet})
 
     translations = []

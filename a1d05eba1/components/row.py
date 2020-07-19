@@ -1,4 +1,5 @@
 from ..utils.kfrozendict import kfrozendict
+from ..utils.kfrozendict import deepfreeze
 from ..utils.yparse import yload_file
 
 from ..fields import TranslatedVal, UntranslatedVal
@@ -78,10 +79,10 @@ class Row(SurveyComponentWithOrderedDict, Parented):
             for sfield in Field.pull_from_row(_r, self.content):
                 self.set(Field.EXPORT_KEY, sfield)
 
-        self._additionals = kfrozendict.freeze(_additionals)
+        self._additionals = deepfreeze(_additionals)
 
     def load_from_1(self, **kwargs):
-        srow = kfrozendict.freeze(kwargs.get('row'))
+        srow = deepfreeze(kwargs.get('row'))
         if '$kuid' in srow:
             raise ValueError('unexpected value: $kuid')
         if '$anchor' in srow:
@@ -123,7 +124,7 @@ class Row(SurveyComponentWithOrderedDict, Parented):
                 col = UntranslatedVal(self.content, key, val)
 
             self.set(col.key, col)
-        self._additionals = kfrozendict.freeze(_additionals)
+        self._additionals = deepfreeze(_additionals)
 
         for Field in ROW_SPECIAL_FIELDS:
             if not Field.in_row(srow, schema=self.content.schema_version):

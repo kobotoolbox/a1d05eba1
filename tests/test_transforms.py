@@ -3,6 +3,7 @@ import pytest
 from a1d05eba1.content import Content
 
 from a1d05eba1.utils.kfrozendict import kfrozendict
+from a1d05eba1.utils.kfrozendict import deepfreeze
 from a1d05eba1.transformations.xlsform_translations import (
     XlsformTranslations,
     inspect_content_translations,
@@ -17,7 +18,7 @@ from a1d05eba1.exceptions import MismatchedBeginEndGroupError
 
 NULL_TRANSLATION = 'NULL_TRANSLATION'
 
-S1 = kfrozendict.freeze({
+S1 = deepfreeze({
     'survey': [
         {'$anchor':'aaa','value':'111'},
         {'$anchor':'bbb','value':'222'},
@@ -45,7 +46,7 @@ def test_flattener():
 
 
 def test_reverser():
-    content = kfrozendict.freeze({
+    content = deepfreeze({
         'survey': [
             {'label': 'abc',
              'label::English': 'xyz'}
@@ -212,7 +213,7 @@ def test_noop():
     assert result
 
 
-GRP_S1 = kfrozendict.freeze({
+GRP_S1 = deepfreeze({
     'survey': [{'type': 'begin_group', '$anchor': 'grp_a'},
                 {'type': 'note', '$anchor': 'note_a'},
                 {'type': 'begin_group', '$anchor': 'grp_b'},

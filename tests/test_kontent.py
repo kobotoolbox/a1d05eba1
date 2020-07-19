@@ -1,6 +1,6 @@
 from a1d05eba1.content import Content
 from a1d05eba1.utils.kfrozendict import kfrozendict
-
+from a1d05eba1.utils.kfrozendict import deepfreeze
 
 CONTENT_1 = {
     'survey': [
@@ -173,7 +173,7 @@ def test_kfrozendict_utility_methods():
     ex1_unfrozen2 = kfrozendict.unfreeze(ex1)
     assert is_not_frozen(ex1_unfrozen2)
 
-    ex2 = kfrozendict.freeze({'abc': 123})
+    ex2 = deepfreeze({'abc': 123})
     assert is_frozen(ex2)
 
     ex3 = kfrozendict({'abc': {'def': {'ghi': 999}}})

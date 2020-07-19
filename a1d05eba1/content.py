@@ -1,10 +1,10 @@
 import re
 
-from types import SimpleNamespace
-
 from jsonschema import validate
 
 from .utils.kfrozendict import kfrozendict
+from .utils.kfrozendict import unfreeze, deepfreeze
+
 
 # components
 from .components import Surv
@@ -87,7 +87,7 @@ class Content:
         if content['schema'] == '2' and perform_validation:
             validate(content, MAIN_JSONSCHEMA)
 
-        content = kfrozendict.freeze(content)
+        content = deepfreeze(content)
 
         self.perform_renames = True
         self.perform_transformations = True
@@ -127,7 +127,7 @@ class Content:
 
         self.schema_version = schema
 
-        self.data = kfrozendict.freeze(content)
+        self.data = deepfreeze(content)
 
         if self.schema_version == '1':
             self.load_content_schema_1()
@@ -153,7 +153,7 @@ class Content:
 
     def export(self, schema='2', flat=FLAT_DEFAULT, remove_nulls=False,
                immutable=False):
-        self.export_params = SimpleNamespace(remove_nulls=remove_nulls)
+        self.export_params = {'remove_nulls': remove_nulls}
         result = None
         designated_schema = schema
         # schema string is in the format:
@@ -167,7 +167,7 @@ class Content:
         else:
             result = self.to_structure(schema=schema, flat=flat)
 
-        result = kfrozendict.freeze(result)
+        result = deepfreeze(result)
         schemas = [schema]
         for transformation in transformations:
             transformer = TRANSFORMERS[transformation]
@@ -181,7 +181,7 @@ class Content:
         result = result.copy(schema='+'.join(schemas))
         if immutable:
             return result
-        return kfrozendict.unfreeze(
+        return unfreeze(
             result.copy(schema='+'.join(schemas))
         )
 
@@ -214,7 +214,7 @@ class Content:
         )
 
     def to_structure(self, schema='2', flat=FLAT_DEFAULT):
-        return _sans_empty_values(kfrozendict.unfreeze({
+        return _sans_empty_values(unfreeze({
             'schema': schema,
             'translations': self.txs.to_list(schema=schema),
             'survey': self.survey.to_list(schema=schema, flat=flat),
@@ -250,7 +250,7 @@ class Content:
         self.settings = Settings(content=self)
 
     def to_v1_structure(self):
-        return kfrozendict.unfreeze({
+        return unfreeze({
             'schema': '1',
             'translated': sorted(self._tx_columns),
             'translations': self.txs.to_v1_strings(),
