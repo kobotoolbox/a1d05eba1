@@ -1,0 +1,680 @@
+{
+  "$defs": {
+    "booleanOrTaggedMeta": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/type--string"
+        },
+        {
+          "$ref": "#/$defs/type--boolean"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/nameString"
+            },
+            "tags": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "booleanOrXpath": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/type--boolean"
+        },
+        {
+          "$ref": "#/$defs/xpath"
+        }
+      ]
+    },
+    "choice": {
+      "additionalProperties": false,
+      "properties": {
+        "$anchor": {
+          "type": "string"
+        },
+        "audio": {
+          "$ref": "#/$defs/translatable"
+        },
+        "filters": {
+          "type": "object"
+        },
+        "image": {
+          "$ref": "#/$defs/translatable"
+        },
+        "label": {
+          "$ref": "#/$defs/translatable"
+        },
+        "value": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "type": "object"
+    },
+    "choiceFilter": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "raw": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "raw"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "choices": {
+      "patternProperties": {
+        ".*": {
+          "items": {
+            "$ref": "#/$defs/choice"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "grouping": {
+      "additionalProperties": false,
+      "properties": {
+        "$anchor": {
+          "type": "string"
+        },
+        "appearance": {
+          "type": "string"
+        },
+        "guidance_hint": {
+          "$ref": "#/$defs/translatable"
+        },
+        "hint": {
+          "$ref": "#/$defs/translatable"
+        },
+        "label": {
+          "$ref": "#/$defs/translatable"
+        },
+        "name": {
+          "type": "string"
+        },
+        "repeat_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/groupingOrRow"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "group",
+            "repeat"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "$anchor"
+      ],
+      "type": "object"
+    },
+    "groupingOrRow": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/surveyRow"
+        },
+        {
+          "$ref": "#/$defs/grouping"
+        }
+      ]
+    },
+    "metas": {
+      "additionalProperties": false,
+      "properties": {
+        "audit": {
+          "$ref": "#/$defs/booleanOrTaggedMeta"
+        },
+        "deviceid": {
+          "$ref": "#/$defs/booleanOrTaggedMeta"
+        },
+        "email": {
+          "$ref": "#/$defs/booleanOrTaggedMeta"
+        },
+        "end": {
+          "$ref": "#/$defs/booleanOrTaggedMeta"
+        },
+        "phonenumber": {
+          "$ref": "#/$defs/booleanOrTaggedMeta"
+        },
+        "simserial": {
+          "$ref": "#/$defs/booleanOrTaggedMeta"
+        },
+        "start": {
+          "$ref": "#/$defs/booleanOrTaggedMeta"
+        },
+        "subscriberid": {
+          "$ref": "#/$defs/booleanOrTaggedMeta"
+        },
+        "today": {
+          "$ref": "#/$defs/booleanOrTaggedMeta"
+        },
+        "username": {
+          "$ref": "#/$defs/booleanOrTaggedMeta"
+        }
+      },
+      "type": "object"
+    },
+    "nameString": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "notFalseyBooleanString": {
+      "not": {
+        "description": "Some fields like \"required\", for example are best represented as a boolean (true or false) and this schema prevents these fields from being saved as a boolean-like string\n",
+        "enum": [
+          "true",
+          "TRUE",
+          "true()",
+          "True",
+          "TRUE()",
+          "false",
+          "FALSE",
+          "FALSE()",
+          "false()",
+          "False",
+          "YES",
+          "Yes",
+          "yes",
+          "NO",
+          "No",
+          "no"
+        ],
+        "type": "string"
+      }
+    },
+    "settings": {
+      "additionalProperties": false,
+      "properties": {
+        "auto_delete": {
+          "type": "boolean"
+        },
+        "auto_send": {
+          "type": "boolean"
+        },
+        "delimiter": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "instance_name": {
+          "type": "string"
+        },
+        "namespaces": {
+          "type": "object"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "public_key": {
+          "anyOf": [
+            {
+              "pattern": "^[^\n]+$",
+              "type": "string"
+            },
+            {
+              "properties": {
+                "$ref": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        },
+        "root": {
+          "type": "string"
+        },
+        "style": {
+          "items": {
+            "enum": [
+              "theme-grid",
+              "pages",
+              "no-text-transform"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "submission_url": {
+          "$ref": "#/$defs/type--url"
+        },
+        "title": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "survey": {
+      "items": {
+        "$ref": "#/$defs/groupingOrRow"
+      },
+      "type": "array"
+    },
+    "surveyRow": {
+      "additionalProperties": false,
+      "properties": {
+        "$anchor": {
+          "type": "string"
+        },
+        "appearance": {
+          "enum": [
+            "field-list",
+            "horizontal-compact",
+            "label",
+            "rating",
+            "likert",
+            "list-nolabel",
+            "minimal",
+            "multiline",
+            "no-calendar",
+            "month-year",
+            "year",
+            "literacy"
+          ],
+          "type": "string"
+        },
+        "audio": {
+          "$ref": "#/$defs/translatableMedia"
+        },
+        "bind": {
+          "type": "object"
+        },
+        "body_kb_flash": {
+          "type": "string"
+        },
+        "calculation": {
+          "$ref": "#/$defs/type--string"
+        },
+        "choice_filter": {
+          "$ref": "#/$defs/choiceFilter"
+        },
+        "compact_tag": {
+          "$ref": "#/$defs/type--string"
+        },
+        "constraint": {
+          "properties": {
+            "message": {
+              "$ref": "#/$defs/translatable"
+            }
+          },
+          "type": "object"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/type--string"
+            },
+            {
+              "$ref": "#/$defs/booleanOrXpath"
+            }
+          ]
+        },
+        "guidance_hint": {
+          "$ref": "#/$defs/translatable"
+        },
+        "hint": {
+          "$ref": "#/$defs/translatable"
+        },
+        "image": {
+          "$ref": "#/$defs/translatableMedia"
+        },
+        "intent": {
+          "type": "string"
+        },
+        "kobo--matrix_list": {
+          "type": "string"
+        },
+        "kobo--rank-constraint-message": {
+          "type": "string"
+        },
+        "kobo--rank-items": {
+          "pattern": ".*",
+          "type": "string"
+        },
+        "kobo--score-choices": {
+          "type": "string"
+        },
+        "label": {
+          "$ref": "#/$defs/translatable"
+        },
+        "name": {
+          "$ref": "#/$defs/nameString"
+        },
+        "params": {
+          "additionalProperties": false,
+          "patternProperties": {
+            ".+": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          },
+          "type": "object"
+        },
+        "read_only": {
+          "$ref": "#/$defs/booleanOrXpath"
+        },
+        "relevant": {
+          "$ref": "#/$defs/xpath"
+        },
+        "required": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/booleanOrXpath"
+            },
+            {
+              "$ref": "#/$defs/notFalseyBooleanString"
+            }
+          ]
+        },
+        "select_from": {
+          "pattern": ".*",
+          "type": "string"
+        },
+        "select_from_external": {
+          "type": "string"
+        },
+        "select_from_file": {
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "$ref": "#/$defs/surveyRowType"
+        },
+        "video": {
+          "$ref": "#/$defs/translatableMedia"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "surveyRowType": {
+      "enum": [
+        "integer",
+        "decimal",
+        "range",
+        "text",
+        "select_one",
+        "select_multiple",
+        "select_one_from_file",
+        "select_multiple_from_file",
+        "select_one_external",
+        "rank",
+        "note",
+        "geopoint",
+        "geotrace",
+        "geoshape",
+        "osm",
+        "xml-external",
+        "audit",
+        "date",
+        "time",
+        "datetime",
+        "image",
+        "audio",
+        "video",
+        "file",
+        "barcode",
+        "calculate",
+        "acknowledge",
+        "hidden",
+        "xmlexternal",
+        "begin_group",
+        "end_group",
+        "begin_repeat",
+        "end_repeat",
+        "begin_kobomatrix",
+        "end_kobomatrix",
+        "begin_score",
+        "score__row",
+        "end_score",
+        "begin_koborank",
+        "begin_rank",
+        "rank__level",
+        "koborank__level",
+        "end_koborank",
+        "end_rank",
+        "osm",
+        "osm_buildingtags",
+        "xmlexternal"
+      ],
+      "type": "string"
+    },
+    "translatable": {
+      "$comment": "Translatable fields have keys {tx0, tx1}",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-zA-Z0-9_]{2,6}$": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/xpath"
+            },
+            {
+              "$ref": "#/$defs/type--string"
+            },
+            {
+              "$ref": "#/$defs/type--null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "translatableMedia": {
+      "patternProperties": {
+        "^[a-zA-Z0-9_]{2,6}$": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/type--string"
+            },
+            {
+              "$ref": "#/$defs/type--filecode"
+            },
+            {
+              "$ref": "#/$defs/type--url"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "translations": {
+      "items": {
+        "$ref": "#/$defs/translationsItem"
+      },
+      "type": "array"
+    },
+    "translationsItem": {
+      "additionalProperties": false,
+      "properties": {
+        "$anchor": {
+          "minLength": 2,
+          "pattern": "^[a-zA-Z0-9_]{2,6}$",
+          "type": "string"
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "locale": {
+          "minLength": 2,
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "$anchor"
+      ],
+      "type": "object"
+    },
+    "type--boolean": {
+      "type": "boolean"
+    },
+    "type--filecode": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "pattern": "^\\w",
+              "type": "string"
+            }
+          },
+          "required": [
+            "file"
+          ],
+          "type": "object"
+        },
+        {
+          "match": "/.*\\.\\w{3}/",
+          "type": "string"
+        }
+      ]
+    },
+    "type--null": {
+      "type": "null"
+    },
+    "type--string": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "type--url": {
+      "type": "string"
+    },
+    "xpath": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/type--string"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "raw": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "raw"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "compile": {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/type--string"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "$path": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "compile"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "$id": "https://dorey.github.io/a1d05eba1/schemas/schema-2020-07-20-58884fea.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "choices": {
+      "$ref": "#/$defs/choices"
+    },
+    "metas": {
+      "$ref": "#/$defs/metas"
+    },
+    "schema": {
+      "type": "string"
+    },
+    "settings": {
+      "$ref": "#/$defs/settings"
+    },
+    "survey": {
+      "$ref": "#/$defs/survey"
+    },
+    "translations": {
+      "$ref": "#/$defs/translations"
+    }
+  },
+  "type": "object"
+}
