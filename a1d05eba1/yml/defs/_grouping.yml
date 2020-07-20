@@ -1,0 +1,32 @@
+type: object
+additionalProperties: false
+required:
+- 'type'
+- '$anchor'
+properties:
+  type:
+    type: string
+    enum:
+    - group
+    - repeat
+  $anchor:
+    type: string
+  appearance:
+    type: string
+  rows:
+    type: array
+    items:
+      $ref: '#/$defs/groupingOrRow'
+  name:
+    type: string
+  label:
+    $ref: '#/$defs/translatable'
+  hint:
+    $ref: '#/$defs/translatable'
+  guidance_hint:
+    $ref: '#/$defs/translatable'
+
+  repeat_count:
+    anyOf:
+    - type: 'integer'
+    - type: 'string'

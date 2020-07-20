@@ -14,10 +14,8 @@ class RelevantVal:
 
     @classmethod
     def pull_from_row(kls, row, content):
-        schema = content.schema
-        if 'relevant' not in row:
-            return
-        else:
+        schema = content.schema_version
+        if 'relevant' in row:
             yield kls(content, row['relevant'])
 
     def __init__(self, content, val):
@@ -26,8 +24,8 @@ class RelevantVal:
         if isinstance(val, str):
             self.string = val
         elif isinstance(val, (dict, kfrozendict)):
-            self.string = val.get('string')
-        self.val = {'string': self.string}
+            self.string = val.get('raw')
+        self.val = {'raw': self.string}
 
     def dict_key_vals_old(self, renames=None):
         yield ('relevant', self.string)

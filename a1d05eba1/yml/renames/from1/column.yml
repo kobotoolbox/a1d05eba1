@@ -8,3 +8,8 @@ select_from:
 - select_from_list_name
 $anchor:
 - $kuid
+
+# TODO: decide if we want a consistent way to pass attribute values through to
+#       pyxform, etc. (body::kb:flash is used in kobo literacy tests)
+body_kb_flash:
+- 'body::kb:flash'

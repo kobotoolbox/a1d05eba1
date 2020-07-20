@@ -7,6 +7,7 @@ from pprint import pprint
 CONTENT_1 = {
     'survey': [
         {'type': 'text',
+            '$anchor': 'x',
             'name': 'book',
             'label': ['The patient']
         },
@@ -88,6 +89,7 @@ def test_one2two():
         'survey': [
             {
                 'type': 'text',
+                '$anchor': 'q1',
                 'label': ['enlabelle'],
             }
         ],
@@ -113,15 +115,17 @@ def test_reorder_translations():
         'survey': [
             {'type': 'text',
                 'name': 'q1',
+                '$anchor': 'x',
                 'label': {
-                    'en': {'string': 'en q1'},
-                    'fr': {'string': 'fr q1'}
+                    'en': 'en q1',
+                    'fr': 'fr q1',
                 }},
             {'type': 'text',
+                '$anchor': 'y',
                 'name': 'q2',
                 'label': {
-                    'en': {'string': 'en q2'},
-                    'fr': {'string': 'fr q2'}
+                    'en': 'en q2',
+                    'fr': 'fr q2',
                 }}
         ],
         'translations': [
@@ -141,23 +145,3 @@ def test_reorder_translations():
     cc.txs.reorder()
     anchors_1 = [c.anchor for c in cc.txs]
     assert anchors_1 == ['fr', 'en']
-
-def test_aliases():
-    cc = Content({'schema': '2',
-        'settings': {},
-        'survey': [],
-        'translations': [
-        {'name': 't1',
-            'code': 't1'}
-    ]})
-    assert cc.export(schema='2')['translations'][0] == {'name': 't1', 'default': True, '$anchor': 't1'}
-
-    cc = Content({'schema': '2',
-        'settings': {},
-        'survey': [],
-        'translations': [
-        {'name': 't1',
-            'uicode': 'en',
-            'code': 't1'}
-    ]})
-    assert cc.export(schema='2')['translations'][0] == {'name': 't1', 'default': True, '$anchor': 't1', 'locale': 'en'}

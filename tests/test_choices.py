@@ -15,12 +15,14 @@ CONTENT_1 = {
         {'type': 'select_one',
           'label': ['Select state'],
           'select_from_list_name': 'states',
+          '$anchor': 'aa',
           'name': 'state',
           },
         {'type': 'select_one',
           'label': ['Select county'],
           'select_from_list_name': 'counties',
           'name': 'county',
+          '$anchor': 'ab',
           'choice_filter': 'state=${state}',
           },
       ],
@@ -90,7 +92,9 @@ CONTENT_2 = {'schema': '2',
 
 
 def test_one2two():
-    result = Content(CONTENT_1, perform_validation=True).export(schema='2')
+    result = Content(CONTENT_1,
+                     perform_validation=True,
+                     ).export(schema='2')
     cxs = result.get('choices')
     states = cxs.get('states')
     (st0, st1) = states

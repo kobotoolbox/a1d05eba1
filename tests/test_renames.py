@@ -28,6 +28,7 @@ def test_renames_column_on_import():
     cc2 = Content(cc1)
     row = Row(content=cc2, row={
         'type': 'text',
+        '$anchor': 'uniqueanchor',
         'media::image': ['abc']
     })
 
@@ -43,16 +44,17 @@ def test_reverts_certain_names_on_export():
     cc2 = Content(cc1)
     row = Row(content=cc2, row={
         'type': 'text',
+        '$anchor': 'x',
         'media::image': ['abc']
     })
 
     schema = '1'
-    assert 'image' not in row.to_export(schema=schema)
-    assert 'media::image' in row.to_export(schema=schema)
+    assert 'image' not in row.flat_export(schema=schema)
+    assert 'media::image' in row.flat_export(schema=schema)
 
     schema = '2'
-    assert 'image' in row.to_export(schema=schema)
-    assert 'media::image' not in row.to_export(schema=schema)
+    assert 'image' in row.flat_export(schema=schema)
+    assert 'media::image' not in row.flat_export(schema=schema)
 
 
 def test_reverts_select_from_on_export():
@@ -60,17 +62,18 @@ def test_reverts_select_from_on_export():
     cc2 = Content(cc1)
     row = Row(content=cc2, row={
         'type': 'select_one',
+        '$anchor': 'xx',
         'select_from_list_name': 'xyz',
     })
 
     schema = '1'
-    assert 'select_from' not in row.to_export(schema=schema)
-    assert 'select_from_list_name' in row.to_export(schema=schema)
+    assert 'select_from' not in row.flat_export(schema=schema)
+    assert 'select_from_list_name' in row.flat_export(schema=schema)
 
 
     schema = '2'
-    assert 'select_from' in row.to_export(schema=schema)
-    assert 'select_from_list_name' not in row.to_export(schema=schema)
+    assert 'select_from' in row.flat_export(schema=schema)
+    assert 'select_from_list_name' not in row.flat_export(schema=schema)
     # pprint(row2schema1)
 
 

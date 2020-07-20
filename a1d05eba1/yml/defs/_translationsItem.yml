@@ -1,5 +1,5 @@
 # translations: [
-#   - name: null
+#   - name: ''
 #     $anchor: tx0
 #   - name: English
 #     $anchor: en
@@ -14,7 +14,10 @@ required:
 properties:
   # name can be an empty string representing an unnamed translation
   name:
-    type: string
+    anyOf:
+    - type: string
+    - type: "null"
+
   $anchor:                        # could equal the locale, but has a different
                                   # purpose
     type: string

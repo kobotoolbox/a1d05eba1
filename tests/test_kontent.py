@@ -1,6 +1,6 @@
 from a1d05eba1.content import Content
 from a1d05eba1.utils.kfrozendict import kfrozendict
-
+from a1d05eba1.utils.kfrozendict import deepfreeze
 
 CONTENT_1 = {
     'survey': [
@@ -24,7 +24,7 @@ CONTENT_1 = {
     'translated': [
         'label'
     ],
-    'settings': {'id_string': 'example',},
+    'settings': {'identifier': 'example',},
     'schema': '1',
 }
 
@@ -34,40 +34,38 @@ CONTENT_2 = {
         {'type': 'select_one',
             'select_from': 'xlistnamex',
             'name': 'q1',
+            '$anchor': 'xxxxxxb',
             'label': {
-                'tx0': {
-                    'string': 'mylabel'
-                },
+                'tx0': 'mylabel',
             },
         },
         {'type': 'text',
             'name': 'show_if_q1_empty',
+            '$anchor': 'xxxxxxc',
             'label': {
-                'tx0': {
-                    'string': 'reason q1 is empty?',
-                }
+                'tx0': 'reason q1 is empty?',
             },
             'relevant': {
-                'string': '${q1} = \'\'',
+                'raw': '${q1} = \'\'',
             }}
     ],
     'choices': {
         'xlistnamex': [
             {'value': 'r1', 'label': {
-            'tx0': {
-                'string': 'r1',
-            }
-            }},
+             'tx0': 'r1',
+            },
+            '$anchor': 'xxxxxxd',
+            },
             {'value': 'r2', 'label': {
-            'tx0': {
-                'string': 'r2',
-            }
-            }},
+             'tx0': 'r2',
+            },
+            '$anchor': 'xxxxxxe',
+            },
             {'value': 'r3', 'label': {
-            'tx0': {
-                'string': 'r3',
-            }
-            }},
+             'tx0': 'r3',
+            },
+            '$anchor': 'xxxxxxf',
+            },
         ],
     },
     'translations': [
@@ -78,7 +76,7 @@ CONTENT_2 = {
         }
     ],
     'settings': {
-        'id_string': 'example',
+        'identifier': 'example',
     },
     'schema': '2',
 }
@@ -98,45 +96,6 @@ def test_one2two():
     assert tx1 == {'$anchor':'tx0', 'name': '', 'default': True}
     assert isinstance(result['choices'], dict)
     assert len(result['choices'].keys()) > 0
-
-
-def test_generate_anchors():
-    def get_row0s(surv):
-        row0 = surv['survey'][0]
-        if isinstance(surv['choices'], list):
-            return (row0, surv['choices'][0])
-        return (row0, surv['choices']['xlistnamex'][0])
-
-    for _gen in [True, False]:
-        # generate_anchors=True/False
-        for content in [CONTENT_1, CONTENT_2]:
-            # content.export(schema='1'/'2')
-            for cs in ['1', '2']:
-                akey = '$anchor' if (cs == '2') else '$kuid'
-                result = Content(content,
-                                 generate_anchors=_gen
-                                 ).export(schema=cs)
-                if _gen:
-                    (row0, choice0) = get_row0s(result)
-                    assert akey in row0
-                    assert akey in choice0
-                    asval1 = row0[akey]
-                    acval1 = choice0[akey]
-                    for cs2 in ['1', '2']:
-                        # ensure anchor is preserved on second pass
-                        result_x = Content(result,
-                                           generate_anchors=True
-                                           ).export(schema=cs2)
-                        akey = '$anchor' if (cs2 == '2') else '$kuid'
-                        (row0, choice0) = get_row0s(result_x)
-
-                        # survey[n]['$anchor'] does not get changed on pass 2
-                        asval2 = row0[akey]
-                        assert asval1 == asval2
-
-                        # choices[...]['$anchor'] does not get changed on pass 2
-                        acval2 = choice0[akey]
-                        assert acval1 == acval2
 
 
 def test_one2one():
@@ -178,7 +137,7 @@ def test_two2two():
 
 def test_rename_kuid_to_anchor():
     cc = Content({
-        'schema': '1',
+        'schema': '1+koboxlsform',
         'survey': [
             {'type': 'text',
                 'label': ['asdf'],
@@ -191,5 +150,38 @@ def test_rename_kuid_to_anchor():
     exp = cc.export(schema='2')
     assert '$anchor' in exp['survey'][0]
     # and rename it back to '$kuid' when saved as schema='1'
-    exp2 = Content(exp).export(schema='1')
+    exp2 = Content(exp).export(schema='1+koboxlsform')
     assert '$kuid' in exp2['survey'][0]
+
+
+def test_kfrozendict():
+    kf1_0 = kfrozendict(abc=123)
+    kf1_1 = kfrozendict(abc=123)
+    kf2 = kfrozendict(abc=456)
+    assert kf1_0 == kf1_1
+    assert hash(kf1_0) == hash(kf1_1)
+    assert repr(kf1_0) == '''<kfrozendict {'abc': 123}>'''
+
+def test_kfrozendict_utility_methods():
+    is_frozen = lambda dd: isinstance(dd, kfrozendict)
+    is_not_frozen = lambda dd: isinstance(dd, dict)
+
+    ex1 = kfrozendict(abc=123)
+    ex1_unfrozen = ex1.unfreeze()
+    assert is_not_frozen(ex1_unfrozen)
+
+    ex1_unfrozen2 = kfrozendict.unfreeze(ex1)
+    assert is_not_frozen(ex1_unfrozen2)
+
+    ex2 = deepfreeze({'abc': 123})
+    assert is_frozen(ex2)
+
+    ex3 = kfrozendict({'abc': {'def': {'ghi': 999}}})
+    assert is_not_frozen(ex3['abc'])
+    assert is_not_frozen(ex3['abc']['def'])
+    assert ex3['abc']['def']['ghi'] == 999
+
+    ex3f = ex3.freeze()
+    assert is_frozen(ex3f['abc'])
+    assert is_frozen(ex3f['abc']['def'])
+    assert ex3f['abc']['def']['ghi'] == 999

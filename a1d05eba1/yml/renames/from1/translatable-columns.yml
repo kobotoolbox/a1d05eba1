@@ -1,3 +1,4 @@
-- label
+---
+# columns which are translatable but not found in the schema
+# constraint_message is in the schema under "constraint.message"
 - constraint_message
-- guidance_hint

@@ -13,23 +13,48 @@ properties:
   type:
     $ref: '#/$defs/surveyRowType'
   name:
-    type: string
+    $ref: '#/$defs/nameString'
   params:
     type: object
     additionalProperties: false
     patternProperties:
       '.+':
-        type: 'string'
+        anyOf:
+        - type: number
+        - type: string
+        - type: boolean
+  tags:
+    type: array
+    items:
+      type: string
 
   $anchor:
     type: string
   appearance:
     type: string
+    enum:
+    - field-list
+    - horizontal-compact
+    - label
+    - rating                      # type: range
+    - likert
+    - list-nolabel
+    - minimal
+    - multiline
+    - no-calendar
+    - month-year
+    - year
+
+    # kobo literacy field
+    - literacy
 
   # auto_delete:
   #   type: string
   bind:
-    $ref: '#/$defs/type--string'
+    type: object
+  body_kb_flash:
+    type: string
+
   calculation:
     $ref: '#/$defs/type--string'
   choice_filter:
@@ -50,8 +75,8 @@ properties:
     $ref: '#/$defs/translatable'
   guidance_hint:
     $ref: '#/$defs/translatable'
-  constraint_message:
-    $ref: '#/$defs/translatable'
+  # constraint_message:
+  #   $ref: '#/$defs/translatable'
 
   image:
     $ref: '#/$defs/translatableMedia'
@@ -62,23 +87,25 @@ properties:
 
   intent:
     type: string
-  kobo--rank-constraint-message:
+
+  'kobo--rank-constraint-message':
     type: string
-  kobo--score-choices:
+  'kobo--score-choices':
     type: string
   'kobo--matrix_list':
     type: string
-  # parameters:
-  # !!renamed to "params"
-  #   type: string
+
+  # parameters:                          !! renamed to "params"
   default:
     anyOf:
-      - $ref: '#/$defs/type--string'
-      - $ref: '#/$defs/booleanOrXpath'
+    - $ref: '#/$defs/type--string'
+    - $ref: '#/$defs/booleanOrXpath'
   read_only:
     $ref: '#/$defs/booleanOrXpath'
   required:
-    $ref: '#/$defs/booleanOrXpath'
+    allOf:
+    - $ref: '#/$defs/booleanOrXpath'
+    - $ref: '#/$defs/notFalseyBooleanString'
   select_from:
     type: string
     pattern: 'CHOICE_LIST_NAME_REGEX'
@@ -88,4 +115,7 @@ properties:
     type: string
     pattern: 'CHOICE_LIST_NAME_REGEX'
   select_from_file:
+    type: string
+  # hmm how to implement?
+  select_from_external:
     type: string

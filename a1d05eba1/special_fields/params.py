@@ -32,7 +32,7 @@ class Params:
 
     @classmethod
     def pull_from_row(kls, row, content):
-        schema = content.schema
+        schema = content.schema_version
         if schema == '2':
             rowparams = row.get('params')
             if not rowparams:

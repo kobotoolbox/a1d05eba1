@@ -1,22 +1,19 @@
+'''
+this module compiles the jsonschema from the YML files with BASE_SCHEMA
+as the root, and finds any sections referenced in the format
+    "$ref": "#/$defs/section-name"
+and collects those and loads those sections into the "defs" of the document
+which is accessible as the property "MAIN_JSONSCHEMA"
+'''
+
 import os
 import yaml
-from types import SimpleNamespace
+
+from jsonschema import Draft7Validator
 
 from .exceptions import SchemaRefError
 
 from .YAML_CONSTANTS import YAML_CONSTANTS
-
-BASE_SCHEMA = {
-    'type': 'object',
-    'additionalProperties': False,
-    'properties': {
-        'schema': { 'type': 'string' },
-        'survey':  { '$ref': '#/$defs/survey' },
-        'translations': {'$ref': '#/$defs/translations' },
-        'choices': { '$ref': '#/$defs/choices' },
-        'settings': {'$ref': '#/$defs/settings'},
-    },
-}
 
 project_path = os.path.dirname(os.path.realpath(__file__))
 YML_DIR = os.path.join(project_path, 'yml')
@@ -25,9 +22,9 @@ defpath = lambda defid: os.path.join(YML_DIR, 'defs', defid + '.yml')
 def _load_path(fpath):
     with open(fpath, 'r') as ff:
         yaml_in = ff.read()
-    for (val, rep_with) in YAML_CONSTANTS:
-        if val in yaml_in:
-            yaml_in = yaml_in.replace(val, rep_with)
+    for (yval, rep_with) in YAML_CONSTANTS:
+        if yval in yaml_in:
+            yaml_in = yaml_in.replace(yval, rep_with)
     return yaml.full_load(yaml_in)
 
 BASE_SCHEMA = _load_path(os.path.join(YML_DIR, 'schema.yml'))
@@ -44,8 +41,8 @@ def _collect_refs(obj, parent_key=''):
 
     if isinstance(obj, dict):
         if '$ref' in obj:
+            # if parent_key == 'properties' then $ref itself is a property
             if parent_key != 'properties':
-                # $ref is a property, not a reference to a def
                 yield unpeel(obj['$ref'])
         else:
             for (key, item) in obj.items():
@@ -82,13 +79,26 @@ def build_schema(base_schema=None):
     return {'$defs': loaded,
             **base_schema}
 
-MAIN_SCHEMA = build_schema()
-JSONSCHEMA = MAIN_SCHEMA
+MAIN_JSONSCHEMA = build_schema()
 
-from jsonschema import Draft7Validator
-Draft7Validator.check_schema(MAIN_SCHEMA)
+Draft7Validator.check_schema(MAIN_JSONSCHEMA)
 
-defs = SimpleNamespace()
-for (key, val) in JSONSCHEMA['$defs'].items():
+_defs = {}
+for (ref, val) in MAIN_JSONSCHEMA['$defs'].items():
     Draft7Validator.check_schema(val)
-    setattr(defs, key.replace('type--', 'type_'), val)
+    _defs[ref] = val
+
+__cached_defs = {}
+def schema_for_def(defname):
+    if defname not in __cached_defs:
+        _subdefs = {}
+        def append_ref_and_subrefs(xdef, key):
+            if key:
+                _subdefs[key] = xdef
+            for _ref in _collect_refs(xdef):
+                if _ref not in _subdefs:
+                    append_ref_and_subrefs(_defs[_ref], _ref)
+        _def = _defs[defname]
+        append_ref_and_subrefs(_def, key=False)
+        __cached_defs[defname] = {**_def, '$defs': _subdefs}
+    return __cached_defs[defname]

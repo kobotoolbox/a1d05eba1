@@ -1,3 +1,4 @@
 image: media::image
 select_from: select_from_list_name
 $anchor: $kuid
+body_kb_flash: 'body::kb:flash'

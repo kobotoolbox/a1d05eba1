@@ -1,0 +1,33 @@
+type: object
+additionalProperties: false
+properties:
+
+  start:
+    $ref: '#/$defs/booleanOrTaggedMeta'
+
+  end:
+    $ref: '#/$defs/booleanOrTaggedMeta'
+
+  today:
+    $ref: '#/$defs/booleanOrTaggedMeta'
+
+  deviceid:
+    $ref: '#/$defs/booleanOrTaggedMeta'
+
+  subscriberid:
+    $ref: '#/$defs/booleanOrTaggedMeta'
+
+  simserial:
+    $ref: '#/$defs/booleanOrTaggedMeta'
+
+  phonenumber:
+    $ref: '#/$defs/booleanOrTaggedMeta'
+
+  username:
+    $ref: '#/$defs/booleanOrTaggedMeta'
+
+  email:
+    $ref: '#/$defs/booleanOrTaggedMeta'
+
+  audit:
+    $ref: '#/$defs/booleanOrTaggedMeta'
