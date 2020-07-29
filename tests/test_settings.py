@@ -67,5 +67,5 @@ def test_settings_public_key():
     ]}
     rr = Content(C1).export(schema='2')
     # assert len(rr['settings']['public_key'].split('\n')) == 1
-    rr = Content(rr, perform_validation=True).export(schema='1')
+    rr = Content(rr, validate=True).export(schema='1')
     assert len(rr['settings']['public_key'].split('\n')) == 7

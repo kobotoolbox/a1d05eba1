@@ -82,7 +82,7 @@ def test_colons_forward_empty_tx():
                      'name': 'state',
                      'select_from': 'states',
                      'type': 'select_one'}],
-         'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]}
+         'translations': [{'$anchor': 'tx0', 'name': ''}]}
     result = Content(cc).export(schema='xlsform')
     row0 = result['survey'][0]
     assert 'label' in row0
@@ -108,8 +108,7 @@ def test_additional():
     content = Content(cc)
     result = content.export(schema='2')
     assert len(result['translations']) == 1
-    assert result['translations'] == [{'$anchor': 'tx0', 'default': True,
-                                       'name': ''}]
+    assert result['translations'] == [{'$anchor': 'tx0',                                        'name': ''}]
 
 
 def test_colons_forward():
@@ -203,14 +202,14 @@ def test_split_types():
     row0 = content.export(schema='1+xlsform_aliases')['survey'][0]
     assert row0['type'] == 'select_one dog'
 
-def test_noop():
-    result = Content({
-        'schema': '1+noop',
-        'survey': [],
-        'translated': [],
-        'settings': {}
-    }).export(schema='1+')
-    assert result
+# def test_noop():
+#     result = Content({
+#         'schema': '1+noop',
+#         'survey': [],
+#         'translated': [],
+#         'settings': {}
+#     }).export(schema='1+')
+#     assert result
 
 
 GRP_S1 = deepfreeze({
@@ -295,7 +294,7 @@ def test_unique_anchors():
             'choices': {'xx': [{'$anchor': 'x',
                              'label': {'tx0': 'label 1'},
                              'value': 'l1v1'}]},
-            'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]
+            'translations': [{'$anchor': 'tx0', 'name': ''}]
          })
 
 def test_validates_choices_not_list():
@@ -307,7 +306,7 @@ def test_validates_choices_not_list():
                              'label': {'tx0': 'label 1'},
                              'list_name': 'xx',
                              'value': 'l1v1'}],
-            'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]
+            'translations': [{'$anchor': 'tx0', 'name': ''}]
          })
 
 def test_validates_settings_not_list():
@@ -316,7 +315,7 @@ def test_validates_settings_not_list():
             'schema': '2+validate_settings_not_list',
             'survey': [{'$anchor': 'x', 'label': {'tx0': 'q1'}, 'type': 'text'}],
             'settings': [{'title': 'form title'}],
-            'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]
+            'translations': [{'$anchor': 'tx0', 'name': ''}]
          })
 
 
@@ -328,7 +327,7 @@ def test_unmatched_group_1():
                 {'$anchor': 'a', 'type': 'begin_group'},
                 {'$anchor': 'b', 'type': 'text'},
             ],
-            'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]
+            'translations': [{'$anchor': 'tx0', 'name': ''}]
          })
 
 def test_unmatched_group_2():
@@ -341,5 +340,92 @@ def test_unmatched_group_2():
                 {'$anchor': 'c', 'type': 'end_group'},
                 {'$anchor': 'd', 'type': 'end_group'},
             ],
-            'translations': [{'$anchor': 'tx0', 'default': True, 'name': ''}]
+            'translations': [{'$anchor': 'tx0', 'name': ''}]
          })
+
+
+
+def test_formpack_schema_to_lists():
+    # with pytest.raises(ValueError):
+    kontent = {'choices': [{'label': ['French'],
+              'list_name': 'al1hv46',
+              'name': 'french',
+              'order': 0},
+             {'label': ['Italian'],
+              'list_name': 'al1hv46',
+              'name': 'italian',
+              'order': 1},
+             {'label': ['American'],
+              'list_name': 'al1hv46',
+              'name': 'american',
+              'order': 2}],
+ 'survey': [{'label': ['Favorite coffee type'],
+             'name': 'favorite_coffee_type',
+             'required': False,
+             'select_from_list_name': 'al1hv46',
+             'type': 'select_multiple'},
+            {'label': ['Brand of coffee machine'],
+             'name': 'brand_of_coffee_machine',
+             'required': False,
+             'type': 'text'}],
+             'schema': '1+formpack'}
+    cc = Content(kontent)
+    result = cc.export(schema='2')
+    s0, s1 = result['survey']
+    assert isinstance(s0['label'], dict)
+    assert set(iter(s0['label'].keys())) == {'tx0'}
+
+#
+# def test_weird_lists():
+#     content_str = '''
+#     {
+#   "choices": [
+#     {
+#       "name": "french",
+#       "label": [
+#         "French"
+#       ],
+#       "list_name": "al1hv46",
+#       "order": 0
+#     },
+#     {
+#       "name": "italian",
+#       "label": [
+#         "Italian"
+#       ],
+#       "list_name": "al1hv46",
+#       "order": 1
+#     },
+#     {
+#       "name": "american",
+#       "label": [
+#         "American"
+#       ],
+#       "list_name": "al1hv46",
+#       "order": 2
+#     }
+#   ],
+#   "survey": [
+#     {
+#       "select_from_list_name": "al1hv46",
+#       "required": false,
+#       "label": [
+#         "Favorite coffee type"
+#       ],
+#       "name": "favorite_coffee_type",
+#       "type": "select_multiple"
+#     },
+#     {
+#       "required": false,
+#       "type": "text",
+#       "label": [
+#         "Brand of coffee machine"
+#       ],
+#       "name": "brand_of_coffee_machine"
+#     }
+#   ]
+# }
+#     '''
+#     import json
+#     cobj = json.loads(content_str)
+#     import ipdb; ipdb.set_trace()

@@ -73,7 +73,7 @@ def test_tagged_metas():
             'start': True
         },
         'settings': {}
-    }, perform_validation=True)
+    }, validate=True)
     res = cc.export(schema='1')
     assert cc.metas.any()
     assert 'metas' not in res['settings']
@@ -90,7 +90,7 @@ def test_tagged_metas():
                 'tags': ['hxl:#foo', 'hxl:+bar'],
             }
         },
-    }, perform_validation=True)
+    }, validate=True)
     row0 = cc.export(schema='1')['survey'][0]
     assert row0['type'] == 'start'
     assert row0['name'] == 'start'
@@ -105,7 +105,7 @@ def test_tagged_metas_content_1():
             {'type': 'start',
               'name': 'start',}
         ],
-    }, perform_validation=True)
+    }, validate=True)
     res = cc.export(schema='2')
     assert 'metas' not in res['settings']
     assert res['metas']['start'] == True
@@ -117,7 +117,7 @@ def test_tagged_metas_content_1():
               'hxl': '#foo+baz',
               'name': 'start',}
         ],
-    }, perform_validation=True)
+    }, validate=True)
     res = cc.export(schema='2')
     _start_meta = res['metas']['start']
     assert _start_meta == {'tags': ['hxl:#foo', 'hxl:+baz']}
@@ -162,7 +162,7 @@ def test_metas_overandover():
 
     kwargs = {
         'each': [basic, basic_2],
-        'perform_validation': True,
+        'validate': True,
     }
 
     for (content, ctx) in buncha_times(**kwargs):

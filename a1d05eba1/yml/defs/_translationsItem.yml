@@ -26,5 +26,6 @@ properties:
   locale:                         # examples: "fr", "en_US",
     type: string
     minLength: 2
-  default:
+  # formerly: "default" / "settings.default_language"
+  initial:
     type: boolean

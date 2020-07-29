@@ -70,7 +70,7 @@ def test_tags_validate():
         {'type': 'text',
          '$anchor': 'q1',
          'tags': ['hxl:#foo', 'hxl:#loc', 'hxl:+name', 'misc']}
-    ]}, perform_validation=True)
+    ]}, validate=True)
 
 def test_expand_tags_method():
     def _expand(tag_str, existing_tags=None):

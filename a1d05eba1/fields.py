@@ -7,6 +7,8 @@ class RawValue:
         if isinstance(value, (dict, kfrozendict)):
             if 'string' in value:
                 self.value = value['string']
+        elif isinstance(value, (list, tuple)):
+            raise ValueError('RawValue should be a dict or string')
         else:
             self.value = value
 
@@ -37,6 +39,8 @@ class TranslatedVal:
 
     def load_from_new_vals(self, txvals):
         vals = kfrozendict()
+        if isinstance(txvals, str):
+            raise ValueError('label cannot be a string when schema==2')
         for (tx_anchor, val) in txvals.items():
             vals = vals.copy(**{tx_anchor: RawValue(self, val)})
         return vals
@@ -45,8 +49,8 @@ class TranslatedVal:
         vals = tuple()
         if isinstance(txvals, str):
             _arr = [None] * len(self.content.txs)
-            _dtx_index = self.content.txs.index(self.content.default_tx)
-            _arr[_dtx_index] = txvals
+            _fallback_tx_index = self.content.fallback_tx_index()
+            _arr[_fallback_tx_index] = txvals
             txvals = _arr
         assert len(txvals) == len(self.content.txs)
         for (tx, val) in zip(self.content.txs, txvals):
@@ -61,6 +65,7 @@ class TranslatedVal:
         for tx in self.content.txs:
             tx_anchor = tx.anchor
             value = dvals[tx_anchor].to_dict()
+            assert not isinstance(value, (list, tuple))
             if value is not None:
                 _oldvals[tx_anchor] = value
         return (self.key, _oldvals)
@@ -72,6 +77,7 @@ class TranslatedVal:
         dd = dict(self.vals)
         for tx in self.content.txs:
             value = dd[tx.anchor].to_string()
+            assert not isinstance(value, (list, tuple))
             _oldvals.append(value)
         key = self.key
         if key in renames:

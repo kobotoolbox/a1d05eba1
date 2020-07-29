@@ -87,13 +87,13 @@ CONTENT_2 = {'schema': '2',
             }
         ]
     },
-    'translations': [{'$anchor': 'tx0', 'default': True, 'name': 'English'}]
+    'translations': [{'$anchor': 'tx0', 'name': 'English'}]
  }
 
 
 def test_one2two():
     result = Content(CONTENT_1,
-                     perform_validation=True,
+                     validate=True,
                      ).export(schema='2')
     cxs = result.get('choices')
     states = cxs.get('states')
@@ -112,7 +112,7 @@ def test_buncha_times():
     contents = []
     params = {
         'each': [CONTENT_1, CONTENT_2],
-        'perform_validation': True,
+        'validate': True,
     }
     for (content, ctx) in buncha_times(**params):
         contents.append(content)

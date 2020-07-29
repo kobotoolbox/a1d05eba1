@@ -3,8 +3,6 @@ additionalProperties: false
 properties:
   identifier:
     type: string
-  # $uid:
-  #   type: string
   title:
     type: string
   root:
@@ -12,6 +10,10 @@ properties:
   namespaces:
     type: object
   version:
+    type: string
+
+  # this is how kobo injects version into the instance in a hidden field
+  version_key:
     type: string
   delimiter:
     type: string

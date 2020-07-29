@@ -3,17 +3,29 @@ import string
 
 from .base_component import SurveyComponentWithTuple
 
+from ..exceptions import TranslationImportError
 
 LETTERS = string.ascii_lowercase + string.digits
 NULL_TRANSLATION = 'NULL_TRANSLATION'
+
+def load_string(name):
+    mtch = re.match('(.*)\\s*\\((.*)\\)\\s*', name)
+    if mtch:
+        [_name, locale] = mtch.groups()
+        return (_name.strip(), locale)
+    else:
+        return (name.strip(), None)
 
 
 class Translation:
     def __init__(self, name,
                  anchor=None,
                  locale=None,
+                 _initial=None,
                  _tx_index=None):
-
+        assert name is not None
+        assert name != ''
+        self._initial_name = _initial
         self.name = name
         if name in ['', None]:
             self.name = NULL_TRANSLATION
@@ -23,32 +35,29 @@ class Translation:
             anchor = 'tx{}'.format(_tx_index)
         self.anchor = anchor
         self.locale = locale
-
-    def load_string(self, name):
-        self._initial_name = name
-        mtch = re.match('(.*)\\s+\\((.*)\\)\\s*', name)
-        if mtch:
-            [_name, locale] = mtch.groups()
-            self.name = _name
-            self.locale = locale
-            self.anchor = locale
+        if not self.locale:
+            self._name_plus_locale = self.name
+            self._aliases = (self.name,)
+        else:
+            assert self.name is not NULL_TRANSLATION
+            self._name_plus_locale = '{} ({})'.format(self.name, self.locale)
+            self._aliases = (
+                self.name,
+                self.locale,
+                self._name_plus_locale
+            )
 
     def as_string_or_null(self):
         # for exporting to schema='1'
         if self.name is NULL_TRANSLATION:
             return None
-        out = self.name
-        if self.locale:
-            out += ' ({})'.format(self.locale)
-        return out
+        return self._name_plus_locale
 
-    def as_object(self, is_default=False):
+    def as_object(self):
         obj = {'$anchor': self.anchor,}
         obj['name'] = '' if self.name is NULL_TRANSLATION else self.name
         if self.locale:
             obj['locale'] = self.locale
-        if is_default:
-            obj['default'] = True
         return obj
 
 
@@ -59,31 +68,48 @@ class TxList(SurveyComponentWithTuple):
         elif self.content.schema_version == '2':
             self._load_from_new_list(**kwargs)
 
+    def set_initial_by_string(self, tx_str):
+        _initial_tx = False
+        for tx in self:
+            if tx_str in tx._aliases:
+                _initial_tx = tx
+                break
+        if _initial_tx:
+            self.set_first(_initial_tx)
+
     def to_v1_strings(self):
         return [tx.as_string_or_null() for tx in self._tuple]
 
-    def reorder(self):
-        # put the default translation first
-        default_tx = self.content.default_tx
-        if default_tx and len(self._tuple) > 0:
-            others = (tx for tx in self._tuple if tx is not default_tx)
-            self._tuple = (default_tx,) + tuple(others)
+    def set_first(self, first):
+        assert isinstance(first, Translation) and first in self
+        others = (tx for tx in self if tx is not first)
+        self._tuple = (first,) + tuple(others)
+
+    @property
+    def names(self):
+        return [tx.name for tx in self]
 
     def _load_from_strings(self):
         self._tx_strings = self.content.data.get('translations', [])
         tx_name_lookup = {}
         for (index, txname) in enumerate(self._tx_strings):
-            assert txname is None or isinstance(txname, str)
-            tx = Translation(name=txname, _tx_index=index)
-            if txname is not None:
-                tx.load_string(txname)
+            _initial = txname
+            if txname in [None, '']:
+                txname = NULL_TRANSLATION
+            assert txname != ''
+            txanchor = None
+            locale = None
+            if txname != NULL_TRANSLATION:
+                txname, locale = load_string(txname)
+                txanchor = locale
+            tx = Translation(name=txname, anchor=txanchor, locale=locale, _tx_index=index, _initial=_initial)
             if tx.name in tx_name_lookup:
                 errmsg = '{} "{}" and "{}"'.format(
-                    'Inconsistent translation columns:',
+                    'Conflicting translation columns:',
                     tx_name_lookup[tx.name]._initial_name,
                     tx._initial_name,
                 )
-                raise ValueError(errmsg)
+                raise TranslationImportError(errmsg)
             tx_name_lookup[tx.name] = tx
 
             self._tuple = self._tuple + (
@@ -95,27 +121,29 @@ class TxList(SurveyComponentWithTuple):
 
     def _load_from_new_list(self):
         array_of_txs = self.content.data.get('translations', [])
+        bump_to_first = False
         for (index, tx) in enumerate(array_of_txs):
-            defaultval = False
-            if 'default' in tx:
-                (tx, defaultval) = tx.popout('default')
+            (tx, initial_) = tx.popout('initial', False)
+
+            if tx['name'] == '':
+                tx = tx.copy(name=NULL_TRANSLATION, _initial='')
 
             if '$anchor' in tx:
                 (tx, anchor) = tx.popout('$anchor')
                 tx = tx.copy(anchor=anchor)
 
             cur_translation = Translation(**tx)
-
-            if defaultval and not self.content.default_tx:
-                self.content.default_tx = cur_translation
+            if initial_:
+                bump_to_first = cur_translation
 
             self._tuple = self._tuple + (
                 cur_translation,
             )
+        if bump_to_first:
+            self.set_first(bump_to_first)
 
     def to_list(self, schema):
         objs = []
-        default_tx = self.content.default_tx
         for tx in self._tuple:
-            objs.append(tx.as_object(is_default=(tx is default_tx)))
+            objs.append(tx.as_object())
         return objs

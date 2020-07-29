@@ -93,7 +93,7 @@ def test_one2two():
 
     tx1 = result['translations'][0]
     assert isinstance(tx1, dict)
-    assert tx1 == {'$anchor':'tx0', 'name': '', 'default': True}
+    assert tx1 == {'$anchor':'tx0', 'name': ''}
     assert isinstance(result['choices'], dict)
     assert len(result['choices'].keys()) > 0
 
@@ -130,7 +130,7 @@ def test_two2two():
     assert set(label.keys()) == set(['tx0'])
     tx1 = result['translations'][0]
     assert isinstance(tx1, dict)
-    assert tx1 == {'$anchor':'tx0', 'name':'eng', 'locale': 'en', 'default': True}
+    assert tx1 == {'$anchor':'tx0', 'name':'eng', 'locale': 'en'}
     row2 = result['survey'][1]
     assert 'name' in row2
 
@@ -152,6 +152,7 @@ def test_rename_kuid_to_anchor():
     # and rename it back to '$kuid' when saved as schema='1'
     exp2 = Content(exp).export(schema='1+koboxlsform')
     assert '$kuid' in exp2['survey'][0]
+    assert exp2['schema'] == '1+koboxlsform'
 
 
 def test_kfrozendict():

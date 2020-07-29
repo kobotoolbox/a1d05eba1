@@ -40,7 +40,7 @@ def open_xls(path_in):
     }
 
 def print_out(form, validate=False, format=None):
-    loaded_form = Content(form, perform_validation=validate).export(schema='2')
+    loaded_form = Content(form, validate=validate).export(schema='2')
 
     if format == 'json':
         print(json.dumps(loaded_form, indent=2))

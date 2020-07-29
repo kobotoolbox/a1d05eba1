@@ -1,7 +1,9 @@
+import pytest
+
 from a1d05eba1.content import Content
 from a1d05eba1.utils.kfrozendict import kfrozendict
-
-from pprint import pprint
+from a1d05eba1.exceptions import TranslationImportError
+from a1d05eba1.components.translations import load_string
 
 
 CONTENT_1 = {
@@ -28,22 +30,6 @@ def content2tx(content):
     return (kk.txs._tuple[0], kk)
 
 
-def test_1_with_no_default_tx():
-    content = Content({
-        'survey': [],
-        'translations': [
-            'English',
-        ],
-        'settings': {},
-        'schema': '1',
-    })
-    result = content.export(schema='2')
-    defaults = [
-        tx.get('default') for tx in result['translations']
-    ]
-    assert defaults == [True]
-
-
 def test_1_with_default_tx():
     content = Content({
         'survey': [],
@@ -56,31 +42,35 @@ def test_1_with_default_tx():
         },
         'schema': '1',
     })
+    assert content.txs[0].name == 'French'
     result = content.export(schema='2')
-    defaults = [
-        tx.get('default') for tx in result['translations']
+    names = [
+        tx.get('name') for tx in result['translations']
     ]
-    assert defaults == [None, True]
+    assert names == ['French', 'English']
 
 
 def test_1_with_tx_locales():
-    content = Content({
-        'survey': [],
-        'translations': [
-            'English (en)',
-            'French (fr)',
-        ],
-        'settings': {
-            'default_language': 'French (fr)',
-        },
-        'schema': '1',
-    })
-    result = content.export(schema='2')
-    result2 = Content(result).export(schema='1')
-    defaults = [
-        tx.get('default') for tx in result['translations']
+    aliases_for_french = [
+        'French (fr)',
+        'French',
+        'fr',
     ]
-    assert defaults == [None, True]
+    for dtx in aliases_for_french:
+        content = Content({
+            'survey': [],
+            'translations': [
+                'English (en)',
+                'French (fr)',
+            ],
+            'settings': {
+                'default_language': dtx,
+            },
+            'schema': '1',
+        })
+        result = content.export(schema='2')
+        # verify order was changed
+        assert content.txs.names == ['French', 'English']
 
 
 def test_one2two():
@@ -133,15 +123,48 @@ def test_reorder_translations():
                 '$anchor': 'en',
                 'locale': 'en'},
             {'name': 'fr',
+                'initial': True,
                 '$anchor': 'fr',
-                'default': True,
                 'locale': 'fr'}
         ],
         'settings': {},
         'schema': '2',
     })
     anchors_0 = [c.anchor for c in cc.txs]
-    assert anchors_0 == ['en', 'fr']
-    cc.txs.reorder()
-    anchors_1 = [c.anchor for c in cc.txs]
-    assert anchors_1 == ['fr', 'en']
+    assert anchors_0 == ['fr', 'en']
+
+
+
+def test_no_duplicate_translation_names():
+    # because that would be confusing
+    invalid_txpairs = [
+        ['English', 'English'],
+        ['', None],
+        ['English (en)', 'English'],
+        ['English', 'English (en)'],
+    ]
+    for invalid_txpair in invalid_txpairs:
+        with pytest.raises(TranslationImportError):
+            cc = Content({
+                'schema': '1',
+                'survey': [],
+                'translations': invalid_txpair,
+            })
+
+
+def test_schema_1_load_strings_method():
+    expected_vals = [
+        # preferred:
+        ('English (en)',    'English', 'en'),
+        # also found in "the wild":
+        ('English(en)',     'English', 'en'),
+        ('English  (en)',   'English', 'en'),
+        ('English',         'English', None),
+        # why not
+        (' English ',       'English', None),
+    ]
+
+    for (fullname, ex_name, ex_locale) in expected_vals:
+        _name, _locale = load_string(fullname)
+        assert _name == ex_name
+        assert _locale == ex_locale

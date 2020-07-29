@@ -157,5 +157,5 @@ BIRDS = {'choices': [{'label': 'Dry or low', 'list name': 'humidity', 'name': 'l
 
 
 def test_birds():
-    cc = Content({**BIRDS, 'schema': '1+xlsform'}, perform_validation=True)
-    results = cc.export(schema='2')
+    cc = Content({**BIRDS, 'schema': '1+xlsform'}, validate=True)
+    results = cc.export(schema='2', flat=False)

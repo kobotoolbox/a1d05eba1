@@ -34,7 +34,7 @@ def test_parameters():
 
     kwargs = {
         'each': [basic, basic_2],
-        'perform_validation': True,
+        'validate': True,
     }
 
     for (content, ctx) in buncha_times(**kwargs):

@@ -25,13 +25,13 @@ def buncha_times(each, **kw):
             for (cnt, ctx) in _iter_load_content(content, schemae, context, **kw):
                 yield (cnt, SimpleNamespace(**ctx))
 
-def _iter_load_content(content, schemas, context, perform_validation=True):
+def _iter_load_content(content, schemas, context, validate=True):
     # (cc, schema_str_comma) = params
     #     schema_strs = schema_str_comma.split(',')
     context = {'done':[]}
     while len(schemas) > 0:
         next_s = schemas.pop(0)
-        obj = Content(content, perform_validation=perform_validation)
+        obj = Content(content, validate=validate)
         context['object'] = obj
         context['done'].append(next_s)
         context['previously_imported_content'] = deepcopy(content)

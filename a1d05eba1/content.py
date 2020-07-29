@@ -1,6 +1,6 @@
 import re
 
-from jsonschema import validate
+from jsonschema import validate as jsonschema_validate
 
 from .utils.kfrozendict import kfrozendict
 from .utils.kfrozendict import unfreeze, deepfreeze
@@ -75,17 +75,23 @@ class Content:
         if colname not in self._known_columns:
             self._known_columns = self._known_columns + (colname,)
 
+    initial_tx = False
+    fallback_tx = False
+
     def __init__(self,
                  content,
-                 perform_validation=False,
+                 validate=False,
+                 debug=False,
                  exports_include_defaults=False,
                  strip_unknown=False,
                  ):
 
         self._known_columns = tuple()
 
+        perform_validation = validate
+
         if content['schema'] == '2' and perform_validation:
-            validate(content, MAIN_JSONSCHEMA)
+            jsonschema_validate(content, MAIN_JSONSCHEMA)
 
         content = deepfreeze(content)
 
@@ -95,8 +101,6 @@ class Content:
         self.strip_unknown = strip_unknown
 
         self.perform_validation = perform_validation
-
-        self.default_tx = False
 
         try:
             initial_schema = content['schema']
@@ -116,7 +120,7 @@ class Content:
         transformer_list = TransformerList([
             TRANSFORMERS[tname]
             for tname in transformations
-        ])
+        ], name='root', debug=debug)
 
         # this will add some transformations onto the list
         # mainly to migrate stuff like choice-lists away from schema:'1'
@@ -138,27 +142,20 @@ class Content:
             self._validate_export()
 
     def _validate_export(self):
-        validate(self.export(schema='2'), MAIN_JSONSCHEMA)
+        _ex = self.export(schema='2')
+        jsonschema_validate(_ex, MAIN_JSONSCHEMA)
 
-    def ensure_default_language(self):
-        _from_setting = self._data_settings.get('default_language')
-        if not self.default_tx:
-            dtx_index = 0
-            if _from_setting:
-                names = [tx.as_string_or_null() for tx in self.txs]
-                if _from_setting in names:
-                    dtx_index = names.index(_from_setting)
-            if len(self.txs) > 0:
-                self.default_tx = self.txs._tuple[dtx_index]
-
-    def export(self, schema='2', flat=FLAT_DEFAULT, remove_nulls=False,
+    def export(self, schema='2',
+               flat=FLAT_DEFAULT,
+               remove_nulls=False,
+               debug=False,
                immutable=False):
         self.export_params = {'remove_nulls': remove_nulls}
         result = None
-        designated_schema = schema
+        specified_export_schema = schema
         # schema string is in the format:
         # "schema+transformation1+transformation2"
-        (schema, transformations) = unpack_schema_string(designated_schema)
+        (schema, transformations) = unpack_schema_string(specified_export_schema)
 
         if schema == '1':
             if not flat:
@@ -167,23 +164,17 @@ class Content:
         else:
             result = self.to_structure(schema=schema, flat=flat)
 
-        result = deepfreeze(result)
-        schemas = [schema]
-        for transformation in transformations:
-            transformer = TRANSFORMERS[transformation]
-            if hasattr(transformer, 'TRANSFORMER'):
-                transformer = transformer.TRANSFORMER
-            _t_result = transformer.fw(result)
-            if _t_result is not None:
-                result = _t_result
-                schemas.append(transformation)
+        transformer_list = TransformerList([
+            TRANSFORMERS[transformation]
+            for transformation in transformations
+        ], name='root', debug=debug)
 
-        result = result.copy(schema='+'.join(schemas))
+        result = transformer_list.fw(deepfreeze(result))
+
+        result = result.copy(schema=specified_export_schema)
         if immutable:
             return result
-        return unfreeze(
-            result.copy(schema='+'.join(schemas))
-        )
+        return result.unfreeze()
 
     def _tanchors(self, **kwargs):
         '''
@@ -230,24 +221,27 @@ class Content:
         self.metas = Metas(content=self)
         self.txs = TxList(content=self)
 
-        self.ensure_default_language()
-
         _ctmp = content.get('choices', {})
         self.choices = ChoiceLists(content=self)
 
         self.survey = Surv(content=self)
         self.settings = Settings(content=self)
 
+    def fallback_tx_index(self):
+        if self.fallback_tx is False:
+            return 0
+        return self.txs.index(self.fallback_tx)
 
     def load_content_schema_1(self):
-        self._data_settings = self.data.get('settings')
-
+        (self._data_settings, _initial_tx) = \
+            self.data.get('settings').popout('default_language', False)
         self.metas = Metas(content=self)
         self.txs = TxList(content=self)
-        self.ensure_default_language()
         self.choices = ChoiceLists(content=self)
         self.survey = Surv(content=self)
         self.settings = Settings(content=self)
+        if _initial_tx:
+            self.txs.set_initial_by_string(_initial_tx)
 
     def to_v1_structure(self):
         return unfreeze({

@@ -64,10 +64,10 @@ class Settings(SurveyComponentWithDict):
                 out.append(
                     ('public_key', _split_pubkey_to_64char_lines(self._pubkey))
                 )
-            if self.content.default_tx != False:
-                dtxname = self.content.default_tx.as_string_or_null()
+            if self.content.initial_tx:
+                txname = self.content.initial_tx.as_string_or_null()
                 out.append(
-                    ('default_language', dtxname)
+                    ('initial_translation', txname)
                 )
             for (key, val) in self._d.items():
                 if key in self.settings_renames_to_1:
