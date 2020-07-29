@@ -56,7 +56,7 @@ class kfrozendict(Mapping):
         return len(self._dict)
 
     def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self._dict)
+        return '<%s %r>' % (self.__class__.__name__, unfreeze(self._dict))
 
     def __hash__(self):
         if self._hash is None:
@@ -73,6 +73,11 @@ class kfrozendict(Mapping):
 
     def unfreeze(self):
         return unfreeze(self)
+
+    # 'uf' is shorthand for "unfreeze()"
+    @property
+    def uf(self):
+        return self.unfreeze()
 
     def freeze(self):
         return deepfreeze(self)
