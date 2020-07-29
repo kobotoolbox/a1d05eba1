@@ -2,7 +2,6 @@ type: object
 additionalProperties: false
 required:
 - 'type'
-- '$anchor'
 properties:
   type:
     type: string
@@ -13,6 +12,8 @@ properties:
     type: string
   appearance:
     type: string
+  relevant:
+    $ref: '#/$defs/xpath'
   rows:
     type: array
     items:
