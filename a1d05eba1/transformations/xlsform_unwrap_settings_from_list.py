@@ -23,6 +23,8 @@ class UnwrapSettingsFromList(Transformer):
       settings:
         {'default_language': 'Latin'}
     '''
+    name = 'unwrap_settings'
+
     def fw(self, content):
         if 'settings' in content:
             settings = content['settings']

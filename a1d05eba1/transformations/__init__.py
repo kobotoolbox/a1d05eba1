@@ -7,13 +7,13 @@ from . import xlsform_choices
 from . import remove_empty_rows
 from . import xlsform_add_anchors
 
+from . import fill_missing_labels
+
 from . import kobo_rename_kuid_to_anchor
 from . import koboxlsform
 from . import xlsform
 from . import formpack
 from . import xlsform_unwrap_settings_from_list
-
-# from . import formpack_prep
 
 
 TRANSFORMERS = {
@@ -31,6 +31,8 @@ TRANSFORMERS = {
     # convert columns like 'label::english': 'x' to 'label': ['x']
     'xlsform_translations': xlsform_translations,
     # 'formpack_prep': formpack_prep,
+
+    'fill_missing_labels': fill_missing_labels,
 
     # type: 'select_one listname' split into 2
     # type: 'rank listname' split into 2

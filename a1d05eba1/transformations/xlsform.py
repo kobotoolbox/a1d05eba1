@@ -27,4 +27,4 @@ TRANSFORMER = TransformerList([
     # ensure unique anchors:
     validators.unique_anchors,
     xlsform_replace_truthy_strings,
-])
+], name='xlsform')

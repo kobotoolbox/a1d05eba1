@@ -9,6 +9,13 @@ if it does not exist, add an empty object
 from .transformer import Transformer
 
 class XlsformChoices(Transformer):
+    '''
+    converts an array of choices with "list_name" into a dictionary of lists
+    keyed by list_name
+    '''
+
+    name = 'XlsformChoices'
+
     def rw(self, content):
         if 'choices' not in content:
             return content.copy_in(choices={})

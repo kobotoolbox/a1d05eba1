@@ -9,18 +9,6 @@ from .transformer import Transformer
 from ..utils.anchor_generator import anchor_generator
 
 class EnsureAnchors(Transformer):
-    def fw__each_row(self, row):
-        # remove $anchor when exporting as xlsform
-        if '$anchor' in row:
-            (row, anchor) = row.popout('$anchor')
-        return row
-
-    def fw__each_choice(self, cx):
-        # remove $anchor when exporting as xlsform
-        if '$anchor' in cx:
-            (cx, anchor) = cx.popout('$anchor')
-        return cx
-
     def rw__each_row(self, row):
         if '$anchor' not in row:
             return row.copy(**{'$anchor': anchor_generator()})

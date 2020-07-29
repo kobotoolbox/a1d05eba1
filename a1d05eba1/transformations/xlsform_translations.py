@@ -3,6 +3,20 @@ xlsform_translations:
 
 parse the columns like "label::English" and construct a structure with
 all the "label" values in one array
+
+input:
+
+    survey[n]
+        {'type': 'text', 'label::english': 'blah'}
+
+
+output:
+
+    survey[n]
+        {'type': 'text', 'label': ['blah']}
+    translations
+        ['english']
+
 '''
 
 import re
@@ -74,17 +88,23 @@ def inspect_content_translations(content):
                     _index = ctx.translations.index(lang)
                     ctx.tx_colnames[colname] = [intended_col_name, lang, _index]
                     ctx.translated = ctx.translated.union([intended_col_name])
+
     for sheet in ['survey', 'choices']:
         for row in content.get(sheet, []):
             gather_txs(row)
+        # ugly fix for temporary problem?
+        # formpack has surveys with labels looking like ["hi"]
+        # on untranslated surveys. Does this exist elsewhere? TBD
+        ctx.needs_mutation = len(ctx.translations) != 1 or \
+                             ctx.translations[0] != NULL_TRANSLATION
     ctx.tx_count = len(ctx.translations)
     return ctx
 
 
-def mutate_content(content, context):
+def mutate_content(content, context, strict=True):
     def mutate_row(row):
         label = row.get('label')
-        if isinstance(label, (list, tuple)):
+        if strict and isinstance(label, (list, tuple)):
             raise ValueError('must be not a list')
         overrides = {}
         dests = {}
@@ -120,7 +140,9 @@ def mutate_content(content, context):
     return content.copy(**changes)
 
 
-class XlsformTranslations(Transformer):
+class XlsformTranslationsStrict(Transformer):
+    strict = True
+
     def fw(self, content):
         assert content['schema'].startswith('1')
         (content, translations) = content.popout('translations')
@@ -154,6 +176,14 @@ class XlsformTranslations(Transformer):
 
     def rw(self, content):
         context = inspect_content_translations(content)
-        return mutate_content(content, context)
+        if not context.needs_mutation:
+            if 'translations' not in content:
+                return content.copy(translations=context.translations)
+            return content
+        return mutate_content(content, context, self.strict)
 
-TRANSFORMER = XlsformTranslations()
+class XlsformTranslations(XlsformTranslationsStrict):
+    strict = False
+
+TRANSFORMER = XlsformTranslationsStrict()
+NOT_STRICT = XlsformTranslations()

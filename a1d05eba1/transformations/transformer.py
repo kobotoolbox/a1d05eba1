@@ -1,4 +1,23 @@
+from ..utils.kfrozendict import kfrozendict
+import sys
+
+
+def _pprint(cc, indent=4):
+    import pprint
+    ss = pprint.pformat(cc, indent=1, width=120)
+    if indent > 0:
+        spaces = ' ' * indent
+        ss = '\n'.join([(spaces + line) for line in ss.split('\n')])
+    print(ss)
+
+
 class Transformer:
+    name = None
+
+    def __init__(self):
+        if self.name is None:
+            self.name = self.__class__.__name__
+
     def fw(self, content):
         updates = {}
         if hasattr(self, 'fw__each_row'):
@@ -53,62 +72,81 @@ class Transformer:
         return choices
 
 
-class TransformerList:
-    def __init__(self, transformers=()):
-        self.transformers = []
-        self.transformers_rw = []
-        self.transformers_fw = []
-        for tfn in transformers:
-            self.add(tfn)
+def unwrap(tt):
+    return tt if not hasattr(tt, 'TRANSFORMER') else tt.TRANSFORMER
 
-    def add(self, transformer):
-        # allow a module with a TRANSFORMER attribute to be added
-        if hasattr(transformer, 'TRANSFORMER'):
-            transformer = transformer.TRANSFORMER
-        self.transformers.append(transformer)
-        if hasattr(transformer, 'rw'):
-            self.transformers_rw.append(transformer.rw)
-        if hasattr(transformer, 'fw'):
-            self.transformers_fw.insert(0, transformer.fw)
+class TransformerList:
+    def __init__(self, transformers=(), name='', debug=False):
+        self.name = name
+        self._debug = debug
+        self.transformers = []
+        for tfn in transformers:
+            tfn = unwrap(tfn)
+            assert isinstance(tfn, (Transformer, TransformerList))
+            self.transformers.append(tfn)
 
     def ensure(self, transformer):
-        if transformer not in self.transformers:
-            self.add(transformer)
+        transformer = unwrap(transformer)
+        assert isinstance(transformer, Transformer)
+        if transformer not in self.transformers_iter():
+            self.transformers.append(transformer)
 
-    def _apply_transformers(self, content, transformer_list, is_rw):
-        for t_fn in transformer_list:
-            _content = t_fn(content)
+    def transformers_iter(self):
+        for transformer in self.transformers:
+            if isinstance(transformer, TransformerList):
+                for sub_transformer in transformer.transformers_iter():
+                    yield sub_transformer
+            else:
+                yield transformer
+
+    def _apply_transformers(self, content, is_rw, stack=()):
+        if self._debug:
+            print('<'+self.name+'>')
+            if self.name == 'root':
+                print('  <input>')
+                _pprint(content.uf)
+                print('  </input>\n')
+
+
+        transformer_list = self.transformers[:]
+
+        if not is_rw:
+            transformer_list.reverse()
+
+        stack = stack + (self.name,)
+
+        for transformer in transformer_list:
+            if isinstance(transformer, TransformerList):
+                if is_rw:
+                    _content = transformer.rw(content, stack=stack)
+                else:
+                    _content = transformer.fw(content, stack=stack)
+            else:
+                if is_rw:
+                    _content = transformer.rw(content)
+                else:
+                    _content = transformer.fw(content)
+
+            if self._debug and _content:
+                print('\n [*] ' + ':'.join(stack) + '::' + transformer.name)
+                print(' ------------')
+                _pprint(_content.uf)
+            elif self._debug:
+                print('\n [ ] ' + ':'.join(stack) + '::' + transformer.name)
+
             if _content:
                 content = _content
+        if self._debug:
+            if self.name == 'root':
+                print('\n  <output>')
+                _pprint(content.uf)
+                print('  </output>')
+
+            print('</'+self.name+'>')
         return content
 
-    def rw(self, content):
-        return self._apply_transformers(content, self.transformers_rw, True)
+    def rw(self, content, stack=()):
+        return self._apply_transformers(content, True, stack=stack)
 
-    def fw(self, content):
-        return self._apply_transformers(content, self.transformers_fw, False)
-
-'''
-class TxDebug(Transformer):
-    def __init__(self, **kwargs):
-        self.if_row = kwargs.pop('if_row', None)
-        self.info = kwargs.pop('info', None)
-        self.if_row_then = kwargs.pop('then', 'pause')
-        self.print_settings = kwargs.pop('print_settings', False)
-    def rw(self, content):
-        if self.print_settings:
-            if self.info:
-                print(self.info)
-            setts = content.get('settings', False)
-            pprint(kfrozendict.unfreeze(setts))
-        if self.if_row:
-            for row in content['survey']:
-                if self.if_row(row):
-                    if self.info:
-                        print(self.info)
-                    if self.if_row_then == 'pause':
-                        import pdb; pdb.set_trace()
-                    elif self.if_row_then == 'print':
-                        pprint(kfrozendict.unfreeze(row))
-        return content
-'''
+    def fw(self, content, stack=()):
+        return self._apply_transformers(content, False, stack=stack)

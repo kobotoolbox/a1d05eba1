@@ -14,7 +14,7 @@ from ..schema_properties import META_PROPERTIES
 XLSFORM_RENAMED_METAS = yload_file('renames/from1/metas', invert=True)
 
 
-class MetasToSettings(Transformer):
+class MetasToSurveyRoot(Transformer):
     def rw(self, content):
         updates = {}
         survey = tuple()
@@ -47,4 +47,4 @@ class MetasToSettings(Transformer):
             is_meta = True
         return (row, is_meta)
 
-TRANSFORMER = MetasToSettings()
+TRANSFORMER = MetasToSurveyRoot()
