@@ -102,7 +102,20 @@ class Metas(SurveyComponentWithDict):
 
     def to_dict(self, schema='2'):
         out = {}
-        for meta in self._metas:
+        for meta in ordered_(self._metas):
             (key, value) = meta.to_key_values()
             out[key] = value
         return out
+
+def ordered_(metas):
+    # exports (xml) depend on metas being in order.
+    _by_type = dict([(mm.type, mm) for mm in metas])
+    # an incomplete list of metas to pass tests
+    _meta_type_order = ['start', 'end']
+
+    # out_metas = []
+    for mtype in _meta_type_order:
+        if mtype in _by_type:
+            yield _by_type.pop(mtype)
+    for val in _by_type.values():
+        yield val
