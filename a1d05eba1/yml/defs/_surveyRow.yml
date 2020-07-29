@@ -1,9 +1,3 @@
-#   # beginGroupOrRepeat:
-#   #   properties:
-#   #     type:
-#   #       type: string
-#   #       enum: ['begin_group', 'begin_repeat']
-
 type: object
 additionalProperties: false
 required:
@@ -30,6 +24,10 @@ properties:
 
   $anchor:
     type: string
+  repeat_count:
+    anyOf:
+      - type: string
+      - type: integer
   appearance:
     type: string
     enum:
