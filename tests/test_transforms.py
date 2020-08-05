@@ -6,12 +6,14 @@ from a1d05eba1.utils.kfrozendict import kfrozendict
 from a1d05eba1.utils.kfrozendict import deepfreeze
 from a1d05eba1.transformations.xlsform_translations import (
     XlsformTranslations,
-    inspect_content_translations,
-    mutate_content,
+    rw_inspect_content_translations,
+    rw_mutate_content,
 )
 
-from a1d05eba1.transformations import flatten_survey_by_anchor
+from a1d05eba1.transformations.flatten_survey_by_anchor import FlattenSurveyByAnchor
+
 from a1d05eba1.exceptions import StructureError
+from a1d05eba1.exceptions import DuplicateAnchorError
 from a1d05eba1.exceptions import UnclosedGroupError
 from a1d05eba1.exceptions import MismatchedBeginEndGroupError
 
@@ -39,6 +41,8 @@ S1 = deepfreeze({
 })
 
 
+flatten_survey_by_anchor = FlattenSurveyByAnchor()
+
 def test_flattener():
     result1 = flatten_survey_by_anchor.fw(S1)
     restored = flatten_survey_by_anchor.rw(result1)
@@ -52,8 +56,8 @@ def test_reverser():
              'label::English': 'xyz'}
         ]
     })
-    ctx = inspect_content_translations(content)
-    content = kfrozendict.unfreeze(mutate_content(content, ctx))
+    ctx = rw_inspect_content_translations(content)
+    content = kfrozendict.unfreeze(rw_mutate_content(content, ctx))
 
     row0 = content['survey'][0]
     assert 'label' in row0
@@ -63,12 +67,34 @@ def test_reverser():
     assert content['translations'] == [NULL_TRANSLATION, 'English']
     assert content['translated'] == ['label']
 
+def test_xlsform_images():
+    ctx = rw_inspect_content_translations(deepfreeze({
+        'survey': [
+            {'media::image::aa': 'abc',
+             'media::image::zz': 'xyz'}
+        ]
+    }))
+    assert 'media::image::aa' in ctx.tx_colnames
+    assert 'media::image::zz' in ctx.tx_colnames
+    assert ctx.translations == ['aa', 'zz']
+
+    ctx = rw_inspect_content_translations(deepfreeze({
+        'survey': [
+            {'media::image': 'abc',
+             'media::image::zz': 'xyz'}
+        ]
+    }))
+    assert 'media::image' in ctx.tx_colnames
+    assert 'media::image::zz' in ctx.tx_colnames
+    assert ctx.translations == [NULL_TRANSLATION, 'zz']
+    assert ctx.translated == {'image'}
+
 def test_reverser_weird_col():
     cc = {'survey':[{'label::':'aa'}, {'label': 'bb'}]}
-    ctx = inspect_content_translations(cc)
+    ctx = rw_inspect_content_translations(cc)
     assert 'label' in ctx.translated
     cc = kfrozendict.freeze(cc)
-    mut = mutate_content(cc, ctx)
+    mut = rw_mutate_content(cc, ctx)
     row0 = mut['survey'][0]
     row1 = mut['survey'][1]
     # row1 and row0 should evaluate to the same translation
@@ -125,7 +151,7 @@ def test_colons_forward():
             }
         ],
         'choices': [
-            {'list_name': 'xyz', 'value':'val1', 'label': [
+            {'list_name': 'xyz', '$anchor': 'aaa', 'value':'val1', 'label': [
                 'c1lab',
                 'c2lab',
             ]}
@@ -255,20 +281,6 @@ def test_remove_empties():
         assert len(result['survey']) == 3
         assert len(result['choices']) == 3
 
-def test_transformation_validations():
-    with pytest.raises(StructureError):
-        cc = Content({
-            'schema': '1+validate_choices_not_list',
-            'survey': [
-                {'type': 'text', '$anchor': 'x'}
-            ],
-            'choices': [
-                {'list_name': 'xx', 'value': 'l1v1', 'label': 'label 1'},
-                {'list_name': 'xx', 'value': 'l1v2', 'label': 'label 2'},
-            ]
-        })
-
-
 def test_create_single_translation():
     cc = Content({
         'schema': '1+xlsform_translations',
@@ -285,39 +297,26 @@ def test_create_single_translation():
     result = cc.export(schema='1')
     assert result['translated'] == ['label']
 
-
 def test_unique_anchors():
-    with pytest.raises(StructureError):
+    with pytest.raises(DuplicateAnchorError):
         cc = Content({
-            'schema': '2+validate_unique_anchors',
-            'survey': [{'$anchor': 'x', 'label': {'tx0': 'q1'}, 'type': 'text'}],
+            'schema': '2',
+            'survey': [
+                # same "$anchor" but different "name"
+                {'$anchor': 'x',
+                 'name': 'q1',
+                 'label': {'tx0': 'q1'}, 'type': 'text',
+                    },
+                {'$anchor': 'x',
+                 'name': 'q2',
+                 'label': {'tx0': 'q2'}, 'type': 'text',
+                    },
+            ],
             'choices': {'xx': [{'$anchor': 'x',
                              'label': {'tx0': 'label 1'},
                              'value': 'l1v1'}]},
             'translations': [{'$anchor': 'tx0', 'name': ''}]
          })
-
-def test_validates_choices_not_list():
-    with pytest.raises(StructureError):
-        cc = Content({
-            'schema': '2+validate_choices_not_list',
-            'survey': [{'$anchor': 'x', 'label': {'tx0': 'q1'}, 'type': 'text'}],
-            'choices': [{'$anchor': 'y',
-                             'label': {'tx0': 'label 1'},
-                             'list_name': 'xx',
-                             'value': 'l1v1'}],
-            'translations': [{'$anchor': 'tx0', 'name': ''}]
-         })
-
-def test_validates_settings_not_list():
-    with pytest.raises(StructureError):
-        cc = Content({
-            'schema': '2+validate_settings_not_list',
-            'survey': [{'$anchor': 'x', 'label': {'tx0': 'q1'}, 'type': 'text'}],
-            'settings': [{'title': 'form title'}],
-            'translations': [{'$anchor': 'tx0', 'name': ''}]
-         })
-
 
 def test_unmatched_group_1():
     with pytest.raises(StructureError):
@@ -342,7 +341,6 @@ def test_unmatched_group_2():
             ],
             'translations': [{'$anchor': 'tx0', 'name': ''}]
          })
-
 
 
 def test_formpack_schema_to_lists():

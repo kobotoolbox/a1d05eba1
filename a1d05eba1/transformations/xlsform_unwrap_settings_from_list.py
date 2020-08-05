@@ -23,14 +23,7 @@ class UnwrapSettingsFromList(Transformer):
       settings:
         {'default_language': 'Latin'}
     '''
-    name = 'unwrap_settings'
-
-    def fw(self, content):
-        if 'settings' in content:
-            settings = content['settings']
-            return content.copy(settings=[settings,])
-
-    def rw(self, content):
+    def rw__1(self, content):
         if 'settings' in content:
             settings = content['settings']
             if isinstance(settings, (list, tuple)):

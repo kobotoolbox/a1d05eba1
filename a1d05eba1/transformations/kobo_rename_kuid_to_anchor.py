@@ -20,7 +20,7 @@ class RenameKuidToAnchor(Transformer):
         if '$kuid' in row:
             return row.renamed('$kuid', '$anchor')
 
-    def rw__each_choice(self, choice):
+    def rw__each_choice(self, choice, list_name):
         if '$kuid' in choice:
             return choice.renamed('$kuid', '$anchor')
 

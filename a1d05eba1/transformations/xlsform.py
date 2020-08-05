@@ -1,30 +1,41 @@
-from . import xlsform_translations
-from . import xlsform_aliases
-from . import remove_empty_rows
-from . import xlsform_metas_to_settings
-from . import xlsform_initial_renames
-from . import xlsform_unwrap_settings_from_list
-from . import xlsform_add_anchors
+from .xlsform_translations import XlsformTranslations
+from .xlsform_aliases import XlsformRenames
+from .remove_empty_rows import RemoveEmpties
+from .xlsform_metas_to_settings import MetasToSurveyRoot
+from .v1_renames import V1Renames
+from .choices_by_list_name import ChoicesByListName
 
-from . import validators
+from .anchors_when_needed import EnsureAnchorsWhenNeeded
+from .anchors_when_needed import DumpExtraneousAnchors
 
-from .transformer import TransformerList
-from . import xlsform_replace_truthy_strings
+from .transformer import Transformer
 
-TRANSFORMER = TransformerList([
-    xlsform_initial_renames,    # 'list name' becomes 'list_name'
-    remove_empty_rows,          # rows without required columns get removed
-    xlsform_unwrap_settings_from_list, # content.settings is a dict
-    # ensure proper structure:
-    validators.settings_not_list,
+from .transformer_list import TransformerList
+from .xlsform_replace_truthy_strings import ReplaceTruthyStrings
 
-    xlsform_metas_to_settings,
-    xlsform_translations,
 
-    xlsform_aliases,
-    xlsform_add_anchors,
+class RemoveTranslatedFromRoot(Transformer):
+    def fw(self, content):
+        if 'translated' in content:
+            (content, translated) = content.popout('translated')
+        return content
 
-    # ensure unique anchors:
-    validators.unique_anchors,
-    xlsform_replace_truthy_strings,
-], name='xlsform')
+
+class Xlsform(TransformerList):
+    name = 'XLSForm'
+
+    transformers = (
+        RemoveTranslatedFromRoot,
+        ChoicesByListName,
+        RemoveEmpties,
+
+        MetasToSurveyRoot,
+        XlsformTranslations,
+
+        XlsformRenames,
+        # EnsureAnchorsWhenNeeded,
+        DumpExtraneousAnchors,
+        V1Renames,
+
+        ReplaceTruthyStrings,
+    )

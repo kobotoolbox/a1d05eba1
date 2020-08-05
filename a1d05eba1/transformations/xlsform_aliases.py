@@ -47,5 +47,3 @@ class XlsformRenames(Transformer):
         for row in content.get('survey', []):
             survey = survey + (rw__each_row(row),)
         return content.copy(survey=survey)
-
-TRANSFORMER = XlsformRenames()

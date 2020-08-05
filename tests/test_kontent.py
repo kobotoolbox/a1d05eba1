@@ -186,3 +186,19 @@ def test_kfrozendict_utility_methods():
     assert is_frozen(ex3f['abc'])
     assert is_frozen(ex3f['abc']['def'])
     assert ex3f['abc']['def']['ghi'] == 999
+
+
+def test_image_alias_imports_translations():
+    cc = Content({
+        'survey': [
+            {'type': 'text',
+                'media::image::aa': 'my_image_aa.jpg',
+                'media::image': 'my_image_nolang.jpg',
+                '$anchor': 'moo',
+                'name': 'name'},
+        ],
+        'schema': '1+xlsform',
+    })
+    ex = cc.export()
+    assert ex['survey'][0]['image'] == {'tx0': 'my_image_nolang.jpg',
+                                        'tx1': 'my_image_aa.jpg'}

@@ -53,9 +53,11 @@ class Meta:
 def load_meta(key, val):
     if val is True:
         return Meta(key=key, name=key, tags=())
+    elif isinstance(val, str):
+        return Meta(key=key, name=val)
     elif isinstance(val, (dict, kfrozendict)):
         return Meta(key=key, **val)
-    raise ValueError('Unhandled Meta')
+    raise ValueError('unhandled meta')
 
 from ..special_fields.tags import _expand_tags
 

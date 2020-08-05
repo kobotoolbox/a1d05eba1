@@ -1,7 +1,9 @@
-from . import kobo_rename_kuid_to_anchor
-from . import xlsform_add_anchors
+from .kobo_rename_kuid_to_anchor import RenameKuidToAnchor
+from .xlsform_replace_truthy_strings import ReplaceTruthyStrings
+from .v1_renames import V1Renames
 
-from .transformer import TransformerList, Transformer
+from .transformer import Transformer
+from .transformer_list import TransformerList
 
 class EnsureTranslationList(Transformer):
     def rw(self, content):
@@ -9,8 +11,20 @@ class EnsureTranslationList(Transformer):
             return content.copy_in(translations=[None])
         return content
 
-TRANSFORMER = TransformerList([
-    kobo_rename_kuid_to_anchor,
-    xlsform_add_anchors,
-    EnsureTranslationList(),
-], name='koboxlsform')
+
+class RemoveTranslated(Transformer):
+    def rw(self, content):
+        if 'translated' not in content:
+            return content
+        (content, translated) = content.popout('translated')
+        return content
+
+
+class KoboXlsform(TransformerList):
+    transformers = (
+        RemoveTranslated,
+        RenameKuidToAnchor,
+        ReplaceTruthyStrings,
+        V1Renames,
+        EnsureTranslationList,
+    )

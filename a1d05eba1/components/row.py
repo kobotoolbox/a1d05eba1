@@ -16,10 +16,6 @@ from .base_component import SurveyComponentWithOrderedDict
 from ..schema_properties import ROW_PROPERTIES
 from ..schema_properties import TRANSLATABLE_SURVEY_COLS
 
-# from ..build_schema import schema_for_def
-# from jsonschema import validate
-# ROW_SCHEMA = schema_for_def('surveyRow')
-
 
 class Parented:
     '''
@@ -37,23 +33,19 @@ class Parented:
 
 class Row(SurveyComponentWithOrderedDict, Parented):
     ALLOWED_PROPERTIES = ROW_PROPERTIES
+    FALLBACK_ANCHOR_KEY = 'name'
     renames_to_v1 = yload_file('renames/to1/column')
     renames_from_v1 = yload_file('renames/from1/column', invert=True)
     rows = tuple()
     _anchor = False
 
-    def postload(self, **kwargs):
-        assert self._anchor is not False
-        assert hasattr(self, 'type')
-
     def load_from_2(self, **kwargs):
-        (_r, anchor) = kfrozendict(kwargs.get('row')).popout('$anchor')
-        self._anchor = anchor
+        self._data = kfrozendict(kwargs.get('row'))
+        item = self._popout_anchor(self._data)
         _additionals = {}
-
         skip_keys = SPECIAL_KEYS['2']
 
-        for (key, val) in _r.items():
+        for (key, val) in item.items():
             if key in skip_keys:
                 continue
             if key not in self.ALLOWED_PROPERTIES:
@@ -73,36 +65,28 @@ class Row(SurveyComponentWithOrderedDict, Parented):
             self.content.add_col(key, 'survey')
 
         for Field in ROW_SPECIAL_FIELDS:
-            if not Field.in_row(_r, schema=self.content.schema_version):
+            if not Field.in_row(item, schema=self.content.schema_version):
                 continue
 
-            for sfield in Field.pull_from_row(_r, self.content):
+            for sfield in Field.pull_from_row(item, self.content):
                 self.set(Field.EXPORT_KEY, sfield)
 
         self._additionals = deepfreeze(_additionals)
 
     def load_from_1(self, **kwargs):
-        srow = deepfreeze(kwargs.get('row'))
-        if '$kuid' in srow:
-            raise ValueError('unexpected value: $kuid')
-        if '$anchor' in srow:
-            (srow, anchor) = srow.popout('$anchor')
-            self._anchor = anchor
-
-        if self._anchor in (None, False):
-            raise ValueError('No "$anchor" value found for row')
+        self._data = deepfreeze(kwargs.get('row'))
+        item = self._popout_anchor(self._data)
 
         skip_keys = SPECIAL_KEYS['1']
 
         _additionals = {}
 
-        for (key, val) in srow.items():
+        for (key, val) in item.items():
             if key in skip_keys:
                 continue
             original = key
             if self.content.perform_renames and key in self.renames_from_v1:
-                newkey = self.renames_from_v1[key]
-                key = newkey
+                key = self.renames_from_v1[key]
 
             # remove columns that are not recognized in the schema
             # (note: this may be aggressive)
@@ -124,13 +108,13 @@ class Row(SurveyComponentWithOrderedDict, Parented):
                 col = UntranslatedVal(self.content, key, val)
 
             self.set(col.key, col)
-        self._additionals = deepfreeze(_additionals)
+        self._additionals = kfrozendict(_additionals)
 
         for Field in ROW_SPECIAL_FIELDS:
-            if not Field.in_row(srow, schema=self.content.schema_version):
+            if not Field.in_row(item, schema=self.content.schema_version):
                 continue
 
-            for sfield in Field.pull_from_row(srow, self.content):
+            for sfield in Field.pull_from_row(item, self.content):
                 self.set(Field.EXPORT_KEY, sfield)
 
     @property
@@ -155,7 +139,6 @@ class Row(SurveyComponentWithOrderedDict, Parented):
                 for kvs in colval.dict_key_vals_old(renames=self.renames_to_v1):
                     out.append(kvs)
         outbound = dict(out)
-        # validate(outbound, ROW_SCHEMA)
         return outbound
 
     def nested_export(self, schema='2'):

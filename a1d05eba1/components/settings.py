@@ -55,8 +55,6 @@ class Settings(SurveyComponentWithDict):
             out = kfrozendict.unfreeze(self._d)
             if self._pubkey:
                 out['public_key'] = self._pubkey
-            if len(out) == 0 and self.content.export_params['remove_nulls']:
-                return None
             return out
         elif schema == '1':
             out = []

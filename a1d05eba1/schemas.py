@@ -150,9 +150,10 @@ for fp in formpacks:
 for fp in formpacks:
     override_def(fp, 'notFalseyBooleanString', {})
 
-FORMPACK_SCHEMA = {
-    'type': 'object',
-    'oneOf': formpacks,
+xlsform['$defs']['surveyRow']['patternProperties'] = {
+    '(label|hint|guidance_hint)::?.*': {'type': 'string'},
 }
+
+FORMPACK_SCHEMA = {'type': 'object', 'oneOf': formpacks,}
 XLSFORM_SCHEMA = xlsform
 KOBOXLSFORM_SCHEMA = koboxlsform

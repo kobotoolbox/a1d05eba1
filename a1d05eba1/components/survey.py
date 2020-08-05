@@ -37,7 +37,7 @@ class Surv(SurveyComponentWithTuple):
                     _row = OpeningRow(content=self.content, row=subrow).set_parent(active_parent)
                 elif action == ROW_END_SECTION:
                     if not hasattr(active_parent, '_parent'):
-                        raise MismatchedBeginEndGroupError()
+                        raise MismatchedBeginEndGroupError(repr(subrow.uf))
                     _row = ClosingRow().set_parent(active_parent)
                 elif action == ROW_CONTINUE:
                     _row = Row(content=self.content, row=subrow).set_parent(active_parent)
@@ -48,7 +48,7 @@ class Surv(SurveyComponentWithTuple):
                 elif action == ROW_END_SECTION:
                     active_parent = active_parent._parent
         if hasattr(active_parent, '_parent'):
-            raise UnclosedGroupError()
+            raise UnclosedGroupError(active_parent.type)
 
     def read_row(self, row):
         _type = row['type']

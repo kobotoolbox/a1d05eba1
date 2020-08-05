@@ -10,6 +10,7 @@ from .base_component import SurveyComponentWithOrderedDict
 
 class Choice(SurveyComponentWithOrderedDict):
     list_name = None
+    FALLBACK_ANCHOR_KEY = 'value'
 
     def load(self, item, **kwargs):
         if self.content.schema_version == '1':
@@ -17,24 +18,29 @@ class Choice(SurveyComponentWithOrderedDict):
         elif self.content.schema_version == '2':
             self.load_from_new_dict(item, **kwargs)
 
-    choice_renames_to_v1 = yload_file('renames/to1/choice-column')
+    to_v1_choice_renames = yload_file('renames/to1/choice-column')
+    from_v1_renames = yload_file('renames/from1/column', invert=True)
+    from_v1_choice_renames = \
+        yload_file('renames/from1/choice-column', invert=True)
 
-    renames_from_v1 = yload_file('renames/from1/column',
-                                 invert=True)
-    choice_specific_renames_from_v1 = yload_file('renames/from1/choice-column',
-                                                 invert=True)
+
+    def register_component_by_anchor(self, anchor, initial_row):
+        anchor = '{}.{}'.format(self.list_name, anchor)
+        super().register_component_by_anchor(anchor, initial_row)
 
     def load_from_old_arr(self, item, list_name):
+        self._data = item
         self.list_name = list_name
         _additionals = {}
+        item = self._popout_anchor(item)
         for (key, val) in item.items():
             original = False
-            if key in self.choice_specific_renames_from_v1:
+            if key in self.from_v1_choice_renames:
                 original = key
-                key = self.choice_specific_renames_from_v1[key]
-            elif key in self.renames_from_v1:
+                key = self.from_v1_choice_renames[key]
+            elif key in self.from_v1_renames:
                 original = key
-                key = self.renames_from_v1[key]
+                key = self.from_v1_renames[key]
             if key not in CHOICE_PROPERTIES:
                 _additionals[key] = val
                 continue
@@ -47,11 +53,11 @@ class Choice(SurveyComponentWithOrderedDict):
 
     def load_from_new_dict(self, item, list_name):
         self.list_name = list_name
+        item = self._popout_anchor(item)
         _filters = False
         for (key, val) in item.items():
             if key == 'filters':
                 _filters = val
-
             if self.content.strip_unknown and key not in CHOICE_PROPERTIES:
                 continue
 
@@ -65,7 +71,9 @@ class Choice(SurveyComponentWithOrderedDict):
             self._additionals = _filters
 
     def to_dict(self):
-        out = []
+        out = [
+            ('$anchor', self._anchor),
+        ]
         for val in self:
             out.append(val.dict_key_vals_new())
         if len(self._additionals) > 0:
@@ -74,12 +82,13 @@ class Choice(SurveyComponentWithOrderedDict):
             )
         return dict(out)
 
-    def to_old_dict(self, list_name=None):
-        dict_out = []
-        if list_name is not None:
-            dict_out.append(
-                ('list_name', list_name),
-            )
+    def to_old_dict(self, list_name):
+        dict_out = [
+            ('$anchor', self._anchor),
+        ]
+        dict_out.append(
+            ('list_name', list_name),
+        )
         if len(self._additionals) > 0:
             for (key, val) in self._additionals.items():
                 dict_out.append(
@@ -87,9 +96,9 @@ class Choice(SurveyComponentWithOrderedDict):
                 )
         for val in self:
             for (okey, oval) in val.dict_key_vals_old():
-                if okey in self.choice_renames_to_v1:
+                if okey in self.to_v1_choice_renames:
                     # kpi autoname still requires choice[n].name to be used
-                    okey = self.choice_renames_to_v1[okey]
+                    okey = self.to_v1_choice_renames[okey]
                 dict_out.append(
                     (okey, oval,)
                 )
@@ -119,10 +128,13 @@ class ChoiceLists(SurveyComponentWithDict):
                     )
 
     def to_old_arr(self):
-        out = []
+        out = {}
         for (key, vals) in self._d.items():
+            out[key] = []
             for val in vals:
-                out.append(val.to_old_dict(list_name=key))
+                out[key].append(
+                    val.to_old_dict(list_name=key)
+                )
         return out
 
     def to_dict(self, schema):

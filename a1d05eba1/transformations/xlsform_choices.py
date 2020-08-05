@@ -13,9 +13,6 @@ class XlsformChoices(Transformer):
     converts an array of choices with "list_name" into a dictionary of lists
     keyed by list_name
     '''
-
-    name = 'XlsformChoices'
-
     def rw(self, content):
         if 'choices' not in content:
             return content.copy_in(choices={})
@@ -28,5 +25,4 @@ class XlsformChoices(Transformer):
                     choices[list_name] = []
                 choices[list_name].append(choice)
             return content.copy_in(choices=choices)
-
-TRANSFORMER = XlsformChoices()
+        return content

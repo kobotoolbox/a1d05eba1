@@ -168,3 +168,27 @@ def test_schema_1_load_strings_method():
         _name, _locale = load_string(fullname)
         assert _name == ex_name
         assert _locale == ex_locale
+
+
+def test_simple_xlsform():
+    cc = Content({
+        'survey': [
+            {'type': 'text', 'name': 'q1', 'label::En': 'Q 1', 'label::Fr': 'Qf 1'},
+            {'type': 'select_one dogs', 'name': 'q2', 'label::En': 'Dog', 'label::Fr': 'Chien'},
+        ],
+        'choices': [
+            {'list name': 'dogs',
+             'name': 'poodle',
+             'label::En': 'Poodle',
+             'label::Fr': 'Poodelle',
+             },
+            {'list name': 'dogs',
+             'name': 'labrador',
+             'label::En': 'Labrador',
+             'label::Fr': 'Labradour',
+             }
+        ],
+        'schema': '1+xlsform',
+    })
+    exp = cc.export()
+    assert [tx['name'] for tx in exp['translations']] == ['En', 'Fr']

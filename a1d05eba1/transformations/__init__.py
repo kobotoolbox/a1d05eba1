@@ -1,53 +1,87 @@
-from . import flatten_survey_by_anchor
-from . import xlsform_translations
-from . import noop
-from . import validators
-from . import xlsform_aliases
-from . import xlsform_choices
-from . import remove_empty_rows
-from . import xlsform_add_anchors
+from ..utils.kfrozendict import kfrozendict
 
-from . import fill_missing_labels
+from .flatten_survey_by_anchor import FlattenSurveyByAnchor
+from .xlsform_translations import XlsformTranslations
+# from . import noop
+# from . import validators
+from .xlsform_aliases import XlsformRenames
+from .xlsform_choices import XlsformChoices
+from .remove_empty_rows import RemoveEmpties
 
-from . import kobo_rename_kuid_to_anchor
-from . import koboxlsform
-from . import xlsform
-from . import formpack
-from . import xlsform_unwrap_settings_from_list
+# from .xlsform_add_anchors import EnsureAnchors
+# from .xlsform_add_anchors import EnsureAnchorsCopyFromName
+from .anchors_when_needed import DumpExtraneousAnchors
 
+from .fill_missing_labels import FillMissingLabels
+
+from .kobo_rename_kuid_to_anchor import RenameKuidToAnchor
+from .koboxlsform import KoboXlsform
+from .choices_by_list_name import ChoicesByListName
+
+from .xlsform import Xlsform
+from .formpack import Formpack
+from .xlsform_unwrap_settings_from_list import UnwrapSettingsFromList
+
+from .transformer import Transformer
+
+class SettingsToList(Transformer):
+    def fw__1(self, content):
+        assert isinstance(content['settings'], kfrozendict)
+        return content.copy(settings=(content['settings'],))
+
+class ChoicesToList(Transformer):
+    def fw__1(self, content):
+        assert isinstance(content['choices'], kfrozendict)
+        all_choices = ()
+        for (list_name, choices) in content['choices'].items():
+            for choice in choices:
+                all_choices = all_choices + (
+                    choice.copy(list_name=list_name),
+                )
+        return content.copy(choices=all_choices)
+
+class ChoicesFromList(Transformer):
+    def rw(self, content):
+        if 'choices' in content and isinstance(content['choices'], (dict, kfrozendict)):
+            return content
+        _choice_lists = {}
+        for choice in content['choices']:
+            (list_name, choice) = choice.popout('list_name')
+            _list = _choice_lists.get(list_name, ())
+            _list = _list + (
+                choice,
+            )
+            _choice_lists[list_name] = _list
+        return content.copy_in(choices=_choice_lists)
+
+class Autoname(Transformer):
+    def rw__each_row(self, row):
+        if 'name' not in row and '$autoname' in row:
+            return row.copy(name=row.get('$autoname'))
+        # /end_group's don't have names, e.g.
+        return row
 
 TRANSFORMERS = {
-    'validate_choices_not_list': validators.choices_not_list,
-    'validate_unique_anchors': validators.unique_anchors,
-    'validate_settings_not_list': validators.settings_not_list,
-    'validate_has_translations': validators.has_translations,
-
-
-    # convert arrays to objects with a "$start" value and "$next" values
-    # to clean up diffs on small changes to large surveys
-    'flatten_survey_by_anchor': flatten_survey_by_anchor,
-    'anchors': flatten_survey_by_anchor,
-
-    # convert columns like 'label::english': 'x' to 'label': ['x']
-    'xlsform_translations': xlsform_translations,
-    # 'formpack_prep': formpack_prep,
-
-    'fill_missing_labels': fill_missing_labels,
-
-    # type: 'select_one listname' split into 2
-    # type: 'rank listname' split into 2
-    'xlsform_aliases': xlsform_aliases,
-    'xlsform_choices': xlsform_choices,
-    'xlsform_add_anchors': xlsform_add_anchors,
-    'xlsform_unwrap_settings_from_list': xlsform_unwrap_settings_from_list,
-
-    'kobo_rename_kuid_to_anchor': kobo_rename_kuid_to_anchor,
-    'formpack': formpack,
-    'koboxlsform': koboxlsform,
-    'xlsform': xlsform,
-    'remove_empty_rows': remove_empty_rows,
-    'noop': noop,
-    '': noop,
+    'flatten_survey_by_anchor': FlattenSurveyByAnchor,
+    'anchors': FlattenSurveyByAnchor,
+    'xlsform_translations': XlsformTranslations,
+    'fill_missing_labels': FillMissingLabels,
+    'xlsform_aliases': XlsformRenames,
+    'xlsform_choices': XlsformChoices,
+    'autoname': Autoname,
+    # 'xlsform_add_anchors': EnsureAnchors,
+    'xlsform_unwrap_settings_from_list': UnwrapSettingsFromList,
+    'choices_by_list_name': ChoicesByListName,
+    'choices_by_list_name': ChoicesByListName,
+    'kobo_rename_kuid_to_anchor': RenameKuidToAnchor,
+    'choices_frm_list': ChoicesFromList,
+    'formpack': Formpack,
+    'koboxlsform': KoboXlsform,
+    'xlsform': Xlsform,
+    'remove_empty_rows': RemoveEmpties,
+    'settings_2_list': SettingsToList,
+    'choices_2_list': ChoicesToList,
+    'remove_extraneous_anchors': DumpExtraneousAnchors,
 }
 
 

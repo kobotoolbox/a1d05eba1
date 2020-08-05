@@ -16,3 +16,8 @@ properties:
     "$ref": "#/$defs/settings"
   metas:
     "$ref": "#/$defs/metas"
+
+  # information about the deployent. e.g. timestamp? Or should this go
+  # in settings?
+  deployment:
+    type: object

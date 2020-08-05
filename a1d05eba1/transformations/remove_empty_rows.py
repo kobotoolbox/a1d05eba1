@@ -18,28 +18,22 @@ rw:
 
 from .transformer import Transformer
 
-
-def remove_empties_from_list(surv_in, required_key='type'):
-    surv_out = tuple()
-    for row in surv_in:
-        if len(row) == 0:
-            continue
-        val = row.get(required_key, '')
-        if val != '':
-            surv_out = surv_out + (row,)
-    return surv_out
-
-
 class RemoveEmpties(Transformer):
-    # ASSERT_CONTENT_SCHEMA = '1'
+    '''
+    This prevents a blank row in the XLSForm from messing up the rest of the
+    form.
 
-    def rw(self, content):
-        assert content['schema'] == '1'
-        choices = content.get('choices', [])
-        updates = {
-            'survey': remove_empties_from_list(content['survey']),
-            'choices': remove_empties_from_list(choices, required_key='list_name'),
-        }
-        return content.copy(**updates)
+    Rows are deemed "blank" if they are missing a "type" value.
+    '''
+    def rw__1(self, content):
+        survey = self._remove_survey_rows_with_no_type(content['survey'])
+        return content.copy(survey=survey)
 
-TRANSFORMER = RemoveEmpties()
+    def _remove_survey_rows_with_no_type(self, _survey):
+        survey = ()
+        for row in _survey:
+            if len(row) == 0:
+                continue
+            if row.get('type') is not None:
+                survey = survey + (row,)
+        return survey
