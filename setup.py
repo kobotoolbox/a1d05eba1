@@ -27,7 +27,6 @@ setuptools.setup(
     install_requires=[
         'oyaml==0.9',
         'pytest==5.4.3',
-        'frozendict==1.2',
         'jsonschema==3.2.0',
     ],
     classifiers=[

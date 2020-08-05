@@ -159,19 +159,6 @@ class Row(SurveyComponentWithOrderedDict, Parented):
                 )
             yield dict(out)
 
-    def get_row_tx_col_names_for_v1(self):
-        cols = []
-        for col in self:
-            if isinstance(col, TranslatedVal):
-                key = col.key
-                if key in self.renames_to_v1:
-                    key = self.renames_to_v1.get(key)
-                cols.append(key)
-            elif isinstance(col, ConstraintVal):
-                if col.msg_txd:
-                    cols.append(col.msg_txd.key)
-        return cols
-
 
 class OpeningRow(Row):
     ALLOWED_PROPERTIES = ROW_PROPERTIES + ('repeat_count',)
@@ -206,6 +193,3 @@ class ClosingRow(Parented):
 
     def compiled_anchor(self):
         return '/' + self._parent._anchor
-
-    def get_row_tx_col_names_for_v1(self):
-        return []

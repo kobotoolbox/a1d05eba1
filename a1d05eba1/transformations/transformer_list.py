@@ -1,22 +1,19 @@
 
 import json
+from pprint import pformat
+
 from ..utils.kfrozendict import kfrozendict, deepfreeze
 
 
-def _pprint(cc, indent=4):
-    import pprint
-    ss = pprint.pformat(cc, indent=1, width=120)
+def indented_pprint(cc, indent=4):
+    ss = cc
+    if not isinstance(cc, str):
+        ss = pformat(cc, indent=1, width=120)
     if indent > 0:
         spaces = ' ' * indent
         ss = '\n'.join([(spaces + line) for line in ss.split('\n')])
     print(ss)
 
-def unwrap(tt):
-    assert not hasattr(tt, 'TRANSFORMER')
-    return tt if not hasattr(tt, 'TRANSFORMER') else tt.TRANSFORMER
-
-
-import inspect
 
 class TransformerList:
     _debug = False
@@ -55,7 +52,7 @@ class TransformerList:
             print('\n' + oindent +'<'+self.name+' direction="' + ('rw' if is_rw else 'fw') + '">')
             if self.name == 'root':
                 print('  <input>')
-                _pprint(content.uf)
+                indented_pprint(content.uf)
                 print('  </input>\n')
 
 
@@ -67,10 +64,7 @@ class TransformerList:
         stack = stack + (self.name,)
 
         for transformer in transformer_list:
-            if inspect.isclass(transformer):
-                transformer = transformer()
-            else:
-                raise Exception('must be a kls')
+            transformer = transformer()
 
             if isinstance(transformer, TransformerList):
                 if is_rw:
@@ -90,17 +84,20 @@ class TransformerList:
             if self._debug:
                 has_change = deepfreeze(content) != deepfreeze(_content)
                 _name = ':'.join(stack) + '::' + transformer.name
-                atts = (
-                    'name="%s"' % _name,
-                )
+                _name_att = 'name="%s"' % _name
+
                 indent = '    ' * len(stack)
+                indent_n = len(stack)
+                _topen = '<transformer ' + _name_att
                 if has_change:
-                    atts = atts + ('changed="+"',)
-                    print('%s<transformer %s>' % (indent, ' '.join(atts)))
-                    _pprint(_content.uf)
-                    print('%s</transformer>' % indent)
+                    _topen += ' changed="+">'
                 else:
-                    print('%s<transformer name="%s" nochange />' % (indent, _name))
+                    _topen += ' nochange>'
+                indented_pprint(_topen, indent_n)
+                if has_change:
+                    indented_pprint(_topen, indent_n)
+                    indented_pprint(_content.uf, indent_n)
+                    indented_pprint('</transformer>', indent_n)
 
             if _content:
                 content = _content
@@ -108,7 +105,7 @@ class TransformerList:
         if self._debug:
             if self.name == 'root':
                 print('\n' + indent + '<output>')
-                _pprint(content.uf)
+                indented_pprint(content.uf, indent_n)
                 print(indent + '</output>')
             print(oindent + '</'+self.name+'>')
 

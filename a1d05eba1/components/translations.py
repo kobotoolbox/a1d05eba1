@@ -115,7 +115,7 @@ class TxList(SurveyComponentWithTuple):
             self._tuple = self._tuple + (
                 tx,
             )
-        if len(self._tuple) is 1:
+        if len(self._tuple) == 1:
             # not the "immutable" way
             self._tuple[0].is_default = True
 
