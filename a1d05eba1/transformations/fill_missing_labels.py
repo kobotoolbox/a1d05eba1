@@ -27,9 +27,9 @@ On export (fw): # PLANNED
     'FALLBACK_TX_STRING' and replace with the value from the specified tx
 '''
 
-from .transformer import Transformer
+from .transformer import TransformerRW
 
-TRANSLATABLE_COLS = ['label', 'hint', 'guidance_hint']
+TRANSLATABLE_COLS = ['label', 'hint', 'guidance_hint', 'constraint_message']
 FALLBACK_TX_STRING = ''
 
 
@@ -101,16 +101,41 @@ def content_has_missing_fields(content, other_anchors):
             if col in row and has_missing_fields(row[col], other_anchors):
                 return True
 
-
-class FillMissingLabels(Transformer):
+class FillMissingLabelsRW(TransformerRW):
     def _get_fallback_tx(self, translations):
         for tx in translations:
             if tx.get('fallback'):
                 return tx
         return translations[0]
 
-    def rw(self, content):
-        translations = content.get('translations')
+    def rw__1(self, content):
+        translations = content.get('translations', [])
+        tx_count = len(translations)
+        if tx_count < 2:
+            return content
+
+        def ensure_n_values(row_col):
+            if not isinstance(row_col, (list, tuple)):
+                raise Exception('should be a list')
+            while len(row_col) < tx_count:
+                row_col = row_col + ('',)
+            return row_col
+
+        survey = ()
+        for row in content['survey']:
+            row_updates = {}
+            for col in TRANSLATABLE_COLS:
+                if col in row:
+                    row_updates[col] = ensure_n_values(row[col])
+            if len(row_updates) > 0:
+                row = row.copy(**row_updates)
+            survey = survey + (row,)
+        # do we need to do this for choices too?
+        return content.copy(survey=survey)
+
+
+    def rw__2(self, content):
+        translations = content.get('translations', [])
         if len(translations) < 2:
             return content
 
@@ -125,7 +150,7 @@ class FillMissingLabels(Transformer):
 
         survey = fill_missing_fields_in_list(
             content['survey'],
-            ['label'],
+            TRANSLATABLE_COLS,
             other_anchors,
         )
         choices = {}
@@ -141,5 +166,3 @@ class FillMissingLabels(Transformer):
             'choices': choices,
         }
         return content.copy(**updates)
-
-TRANSFORMER = FillMissingLabels()

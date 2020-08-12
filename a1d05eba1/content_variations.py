@@ -95,13 +95,14 @@ _register_variation(V2_Content)
 
 def build_content(content, **kwargs):
     content = unfreeze(content)
-    for (klsname, kls) in VARIATIONS.items():
+    for kls in VARIATIONS.values():
         try:
             jsonschema_validate(content, kls.input_schema)
             return kls(content, **kwargs)
         except ValidationError:
             continue
-    raise ValueError('unrecognized content')
+    # no alt schema recognized, falling back to validation errors on main schema
+    jsonschema_validate(content, MAIN_JSONSCHEMA)
 
 def get_klass(schema_code):
     return VARIATIONS[schema_code]

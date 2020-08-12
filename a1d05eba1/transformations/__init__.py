@@ -19,3 +19,4 @@ from .xlsform_choices import XlsformChoicesRW
 from .xlsform_metas_to_settings import MetasToSurveyRootRW
 from .xlsform_translations import EnsureTranslationListRW
 from .xlsform_unwrap_settings_from_list import UnwrapSettingsFromListRW
+from .fill_missing_labels import FillMissingLabelsRW

@@ -130,7 +130,7 @@ class Content:
 
 
     def validate_required_properties(self, content):
-        # initial, very basic test of scrtucture
+        # initial, very basic test of structure
         if 'schema' not in content:
             raise ValueError('content.schema must be a string')
         if 'survey' not in content:
@@ -138,10 +138,15 @@ class Content:
 
         # if class has an "input_schema"
         if self.input_schema:
+            cdict = content
             if isinstance(content, kfrozendict):
-                jsonschema_validate(content.unfreeze(), self.input_schema)
-            else:
-                jsonschema_validate(content, self.input_schema)
+                cdict = content.unfreeze()
+            self.__class__.validate_input_schema(cdict)
+
+    @classmethod
+    def validate_input_schema(kls, content):
+        if kls.input_schema:
+            jsonschema_validate(content, kls.input_schema)
 
     def validate_export(self):
         jsonschema_validate(self.export(), MAIN_JSONSCHEMA)
