@@ -65,6 +65,13 @@ class Transformer:
             )) for item in ['row', 'choice']
         )
 
+        settings_fn = self._first_defined_subclassed_function((
+            f'{direction}__{schema}__settings',
+            f'{direction}__settings',
+        ))
+        if settings_fn:
+            updates['settings'] = settings_fn(content['settings'])
+
         if each_row_fn:
             survey = ()
             for row in content['survey']:

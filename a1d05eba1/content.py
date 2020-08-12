@@ -180,9 +180,9 @@ class Content:
         if schema == '1':
             if not _ec.flat:
                 raise ValueError('cannot export(schema=1, flat=False)')
-            result = self.to_v1_structure()
+            result = self.to_v1_structure(export_configs)
         else:
-            result = self.to_structure(schema=schema, flat=_ec.flat)
+            result = self.to_structure(export_configs)
         result = deepfreeze(result)
         result = result.copy(schema=schema)
 
@@ -232,13 +232,15 @@ class Content:
             )
         )
 
-    def to_structure(self, schema, flat):
+    def to_structure(self, export_configs):
+        flat = export_configs.flat
+        schema = export_configs.schema
         return _sans_empty_values(unfreeze({
             'schema': schema,
             'translations': self.txs.to_list(schema=schema),
             'survey': self.survey.to_list(schema=schema, flat=flat),
             'choices': self.choices.to_dict(schema=schema),
-            'settings': self.settings.to_dict(),
+            'settings': self.settings.to_dict(export_configs),
             'metas': self.metas.to_dict(schema=schema),
         }))
 
@@ -270,12 +272,12 @@ class Content:
         if _initial_tx:
             self.txs.set_initial_by_string(_initial_tx)
 
-    def to_v1_structure(self):
+    def to_v1_structure(self, export_configs):
         return unfreeze({
             'schema': '1',
             'translated': sorted(self._tx_columns),
             'translations': self.txs.to_v1_strings(),
             'survey': self.survey.to_list(schema='1', flat=True),
             'choices': self.choices.to_old_arr(),
-            'settings': self.settings.to_dict_schema_1(),
+            'settings': self.settings.to_dict(export_configs),
         })

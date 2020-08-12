@@ -69,3 +69,14 @@ def test_settings_public_key():
     # assert len(rr['settings']['public_key'].split('\n')) == 1
     rr = build_content(rr, validate=True).export_to('xlsform')
     assert len(rr['settings'][0]['public_key'].split('\n')) == 7
+
+def test_settings_renamed_to_v1():
+    C1 = {**CONTENT_1_NO_SETTINGS, 'settings': [
+        {
+            'id_string': 'my_form_id',
+            'form_title': 'form title',
+        }
+    ]}
+    rr = build_content(C1).export_to('2')
+    rr = build_content(rr, validate=True).export_to('xlsform')
+    assert list(iter(rr['settings'][0].keys())) == ['id_string', 'form_title']

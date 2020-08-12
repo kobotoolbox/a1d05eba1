@@ -20,6 +20,7 @@ class ExportConfigs(TransformerList):
         self.flat = kwargs.pop('flat', True)
         self.immutable = kwargs.pop('immutable', False)
         self.remove_nulls = kwargs.pop('remove_nulls', False)
+        self.default_settings = kwargs.pop('default_settings', {})
         super().__init__(**kwargs)
 
     def fw(self, content, **kwargs):

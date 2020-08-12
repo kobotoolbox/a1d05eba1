@@ -107,11 +107,6 @@ def rw_inspect_content_translations(content):
     for (list_name, choices) in content.get('choices', {}).items():
         for choice in choices:
             gather_txs(choice)
-    # ugly fix for temporary problem?
-    # formpack has surveys with labels looking like ["hi"]
-    # on untranslated surveys. Does this exist elsewhere? TBD
-    ctx.needs_mutation = len(ctx.translations) != 1 or \
-                         ctx.translations[0] != NULL_TRANSLATION
     ctx.tx_count = len(ctx.translations)
     return ctx
 
@@ -162,9 +157,9 @@ def rw_mutate_content(content, context, strict=True):
         )
     translated = sorted(context.translated)
     changes = {
-      'translations': translations,
-      'translated': translated,
-      'schema': '1',
+        'translations': translations,
+        'translated': translated,
+        'schema': '1',
     }
     return content.copy(**changes)
 
@@ -207,17 +202,13 @@ class XlsformTranslations(Transformer):
 
     def rw__1(self, content):
         context = rw_inspect_content_translations(content)
-        if not context.needs_mutation:
-            if 'translations' not in content:
-                return content.copy(translations=context.translations)
-            return content
         return rw_mutate_content(content, context, self.strict)
 
 class XlsformTranslationsStrict(XlsformTranslations):
     strict = True
 
 class EnsureTranslationListRW(TransformerRW):
-    def rw(self, content):
+    def rw__1(self, content):
         if 'translations' not in content:
             return content.copy_in(translations=[None])
         return content
