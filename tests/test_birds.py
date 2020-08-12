@@ -1,4 +1,4 @@
-from a1d05eba1.content import Content
+from a1d05eba1.content_variations import X_Content
 
 
 # BIRDS comes from an example XLSForm "Birds.xlsx"
@@ -157,5 +157,6 @@ BIRDS = {'choices': [{'label': 'Dry or low', 'list name': 'humidity', 'name': 'l
 
 
 def test_birds():
-    cc = Content({**BIRDS, 'schema': '1+xlsform'}, validate=True)
-    results = cc.export(schema='2', flat=False)
+    cc = X_Content(BIRDS, validate=True)
+    result = cc.export_to('2')
+    assert result['choices']['humidity'][0]['$anchor'] == 'humidity.low'

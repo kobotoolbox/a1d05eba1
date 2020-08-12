@@ -1,4 +1,5 @@
-from a1d05eba1.content import Content
+from a1d05eba1.content_variations import build_content
+
 from a1d05eba1.utils import kfrozendict
 
 from a1d05eba1.special_fields.tags import _expand_tags
@@ -19,33 +20,33 @@ CONTENT_2 = {
 }
 
 def test_import_hxl_tags_from_string1():
-    result = Content({**CONTENT_1, 'survey': [
+    result = build_content({**CONTENT_1, 'survey': [
         {'type': 'text',
          '$anchor': 'q1',
          'hxl': '#loc+name #foo+bar'},
-    ]}).export(schema='2')
+    ]}).export_to('2')
 
     row0 = result['survey'][0]
     assert row0['tags'] == ['hxl:#loc', 'hxl:+name', 'hxl:#foo', 'hxl:+bar']
 
 def test_import_hxl_tags_from_string1_plus_tags():
-    result = Content({**CONTENT_1, 'survey': [
+    result = build_content({**CONTENT_1, 'survey': [
         {'type': 'text',
          '$anchor': 'q1',
          'hxl': '#loc+name',
          'tags': 'hxl:#foo'}
-    ]}).export(schema='2')
+    ]}).export_to('2')
 
     row0 = result['survey'][0]
     tags0 = row0['tags']
     assert tags0 == ['hxl:#foo', 'hxl:#loc', 'hxl:+name']
 
 def test_import_hxl_tags_from_string2():
-    result = Content({**CONTENT_2, 'survey': [
+    result = build_content({**CONTENT_2, 'survey': [
         {'type': 'text',
          '$anchor': 'q1',
          'tags': ['hxl:#foo', 'hxl:#loc', 'hxl:+name']}
-    ]}).export(schema='1')
+    ]}).export_to('1')
 
     row0 = result['survey'][0]
     assert 'tags' not in row0
@@ -53,11 +54,11 @@ def test_import_hxl_tags_from_string2():
     assert tags0 == '#foo #loc +name'
 
 def test_import_hxl_tags_from_string2_plus_tags():
-    result = Content({**CONTENT_2, 'survey': [
+    result = build_content({**CONTENT_2, 'survey': [
         {'type': 'text',
          '$anchor': 'q1',
          'tags': ['hxl:#foo', 'hxl:#loc', 'hxl:+name', 'misc']}
-    ]}).export(schema='1')
+    ]}).export_to('1')
 
     row0 = result['survey'][0]
     # assert 'hxl' not in row0
@@ -66,7 +67,7 @@ def test_import_hxl_tags_from_string2_plus_tags():
     assert tags0 == '#foo #loc +name'
 
 def test_tags_validate():
-    cc = Content({**CONTENT_2, 'survey': [
+    cc = build_content({**CONTENT_2, 'survey': [
         {'type': 'text',
          '$anchor': 'q1',
          'tags': ['hxl:#foo', 'hxl:#loc', 'hxl:+name', 'misc']}

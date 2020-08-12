@@ -1,6 +1,6 @@
 import pytest
 
-from a1d05eba1.content import Content
+from a1d05eba1.content_variations import build_content
 
 from a1d05eba1.utils.kfrozendict import kfrozendict
 from a1d05eba1.utils.kfrozendict import deepfreeze
@@ -109,7 +109,7 @@ def test_colons_forward_empty_tx():
                      'select_from': 'states',
                      'type': 'select_one'}],
          'translations': [{'$anchor': 'tx0', 'name': ''}]}
-    result = Content(cc).export(schema='xlsform')
+    result = build_content(cc).export_to('xlsform')
     row0 = result['survey'][0]
     assert 'label' in row0
 
@@ -125,21 +125,23 @@ def test_additional():
                 {'$anchor': 'pm4jk80',
                  'label': 'q2',
                  'required': False,
-                 'type': 'integer'}]}
-    content = Content(cc)
-    result = content.export(schema='1')
+                 'type': 'integer'}],
+        'choices': [],
+    }
+    content = build_content(cc)
+    result = content.export_to('1')
     assert len(result['translations']) == 1
     assert result['translations'] == [None]
 
-    content = Content(cc)
-    result = content.export(schema='2')
+    content = build_content(cc)
+    result = content.export_to('2')
     assert len(result['translations']) == 1
-    assert result['translations'] == [{'$anchor': 'tx0',                                        'name': ''}]
+    assert result['translations'] == [{'$anchor': 'tx0', 'name': ''}]
 
 
 def test_colons_forward():
-    result = Content({
-        'schema': '1',
+    result = build_content({
+        # 'schema': '1',
         'survey': [
             {'type': 'text', 'name': 'q1', '$anchor': 'q1', 'label': ['t1lab', 't2lab']},
             {'type': 'select_one',
@@ -164,7 +166,7 @@ def test_colons_forward():
             'label',
             'hint',
         ]
-    }).export(schema='xlsform')
+    }).export_to('xlsform')
     row0 = result['survey'][0]
     choice0 = result['choices'][0]
     assert 'label::T1' in row0
@@ -172,9 +174,9 @@ def test_colons_forward():
 
 
 def test_1_plus_colons():
-    content = Content({
+    content = build_content({
         # '1+xx' equivalent to 'xlsform'
-        'schema': '1+xlsform',
+        'schema': '1',
         'survey': [
             {'type': 'text',
                 'name': 'book',
@@ -183,17 +185,14 @@ def test_1_plus_colons():
                 'label::French': 'Le patient',
             },
         ],
-        'translated': [
-            'label'
-        ],
-        'settings': {},
+        'settings': [{}],
     })
-    result = content.export(schema='1')
+    result = content.export_to('1')
     row0 = result['survey'][0]
     assert row0['label'] == ['The patient', 'Le patient']
 
 def test_alternative_colon_configs():
-    content = Content({
+    content = build_content({
         'schema': '1+xlsform',
         'survey': [
             {'type': 'text',
@@ -203,18 +202,14 @@ def test_alternative_colon_configs():
                 'label:French': 'Le patient',
             },
         ],
-        'translated': [
-            'label'
-        ],
-        'settings': {},
+        'settings': [{}],
     })
-    txs = content.export(schema='2')['translations']
+    txs = content.export_to('2')['translations']
     txnames = [tx['name'] for tx in txs]
     assert txnames == ['English', 'French']
 
 def test_split_types():
-    content = Content({
-        'schema': '1+xlsform_aliases',
+    content = build_content({
         'survey': [
             {
                 'type': 'select_one dog',
@@ -222,21 +217,11 @@ def test_split_types():
             }
         ]
     })
-    row0 = content.export(schema='1')['survey'][0]
+    row0 = content.export_to('1')['survey'][0]
     assert row0['type'] == 'select_one'
     assert row0['select_from_list_name'] == 'dog'
-    row0 = content.export(schema='1+xlsform_aliases')['survey'][0]
+    row0 = content.export_to('xlsform')['survey'][0]
     assert row0['type'] == 'select_one dog'
-
-# def test_noop():
-#     result = Content({
-#         'schema': '1+noop',
-#         'survey': [],
-#         'translated': [],
-#         'settings': {}
-#     }).export(schema='1+')
-#     assert result
-
 
 GRP_S1 = deepfreeze({
     'survey': [{'type': 'begin_group', '$anchor': 'grp_a'},
@@ -255,35 +240,34 @@ GRP_S1 = deepfreeze({
 
 
 def test_remove_empties():
-    for schema in ['xlsform', '1+remove_empty_rows']:
-        cc = Content({
-            'schema': schema,
-            'survey': [
-                {'type': 'text', '$anchor': 'anchor'},
-                {},
-                {'type': 'text', '$anchor': 'anchor2'},
-                {},
-                {'type': 'text', '$anchor': 'anchor3'},
-            ],
-            'choices': [
-                {'list_name': 'aa',
-                    '$anchor': 'a4',
-                    'value': 'aaa'},
-                {'list_name': 'aa',
-                    '$anchor': 'a5',
-                    'value': 'aab'},
-                {'list_name': 'aa',
-                    '$anchor': 'a6',
-                    'value': 'aac'},
-            ]
-        })
-        result = cc.export(schema='1')
-        assert len(result['survey']) == 3
-        assert len(result['choices']) == 3
+    cc = build_content({
+        'survey': [
+            {'type': 'text', '$anchor': 'anchor'},
+            {},
+            {'type': 'text', '$anchor': 'anchor2'},
+            {},
+            {'type': 'text', '$anchor': 'anchor3'},
+        ],
+        'choices': [
+            {'list_name': 'aa',
+                '$anchor': 'a4',
+                'value': 'aaa'},
+            {'list_name': 'aa',
+                '$anchor': 'a5',
+                'value': 'aab'},
+            {'list_name': 'aa',
+                '$anchor': 'a6',
+                'value': 'aac'},
+        ],
+        # 'settings': [],
+    })
+    result = cc.export_to('xlsform')
+    assert len(result['survey']) == 3
+    assert len(result['choices']) == 3
 
 def test_create_single_translation():
-    cc = Content({
-        'schema': '1+xlsform_translations',
+    cc = build_content({
+        # 'schema': '1+xlsform_translations',
         'survey': [
             {'type': 'text', '$anchor': 'x', 'label': 'q1'},
         ],
@@ -292,14 +276,14 @@ def test_create_single_translation():
             {'list_name': 'xx', 'value': 'l1v2', '$anchor': 'z', 'label': 'label 2'},
         ],
     })
-    result = cc.export(schema='2')
+    result = cc.export_to('2')
     assert len(result['translations']) == 1
-    result = cc.export(schema='1')
+    result = cc.export_to('1')
     assert result['translated'] == ['label']
 
 def test_unique_anchors():
     with pytest.raises(DuplicateAnchorError):
-        cc = Content({
+        cc = build_content({
             'schema': '2',
             'survey': [
                 # same "$anchor" but different "name"
@@ -320,7 +304,7 @@ def test_unique_anchors():
 
 def test_unmatched_group_1():
     with pytest.raises(StructureError):
-        cc = Content({
+        cc = build_content({
             'schema': '2',
             'survey': [
                 {'$anchor': 'a', 'type': 'begin_group'},
@@ -331,7 +315,7 @@ def test_unmatched_group_1():
 
 def test_unmatched_group_2():
     with pytest.raises(StructureError):
-        cc = Content({
+        cc = build_content({
             'schema': '2',
             'survey': [
                 {'$anchor': 'a', 'type': 'begin_group'},
@@ -357,6 +341,8 @@ def test_formpack_schema_to_lists():
               'list_name': 'al1hv46',
               'name': 'american',
               'order': 2}],
+              # how did this pass before?
+              'translations': ['En'],
  'survey': [{'label': ['Favorite coffee type'],
              'name': 'favorite_coffee_type',
              'required': False,
@@ -367,8 +353,8 @@ def test_formpack_schema_to_lists():
              'required': False,
              'type': 'text'}],
              'schema': '1+formpack'}
-    cc = Content(kontent)
-    result = cc.export(schema='2')
+    cc = build_content(kontent)
+    result = cc.export_to('2')
     s0, s1 = result['survey']
     assert isinstance(s0['label'], dict)
     assert set(iter(s0['label'].keys())) == {'tx0'}

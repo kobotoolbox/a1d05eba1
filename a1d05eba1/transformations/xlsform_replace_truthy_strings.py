@@ -32,7 +32,7 @@ class ReplaceTruthyStrings(Transformer):
     def fw__each_row(self, row):
         if 'required' in row:
             req = row['required']
-            req_str = 'true()' if req else 'false()'
+            req_str = 'TRUE' if req else 'FALSE'
             return row.copy(required=req_str)
         return row
 
@@ -48,5 +48,3 @@ class ReplaceTruthyStrings(Transformer):
                 if val in TRUTHY_VALS:
                     return row.copy(**{key: True})
         return row
-
-TRANSFORMER = ReplaceTruthyStrings()

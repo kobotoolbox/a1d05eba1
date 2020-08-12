@@ -1,8 +1,8 @@
-from a1d05eba1.content import Content
+from a1d05eba1.content_variations import build_content
 
 
 def cc1():
-    return Content({
+    return build_content({
         'schema': '2',
         'survey': [
             {'type': 'begin_group',
@@ -19,11 +19,13 @@ def cc1():
              '$anchor': '/g2'},
             {'type': 'end_group',
              '$anchor': '/g1'},
-        ]
+        ],
+        'choices': {},
+        'translations': [{'$anchor': 'tx0', 'name': ''}],
     })
 
 def cc9():
-    return Content({
+    return build_content({
         'schema': '2',
         'survey': [
             {'type': 'group',
@@ -67,7 +69,7 @@ def test_surv_equiv_transforms():
         result = cc.export(schema='2', flat=True)
         assert len(result['survey']) == 7
 
-        tanks = cc.export(schema='1', flat=True) # schema 1 defaults
+        tanks = cc.export(schema='1', flat=True)
 
         typs = cc._tanchors(schema='1', flat=True, key='type')
         assert typs == ['begin_group',
@@ -108,7 +110,7 @@ from a1d05eba1.build_schema import MAIN_JSONSCHEMA
 from jsonschema import validate
 
 def test_odd_group_tree():
-    cc = Content({
+    cc = build_content({
         'schema': '2',
         'survey': [
             {'type': 'group',
@@ -141,9 +143,10 @@ def test_odd_group_tree():
     validate(result, MAIN_JSONSCHEMA)
 
 def test_repeats_with_repeat_count():
-    cc = Content({'choices': {},
+    cc = build_content({'choices': {},
                   'schema': '2',
-                  'settings': {'metas': {}},
+                  'settings': {},
+                  'metas': {},
                   'survey': [{'type': 'repeat',
                               '$anchor': 'rr',
                               'repeat_count': 2,

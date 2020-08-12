@@ -6,7 +6,7 @@ sheet
 '''
 
 from ..utils.yparse import yload_file
-from .transformer import Transformer
+from .transformer import TransformerRW
 
 
 from ..schema_properties import META_PROPERTIES
@@ -14,7 +14,7 @@ from ..schema_properties import META_PROPERTIES
 XLSFORM_RENAMED_METAS = yload_file('renames/from1/metas', invert=True)
 
 
-class MetasToSurveyRoot(Transformer):
+class MetasToSurveyRootRW(TransformerRW):
     def rw(self, content):
         updates = {}
         survey = tuple()
@@ -46,5 +46,3 @@ class MetasToSurveyRoot(Transformer):
         if _type in META_PROPERTIES:
             is_meta = True
         return (row, is_meta)
-
-TRANSFORMER = MetasToSurveyRoot()

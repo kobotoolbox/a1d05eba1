@@ -30,7 +30,7 @@ from ..schema_properties import (
     TRANSLATABLE_CHOICES_COLS,
 )
 
-from .transformer import Transformer
+from .transformer import Transformer, TransformerRW
 from .transformer_list import TransformerList
 
 NULL_TRANSLATION = 'NULL_TRANSLATION'
@@ -172,8 +172,7 @@ def rw_mutate_content(content, context, strict=True):
 class XlsformTranslations(Transformer):
     strict = False
 
-    def fw(self, content):
-        assert content['schema'].startswith('1')
+    def fw__1(self, content):
         (content, translations) = content.popout('translations')
         (content, survey_in) = content.popout('survey')
         content_updates = {'survey': []}
@@ -206,8 +205,7 @@ class XlsformTranslations(Transformer):
         content_updates['choices'] = _choice_updates
         return content.copy_in(**content_updates)
 
-
-    def rw(self, content):
+    def rw__1(self, content):
         context = rw_inspect_content_translations(content)
         if not context.needs_mutation:
             if 'translations' not in content:
@@ -217,3 +215,9 @@ class XlsformTranslations(Transformer):
 
 class XlsformTranslationsStrict(XlsformTranslations):
     strict = True
+
+class EnsureTranslationListRW(TransformerRW):
+    def rw(self, content):
+        if 'translations' not in content:
+            return content.copy_in(translations=[None])
+        return content

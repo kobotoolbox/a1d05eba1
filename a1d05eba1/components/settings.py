@@ -18,6 +18,7 @@ def _split_pubkey_to_64char_lines(pubkey, chars=64):
 
 
 class Settings(SurveyComponentWithDict):
+    _pubkey = None
     settings_renames_from_1 = yload_file('renames/from1/settings', invert=True)
     settings_renames_to_1 = yload_file('renames/to1/settings')
 
@@ -37,7 +38,7 @@ class Settings(SurveyComponentWithDict):
                 val = val.split(' ')
 
             keep_setting = True
-            strip_uk_setts = self.content.strip_unknown
+            strip_uk_setts = self.content.strip_unknown_values
             if strip_uk_setts and key not in SETTINGS_PROPERTIES:
                 keep_setting = False
 
@@ -50,29 +51,30 @@ class Settings(SurveyComponentWithDict):
 
         self._d = deepfreeze(save)
 
-    def to_dict(self, schema):
-        if schema == '2':
-            out = kfrozendict.unfreeze(self._d)
-            if self._pubkey:
-                out['public_key'] = self._pubkey
-            return out
-        elif schema == '1':
-            out = []
-            if self._pubkey:
-                out.append(
-                    ('public_key', _split_pubkey_to_64char_lines(self._pubkey))
-                )
-            if self.content.initial_tx:
-                txname = self.content.initial_tx.as_string_or_null()
-                out.append(
-                    ('initial_translation', txname)
-                )
-            for (key, val) in self._d.items():
-                if key in self.settings_renames_to_1:
-                    key = self.settings_renames_to_1[key]
-                if key == 'style':
-                    val = ' '.join(val)
-                out.append(
-                    (key, val)
-                )
-            return dict(out)
+    def to_dict_schema_1(self):
+        out = []
+        if self._pubkey:
+            out.append(
+                ('public_key', _split_pubkey_to_64char_lines(self._pubkey))
+            )
+        if self.content.initial_tx:
+            txname = self.content.initial_tx.as_string_or_null()
+            out.append(
+                # initial_tx is default_language? depends on version of pyxform
+                ('default_language', txname)
+            )
+        for (key, val) in self._d.items():
+            if key in self.settings_renames_to_1:
+                key = self.settings_renames_to_1[key]
+            if key == 'style':
+                val = ' '.join(val)
+            out.append(
+                (key, val)
+            )
+        return dict(out)
+
+    def to_dict(self):
+        out = self._d
+        if self._pubkey:
+            out = out.copy(public_key=self._pubkey)
+        return out.unfreeze()

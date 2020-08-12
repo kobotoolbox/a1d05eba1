@@ -1,0 +1,36 @@
+type: object
+$defs:
+  anchor:
+    type: 'null'
+properties:
+  choices:
+    type: array
+  metas:
+    type: 'null'
+  survey:
+    items:
+      properties:
+        $anchor:
+          $ref: '#/$defs/anchor'
+        $kuid:
+          type: 'null'
+        label:
+          anyOf:
+          - type: array
+          - type: string
+        name:
+          type: string
+        rows:
+          type: 'null'
+        tags:
+          type: string
+      type: object
+    type: array
+  translations:
+    items:
+      anyOf:
+      - type: string
+      - type: 'null'
+    type: array
+required:
+- translations

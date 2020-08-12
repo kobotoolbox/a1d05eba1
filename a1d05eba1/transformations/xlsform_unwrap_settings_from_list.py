@@ -5,10 +5,10 @@ if settings is a list, pull out the first item.
 settings is always a dict
 '''
 
-from .transformer import Transformer
+from .transformer import TransformerRW
 from ..utils.kfrozendict import kfrozendict
 
-class UnwrapSettingsFromList(Transformer):
+class UnwrapSettingsFromListRW(TransformerRW):
     '''
     when loaded in from an XLSForm, settings is in a 1-item-list
 
@@ -23,6 +23,11 @@ class UnwrapSettingsFromList(Transformer):
       settings:
         {'default_language': 'Latin'}
     '''
+    def rw__2(self, content):
+        if 'settings' not in content:
+            return content.copy(settings=kfrozendict({}))
+        return content
+
     def rw__1(self, content):
         if 'settings' in content:
             settings = content['settings']
@@ -33,5 +38,3 @@ class UnwrapSettingsFromList(Transformer):
                     settings = {}
             return content.copy(settings=settings)
         return content.copy(settings=kfrozendict())
-
-TRANSFORMER = UnwrapSettingsFromList()

@@ -1,0 +1,12 @@
+properties:
+  metas:
+    type: 'null'
+  settings:
+    type: array
+  survey:
+    items:
+      type: object
+    type: array
+  translations:
+    type: 'null'
+type: object

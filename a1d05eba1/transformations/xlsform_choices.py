@@ -6,9 +6,9 @@ if content.choices is a list, convert it to an object.
 if it does not exist, add an empty object
 '''
 
-from .transformer import Transformer
+from .transformer import TransformerRW
 
-class XlsformChoices(Transformer):
+class XlsformChoicesRW(TransformerRW):
     '''
     converts an array of choices with "list_name" into a dictionary of lists
     keyed by list_name

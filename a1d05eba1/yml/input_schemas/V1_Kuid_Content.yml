@@ -1,0 +1,206 @@
+$defs:
+  choicesRow:
+    additionalProperties: true
+    properties:
+      $autovalue:
+        type: string
+      $kuid:
+        type: string
+      fake:
+        type: string
+      label:
+        type: array
+      list name:
+        type: string
+      list_name:
+        type: string
+      name:
+        type: string
+      order:
+        anyOf:
+        - type: string
+        - type: integer
+      setManually:
+        $ref: '#/$defs/stringOrBoolean'
+      value:
+        type: string
+    required:
+    - $kuid
+    type: object
+  settings:
+    additionalProperties: true
+    properties:
+      'Unnamed: 2':
+        type: string
+      allow_choice_duplicates:
+        type: string
+      appearance:
+        type: string
+      default:
+        type: string
+      default-language:
+        type: string
+      default_language:
+        type: string
+      file_name:
+        type: string
+      form title:
+        type: string
+      form_name:
+        type: string
+      form_title:
+        type: string
+      formid:
+        type: string
+      id_string:
+        type: string
+      id_title:
+        type: string
+      instance_name:
+        type: string
+      namespaces:
+        type: string
+      public_key:
+        type: string
+      style:
+        anyOf:
+        - type: string
+        - type: 'null'
+      submission_url:
+        type: string
+      version:
+        type: string
+    type: object
+  stringOrBoolean:
+    anyOf:
+    - type: string
+    - type: boolean
+    properties: {}
+  surveyRow:
+    additionalProperties: true
+    properties:
+      $autoname:
+        type: string
+      $given_name:
+        type: string
+      $kuid:
+        type: string
+      Unnamed:
+        $ref: '#/$defs/translatedArray'
+      _or_other:
+        anyOf:
+        - type: string
+        - type: boolean
+      appearance:
+        type: string
+      bind::orx:max-pixels:
+        type: string
+      bind:relevant:
+        type: string
+      bind:required:
+        type: string
+      body::accuracyThreshold:
+        type: string
+      body::accuracythreshold:
+        type: string
+      body::kb:flash:
+        type: string
+      calculation:
+        type: string
+      choice_filter:
+        type: string
+      constraint:
+        type: string
+      constraint-msg:
+        type: string
+      constraint_message:
+        anyOf:
+        - type: array
+        - type: string
+      default:
+        type: string
+      hint:
+        type: array
+      image:
+        $ref: '#/$defs/translatedArray'
+      kobo--matrix_list:
+        type: string
+      kobo--rank-constraint-message:
+        type: string
+      kobo--rank-items:
+        type: string
+      kobo--score-choices:
+        type: string
+      kuid:
+        type: string
+      label:
+        type: array
+      media::audio:
+        $ref: '#/$defs/translatedArray'
+      media::image:
+        $ref: '#/$defs/translatedArray'
+      media::video:
+        $ref: '#/$defs/translatedArray'
+      name:
+        type: string
+      'null':
+        type: string
+      read_only:
+        type: string
+      relevant:
+        type: string
+      repeat_count:
+        type: string
+      requiered:
+        anyOf:
+        - type: string
+        - type: boolean
+      required:
+        anyOf:
+        - type: string
+        - type: boolean
+      required_message:
+        $ref: '#/$defs/translatedArray'
+      select_from_list_name:
+        type: string
+      tags:
+        type: array
+      type:
+        type: string
+    required:
+    - $kuid
+    type: object
+  translatedArray:
+    anyOf:
+    - type: array
+    - type: string
+    properties: {}
+$id: https://xlsform.github.io/schema.json
+$schema: http://json-schema.org/draft-07/schema#
+additionalProperties: true
+properties:
+  choices:
+    items:
+      $ref: '#/$defs/choicesRow'
+    type: array
+  schema:
+    type: string
+  settings:
+    $ref: '#/$defs/settings'
+  survey:
+    items:
+      $ref: '#/$defs/surveyRow'
+    type: array
+  translated:
+    items:
+      type: string
+    type: array
+  translations:
+    items:
+      anyOf:
+      - type: string
+      - type: 'null'
+    type: array
+  warnings:
+    type: array
+type: object

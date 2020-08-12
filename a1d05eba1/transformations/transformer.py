@@ -1,5 +1,5 @@
 from ..utils.kfrozendict import kfrozendict
-
+from ..exceptions import DirectionalTransformerError
 
 class Transformer:
     '''
@@ -20,10 +20,18 @@ class Transformer:
     '''
 
     name = None
+    assert_schema = None
 
     def __init__(self):
         if self.name is None:
             self.name = self.__class__.__name__
+
+    def rwfw(self, content, direction, stack, debug):
+        # has the same interface as transformer_list.rwfw
+        if direction == 'rw':
+            return self.rw(content)
+        else:
+            return self.fw(content)
 
     def rw(self, content):
         return self._first_defined_subclassed_function((
@@ -33,7 +41,7 @@ class Transformer:
 
     def _rw(self, content):
         # only executed if "self.rw()" is not defined
-        return self._rwfw(content, direction='rw')
+        return self.transform_content(content, direction='rw')
 
     def fw(self, content):
         return self._first_defined_subclassed_function((
@@ -42,10 +50,9 @@ class Transformer:
         ))(content)
 
     def _fw(self, content):
-        return self._rwfw(content, direction='fw')
+        return self.transform_content(content, direction='fw')
 
-
-    def _rwfw(self, content, direction):
+    def transform_content(self, content, direction, **kwargs):
         schema = content['schema']
 
         updates = {}
@@ -68,7 +75,9 @@ class Transformer:
 
         if each_choice_fn and 'choices' in content:
             updates['choices'] = choice_updates = {}
-            assert isinstance(content['choices'], (dict, kfrozendict))
+            if not isinstance(content['choices'], kfrozendict):
+                raise ValueError('content.choices cannot be a list. '
+                                 'See: transformers.ChoicesByListNameRW')
             for (list_name, clist) in content['choices'].items():
                 choices = ()
                 for choice in clist:
@@ -84,3 +93,13 @@ class Transformer:
             fn = getattr(self, each_fn, None)
             if fn:
                 return fn
+        return fn
+
+class TransformerRW(Transformer):
+    def fw(self, *args, **kwargs):
+        raise DirectionalTransformerError(a1='rw()', a2='FW', name=self.name)
+
+
+class TransformerFW(Transformer):
+    def rw(self, *args, **kwargs):
+        raise DirectionalTransformerError(a1='fw()', a2='RW', name=self.name)

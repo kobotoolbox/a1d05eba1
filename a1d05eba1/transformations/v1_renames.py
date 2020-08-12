@@ -4,12 +4,12 @@ Renames survey columns from XLSForm aliases to schema-standardized columns
 E,g, "media::image" becaomse "image"
 '''
 
-from .transformer import Transformer
+from .transformer import TransformerRW
 from ..utils.yparse import yload_file
 
 RENAMES_FROM_V1 = yload_file('renames/from1/column', invert=True)
 
-class V1Renames(Transformer):
+class V1RenamesRW(TransformerRW):
     def rw__1__each_row(self, row):
         renames = []
         for key in row.keys():

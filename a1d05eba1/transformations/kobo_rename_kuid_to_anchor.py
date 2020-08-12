@@ -12,7 +12,7 @@ class RenameKuidToAnchor(Transformer):
         if '$anchor' in row:
             return row.renamed('$anchor', '$kuid')
 
-    def fw__each_choice(self, choice):
+    def fw__each_choice(self, choice, list_name):
         if '$anchor' in choice:
             return choice.renamed('$anchor', '$kuid')
 
@@ -23,5 +23,3 @@ class RenameKuidToAnchor(Transformer):
     def rw__each_choice(self, choice, list_name):
         if '$kuid' in choice:
             return choice.renamed('$kuid', '$anchor')
-
-TRANSFORMER = RenameKuidToAnchor()

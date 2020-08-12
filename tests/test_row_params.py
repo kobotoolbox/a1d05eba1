@@ -1,5 +1,3 @@
-from a1d05eba1.content import Content
-
 from .common_utils import buncha_times
 
 BASIC_1 = {

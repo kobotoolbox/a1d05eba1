@@ -1,23 +1,16 @@
-from a1d05eba1.content import Content
+from a1d05eba1.content_variations import build_content
 from a1d05eba1.components.row import Row
 from a1d05eba1.components.choices import Choice
 
 from a1d05eba1.utils.kfrozendict import kfrozendict
 
-# from kobo.apps.formschema.content.content import Content, Choice
-# from kobo.apps.formschema.content.row import Row
-#
-# # from frozendict import frozendict
-# from kobo.apps.formschema.kfrozendict import kfrozendict
-
 from pprint import pprint
 
 BAREBONES_1 = kfrozendict({
     'schema': '1',
-    'translated': [],
     'survey': [],
-    'settings': {},
-    'translations': [None],
+    'settings': [{}],
+    'translations': ['En'],
 })
 
 
@@ -25,7 +18,7 @@ def test_renames_column_on_import():
     cc1 = BAREBONES_1.copy(translated=(
         'media::image',
     ))
-    cc2 = Content(cc1)
+    cc2 = build_content(cc1.unfreeze())
     row = Row(content=cc2, row={
         'type': 'text',
         '$anchor': 'uniqueanchor',
@@ -41,7 +34,7 @@ def test_reverts_certain_names_on_export():
     cc1 = BAREBONES_1.copy(translated=(
         'media::image',
     ))
-    cc2 = Content(cc1)
+    cc2 = build_content(cc1.unfreeze())
     row = Row(content=cc2, row={
         'type': 'text',
         '$anchor': 'x',
@@ -59,7 +52,7 @@ def test_reverts_certain_names_on_export():
 
 def test_reverts_select_from_on_export():
     cc1 = BAREBONES_1
-    cc2 = Content(cc1)
+    cc2 = build_content(cc1.unfreeze())
     row = Row(content=cc2, row={
         'type': 'select_one',
         '$anchor': 'xx',

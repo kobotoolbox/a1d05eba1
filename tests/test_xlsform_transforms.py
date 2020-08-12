@@ -1,7 +1,8 @@
-from a1d05eba1.content import Content
+from a1d05eba1.content_variations import build_content
+
 
 def test_list_space_name():
-    cc = Content({
+    cc = build_content({
         'schema': 'xlsform',
         'survey': [],
         'choices': [
@@ -13,13 +14,13 @@ def test_list_space_name():
                 'label': 'zz'},
         ]
     })
-    result = cc.export(schema='2')
+    result = cc.export_to('2')
     assert len(result['choices']) == 1
     assert 'xx' in result['choices']
 
 
 def test_metas_and_settings():
-    cc = Content({
+    cc = build_content({
         'schema': 'xlsform',
         'settings': [
             {'formid': 'mynewform'}
@@ -31,6 +32,6 @@ def test_metas_and_settings():
             '$anchor': '$end',},
         ],
     })
-    result = cc.export(schema='2')
+    result = cc.export_to('2')
     assert 'metas' not in result['settings']
     assert 'metas' in result

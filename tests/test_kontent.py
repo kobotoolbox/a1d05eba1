@@ -1,13 +1,15 @@
-from a1d05eba1.content import Content
+from a1d05eba1.content_variations import build_content
+from a1d05eba1.content_variations import X_Content
+
 from a1d05eba1.utils.kfrozendict import kfrozendict
 from a1d05eba1.utils.kfrozendict import deepfreeze
 
+# No anchors
 CONTENT_1 = {
     'survey': [
         {'type': 'select_one',
             'select_from_list_name': 'xlistnamex',
             'name': 'q1',
-            '$anchor': 'xxxxxxx',
             'label': [
                 'label'
             ]
@@ -25,10 +27,9 @@ CONTENT_1 = {
         'label'
     ],
     'settings': {'identifier': 'example',},
-    'schema': '1',
 }
 
-
+# V2, with anchors
 CONTENT_2 = {
     'survey': [
         {'type': 'select_one',
@@ -78,12 +79,11 @@ CONTENT_2 = {
     'settings': {
         'identifier': 'example',
     },
-    'schema': '2',
 }
 
 
 def test_one2two():
-    result = Content(CONTENT_1).export(schema='2')
+    result = build_content(CONTENT_1).export_to('2')
     assert 'translated' not in result
 
     label = result['survey'][0]['label']
@@ -99,8 +99,7 @@ def test_one2two():
 
 
 def test_one2one():
-    result = Content(CONTENT_1).export(schema='1')
-
+    result = build_content(CONTENT_1).export_to('koboxlsform')
     assert 'translated' in result
     label = result['survey'][0]['label']
     assert isinstance(label, list)
@@ -112,7 +111,7 @@ def test_one2one():
 
 
 def test_two2one():
-    result = Content(CONTENT_2).export(schema='1')
+    result = build_content(CONTENT_2).export_to('1')
     assert 'translated' in result
     label = result['survey'][0]['label']
     assert isinstance(label, list)
@@ -123,7 +122,7 @@ def test_two2one():
 
 
 def test_two2two():
-    result = Content(CONTENT_2).export(schema='2')
+    result = build_content(CONTENT_2).export_to('2')
     assert 'translated' not in result
     label = result['survey'][0]['label']
     assert isinstance(label, dict)
@@ -134,14 +133,12 @@ def test_two2two():
     row2 = result['survey'][1]
     assert 'name' in row2
 
-
 def test_rename_kuid_to_anchor():
-    cc = Content({
-        'schema': '1+koboxlsform',
+    cc = build_content({
         'survey': [
             {'type': 'text',
-                'label': ['asdf'],
-                '$kuid': 'asdfasdf'}
+             'label': ['asdf'],
+             '$kuid': 'asdfasdf'}
         ],
         'translations': [None],
         'translated': ['label'],
@@ -150,15 +147,13 @@ def test_rename_kuid_to_anchor():
     exp = cc.export(schema='2')
     assert '$anchor' in exp['survey'][0]
     # and rename it back to '$kuid' when saved as schema='1'
-    exp2 = Content(exp).export(schema='1+koboxlsform')
-    assert '$kuid' in exp2['survey'][0]
-    assert exp2['schema'] == '1+koboxlsform'
+    exp2 = build_content(exp).export_to('xlsform')
+    assert '$anchor' in exp2['survey'][0]
 
 
 def test_kfrozendict():
     kf1_0 = kfrozendict(abc=123)
     kf1_1 = kfrozendict(abc=123)
-    kf2 = kfrozendict(abc=456)
     assert kf1_0 == kf1_1
     assert hash(kf1_0) == hash(kf1_1)
     assert repr(kf1_0) == '''<kfrozendict {'abc': 123}>'''
@@ -189,7 +184,7 @@ def test_kfrozendict_utility_methods():
 
 
 def test_image_alias_imports_translations():
-    cc = Content({
+    cc = X_Content({
         'survey': [
             {'type': 'text',
                 'media::image::aa': 'my_image_aa.jpg',
@@ -197,8 +192,9 @@ def test_image_alias_imports_translations():
                 '$anchor': 'moo',
                 'name': 'name'},
         ],
-        'schema': '1+xlsform',
+        'choices': [],
+        'settings': [],
     })
-    ex = cc.export()
+    ex = cc.export_to('2')
     assert ex['survey'][0]['image'] == {'tx0': 'my_image_nolang.jpg',
                                         'tx1': 'my_image_aa.jpg'}

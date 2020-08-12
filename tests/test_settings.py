@@ -1,4 +1,4 @@
-from a1d05eba1.content import Content
+from a1d05eba1.content_variations import build_content
 from a1d05eba1.utils.kfrozendict import kfrozendict
 
 from pprint import pprint
@@ -36,7 +36,7 @@ CONTENT_1S_WITH_SETTINGS = [
 
 def test_one2two():
     for cc in CONTENT_1S:
-        content = Content(cc)
+        content = build_content(cc)
         rr = content.export(schema='2', remove_nulls=False)
         assert 'settings' in rr
         rr = content.export(schema='2', remove_nulls=True)
@@ -44,10 +44,10 @@ def test_one2two():
 
     for cc in CONTENT_1S_WITH_SETTINGS:
         # don't delete valid settings
-        content = Content(cc)
+        content = build_content(cc)
         rr = content.export(schema='2', remove_nulls=False)
         assert 'settings' in rr
-        content = Content(cc)
+        content = build_content(cc)
         rr = content.export(schema='2', remove_nulls=True)
         assert 'settings' in rr
 
@@ -65,7 +65,7 @@ def test_settings_public_key():
     C1 = {**CONTENT_1_NO_SETTINGS, 'settings': [
         {'public_key': '\n'.join(PUBLIC_KEY_LINES)}
     ]}
-    rr = Content(C1).export(schema='2')
+    rr = build_content(C1).export_to('2')
     # assert len(rr['settings']['public_key'].split('\n')) == 1
-    rr = Content(rr, validate=True).export(schema='1')
+    rr = build_content(rr, validate=True).export_to('xlsform')
     assert len(rr['settings'][0]['public_key'].split('\n')) == 7

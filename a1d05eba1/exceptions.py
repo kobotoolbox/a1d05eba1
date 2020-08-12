@@ -12,6 +12,11 @@ class SchemaError(BaseValueError):
 class TranslationImportError(BaseValueError):
     ''
 
+class DirectionalTransformerError(BaseValueError):
+    '''
+    Cannot call {a1} on a {a2} transformer. [{name}]
+    '''
+
 class SchemaRefError(ImportError):
     pass
 
@@ -47,3 +52,9 @@ class DuplicateAnchorError(BaseValueError):
     - {row1}
     - {row2}
     '''
+
+
+from jsonschema.exceptions import ValidationError
+
+class SchemaValidationError(ValidationError):
+    pass

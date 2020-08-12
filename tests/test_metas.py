@@ -1,4 +1,4 @@
-from a1d05eba1.content import Content
+from a1d05eba1.content_variations import build_content
 from a1d05eba1.utils.kfrozendict import kfrozendict
 from .common_utils import buncha_times
 
@@ -40,47 +40,52 @@ BASIC_2 = {
 def test_extract_metas_properly():
     # just converts back and forth and back and forth
     # verifies settings.metas is correct
-    result_2 = Content(CONTENT).export(schema='2')
+    result_2 = build_content(CONTENT).export()
 
     assert len(result_2['survey']) == 0
     assert 'settings' in result_2
     assert 'metas' in result_2
     assert result_2['metas'] == {'start': True, 'end': True}
 
-    cr2 = Content(result_2)
-    result_21 = cr2.export(schema='1')
+    cr2 = build_content(result_2)
+    result_21 = cr2.export_to('1')
     assert cr2.metas.any()
     assert len(result_21['survey']) == 2
     assert 'metas' not in result_21['settings']
 
-    result_22 = Content(result_2).export(schema='2')
-    result_221 = Content(result_22).export(schema='1')
+    result_22 = build_content(result_2).export_to('2')
+    result_221 = build_content(result_22).export_to('xlsform')
 
     assert len(result_221['survey']) == 2
     assert 'metas' not in result_221['settings']
 
-    result_2212 = Content(result_221).export(schema='2')
+    for row in result_221['survey']:
+        _type = row['type']
+        row['$anchor'] = f'${_type}'
+    result_221['translations'] = []
+    result_2212 = build_content(result_221).export_to('2')
     assert len(result_2212['survey']) == 0
     assert result_2212['metas'] == {'start': True, 'end': True}
 
 
 def test_tagged_metas():
     # baseline works
-    cc = Content({
+    cc = build_content({
         'schema': '2',
         'survey': [],
         'metas': {
             'start': True
         },
-        'settings': {}
+        'settings': {},
+        'translations': [],
     }, validate=True)
-    res = cc.export(schema='1')
+    res = cc.export_to('1')
     assert cc.metas.any()
     assert 'metas' not in res['settings']
     assert res['survey'][0]['type'] == 'start'
 
     # hxl tags work
-    cc = Content({
+    cc = build_content({
         'schema': '2',
         'survey': [],
         'settings': {},
@@ -90,8 +95,9 @@ def test_tagged_metas():
                 'tags': ['hxl:#foo', 'hxl:+bar'],
             }
         },
+        'translations': [],
     }, validate=True)
-    row0 = cc.export(schema='1')['survey'][0]
+    row0 = cc.export_to('1')['survey'][0]
     assert row0['type'] == 'start'
     assert row0['name'] == 'start'
     assert row0['hxl'] == '#foo +bar'
@@ -99,46 +105,49 @@ def test_tagged_metas():
 
 def test_tagged_metas_content_1():
     # baseline works
-    cc = Content({
+    cc = build_content({
         'schema': '1',
         'survey': [
             {'type': 'start',
               'name': 'start',}
         ],
+        'translations': [],
     }, validate=True)
-    res = cc.export(schema='2')
+    res = cc.export_to('2')
     assert 'metas' not in res['settings']
     assert res['metas']['start'] == True
 
-    cc = Content({
+    cc = build_content({
         'schema': '1',
         'survey': [
             {'type': 'start',
               'hxl': '#foo+baz',
               'name': 'start',}
         ],
+        'translations': ['english'],
     }, validate=True)
-    res = cc.export(schema='2')
+    res = cc.export_to('2')
     _start_meta = res['metas']['start']
     assert _start_meta == {'tags': ['hxl:#foo', 'hxl:+baz']}
 
-    cc2 = Content(res)
-    res = cc2.export(schema='2')
+    cc2 = build_content(res)
+    res = cc2.export_to('2')
     _start_meta = res['metas']['start']
     assert _start_meta == {'tags': ['hxl:#foo', 'hxl:+baz']}
 
-    cc3 = Content(res)
-    res = cc3.export(schema='1')
+    cc3 = build_content(res)
+    res = cc3.export_to('xlsform')
+    assert not isinstance(res['choices'], dict)
     _start_row = res['survey'][0]
     assert _start_row == {'name': 'start', 'type': 'start', 'hxl': '#foo +baz'}
 
-    cc4 = Content(res)
-    res = cc4.export(schema='1')
+    cc4 = build_content(res)
+    res = cc4.export_to('xlsform')
     _start_row = res['survey'][0]
     assert _start_row == {'name': 'start', 'type': 'start', 'hxl': '#foo +baz'}
 
-    cc5 = Content(res)
-    res = cc5.export(schema='2')
+    cc5 = build_content(res)
+    res = cc5.export_to('2')
     _start_meta = res['metas']['start']
     assert _start_meta == {'tags': ['hxl:#foo', 'hxl:+baz']}
 

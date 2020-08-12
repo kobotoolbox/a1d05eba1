@@ -1,9 +1,10 @@
 import pytest
 
-from a1d05eba1.content import Content
 from a1d05eba1.utils.kfrozendict import kfrozendict
 from a1d05eba1.exceptions import TranslationImportError
 from a1d05eba1.components.translations import load_string
+
+from a1d05eba1.content_variations import build_content
 
 
 CONTENT_1 = {
@@ -25,14 +26,14 @@ CONTENT_1 = {
 }
 
 
-def content2tx(content):
-    kk = Content(content)
+def content1_to_tx(content):
+    kk = build_content(content)
     return (kk.txs._tuple[0], kk)
 
 
 def test_1_with_default_tx():
-    content = Content({
-        'survey': [],
+    content = build_content({
+        'survey': [{'$anchor': 'x', 'type': 'text'}],
         'translations': [
             'English',
             'French',
@@ -43,7 +44,7 @@ def test_1_with_default_tx():
         'schema': '1',
     })
     assert content.txs[0].name == 'French'
-    result = content.export(schema='2')
+    result = content.export_to('2')
     names = [
         tx.get('name') for tx in result['translations']
     ]
@@ -57,8 +58,8 @@ def test_1_with_tx_locales():
         'fr',
     ]
     for dtx in aliases_for_french:
-        content = Content({
-            'survey': [],
+        content = build_content({
+            'survey': [{'$anchor': 'x', 'type': 'text'}],
             'translations': [
                 'English (en)',
                 'French (fr)',
@@ -68,14 +69,14 @@ def test_1_with_tx_locales():
             },
             'schema': '1',
         })
-        result = content.export(schema='2')
+        result = content.export_to('2')
         # verify order was changed
         assert content.txs.names == ['French', 'English']
 
 
 def test_one2two():
     # ensure that the translations are imported correctly
-    (tx1, kk) = content2tx({
+    (tx1, kk) = content1_to_tx({
         'survey': [
             {
                 'type': 'text',
@@ -95,13 +96,13 @@ def test_one2two():
     assert tx1.locale == 'xxx'
     assert tx1.anchor == 'xxx'
 
-    result = kk.export(schema='2')
+    result = kk.export_to('2')
     assert result['translations'][0]['name'] == 'English'
     assert result['translations'][0]['locale'] == 'xxx'
     assert result['translations'][0]['$anchor'] == 'xxx'
 
 def test_reorder_translations():
-    cc = Content({
+    cc = build_content({
         'survey': [
             {'type': 'text',
                 'name': 'q1',
@@ -145,9 +146,9 @@ def test_no_duplicate_translation_names():
     ]
     for invalid_txpair in invalid_txpairs:
         with pytest.raises(TranslationImportError):
-            cc = Content({
+            cc = build_content({
                 'schema': '1',
-                'survey': [],
+                'survey': [{'$anchor': 'x', 'type': 'text'}],
                 'translations': invalid_txpair,
             })
 
@@ -171,7 +172,7 @@ def test_schema_1_load_strings_method():
 
 
 def test_simple_xlsform():
-    cc = Content({
+    cc = build_content({
         'survey': [
             {'type': 'text', 'name': 'q1', 'label::En': 'Q 1', 'label::Fr': 'Qf 1'},
             {'type': 'select_one dogs', 'name': 'q2', 'label::En': 'Dog', 'label::Fr': 'Chien'},
@@ -188,7 +189,6 @@ def test_simple_xlsform():
              'label::Fr': 'Labradour',
              }
         ],
-        'schema': '1+xlsform',
     })
     exp = cc.export()
     assert [tx['name'] for tx in exp['translations']] == ['En', 'Fr']

@@ -10,7 +10,7 @@ from .base_component import SurveyComponentWithOrderedDict
 
 class Choice(SurveyComponentWithOrderedDict):
     list_name = None
-    FALLBACK_ANCHOR_KEY = 'value'
+    FALLBACK_ANCHOR_KEY = None
 
     def load(self, item, **kwargs):
         if self.content.schema_version == '1':
@@ -22,11 +22,6 @@ class Choice(SurveyComponentWithOrderedDict):
     from_v1_renames = yload_file('renames/from1/column', invert=True)
     from_v1_choice_renames = \
         yload_file('renames/from1/choice-column', invert=True)
-
-
-    def register_component_by_anchor(self, anchor, initial_row):
-        anchor = '{}.{}'.format(self.list_name, anchor)
-        super().register_component_by_anchor(anchor, initial_row)
 
     def load_from_old_arr(self, item, list_name):
         self._data = item
@@ -52,13 +47,15 @@ class Choice(SurveyComponentWithOrderedDict):
         self._additionals = deepfreeze(_additionals)
 
     def load_from_new_dict(self, item, list_name):
+        self._data = item
         self.list_name = list_name
         item = self._popout_anchor(item)
         _filters = False
         for (key, val) in item.items():
             if key == 'filters':
                 _filters = val
-            if self.content.strip_unknown and key not in CHOICE_PROPERTIES:
+            if self.content.strip_unknown_values and \
+                    key not in CHOICE_PROPERTIES:
                 continue
 
             if key in TRANSLATABLE_CHOICES_COLS:

@@ -16,9 +16,9 @@ rw:
     * Preserves rows which may be ruled invalid later on (e.g. unknown type)
 '''
 
-from .transformer import Transformer
+from .transformer import Transformer, TransformerRW
 
-class RemoveEmpties(Transformer):
+class RemoveEmptiesRW(Transformer):
     '''
     This prevents a blank row in the XLSForm from messing up the rest of the
     form.

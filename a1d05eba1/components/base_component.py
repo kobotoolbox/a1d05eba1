@@ -1,12 +1,13 @@
 from ..utils.kfrozendict import kfrozendict
 from ..utils.anchor_generator import anchor_generator
-from ..utils.pop_out_anchor import pop_out_anchor
+
 from ..fields import UntranslatedVal, TranslatedVal
 from ..exceptions import (
     DuplicateAnchorError,
     MissingAnchorError,
     MissingAlternateAnchorError,
 )
+
 
 RAND_ANCHOR_KEY = '!RAND'
 
@@ -114,21 +115,25 @@ class SurveyComponentWithOrderedDict(SurveyComponentBase):
         * ensures that "self._anchor" is unique
         '''
         initial_row = row
-        klsname = self.__class__.__name__
-        row, anchor = pop_out_anchor(row, self.FALLBACK_ANCHOR_KEY, klsname)
+
+        if '$anchor' in row:
+            (row, anchor) = row.popout('$anchor')
+        else:
+            raise MissingAnchorError(row=initial_row.unfreeze(),
+                                     klass=self.__class__.__name__)
+        if anchor == RAND_ANCHOR_KEY:
+            anchor = anchor_generator()
+
         self.register_component_by_anchor(anchor, initial_row)
         return row
 
     def register_component_by_anchor(self, anchor, initial_row):
-        if anchor == RAND_ANCHOR_KEY:
-            anchor = anchor_generator()
         self._anchor = anchor
-        fallback_key = self.FALLBACK_ANCHOR_KEY
         if self._anchor in self.content._anchored_components:
             other = self.content._anchored_components[self._anchor]
             raise DuplicateAnchorError(
                 klass=self.__class__.__name__,
-                key=fallback_key,
+                key=self.FALLBACK_ANCHOR_KEY,
                 row1=other._data.unfreeze(),
                 row2=self._data.unfreeze(),
             )

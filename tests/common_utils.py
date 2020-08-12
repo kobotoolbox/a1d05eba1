@@ -1,7 +1,7 @@
 from copy import deepcopy
 from types import SimpleNamespace
 
-from a1d05eba1.content import Content
+from a1d05eba1.content_variations import build_content, get_klass
 
 
 def buncha_times(each, **kw):
@@ -22,19 +22,18 @@ def buncha_times(each, **kw):
         ]
         for spattern in schema_patterns:
             schemae = spattern.split(',')
-            for (cnt, ctx) in _iter_load_content(content, schemae, context, **kw):
+            for (cnt, ctx) in _iter_load_content(content, schemae, context,
+                                                 **kw):
                 yield (cnt, SimpleNamespace(**ctx))
 
-def _iter_load_content(content, schemas, context, validate=True):
-    # (cc, schema_str_comma) = params
-    #     schema_strs = schema_str_comma.split(',')
+def _iter_load_content(content, schemas, context, validate=True, debug=False):
     context = {'done':[]}
+    content = deepcopy(content)
     while len(schemas) > 0:
         next_s = schemas.pop(0)
-        obj = Content(content, validate=validate)
-        context['object'] = obj
+        context['object'] = obj = build_content(content, validate=validate)
         context['done'].append(next_s)
         context['previously_imported_content'] = deepcopy(content)
         context['schema'] = next_s
-        content = obj.export(schema=next_s)
+        content = deepcopy(obj.export(schema=next_s, debug=debug))
         yield (content, context)

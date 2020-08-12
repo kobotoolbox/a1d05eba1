@@ -27,6 +27,10 @@ class kfrozendict(Mapping):
             )
         return self.__class__(dict(keyvals))
 
+    def without(self, key, **kwargs):
+        content, removed = self.popout(key, **kwargs)
+        return content
+
     def popout(self, key, _default=None):
         val = _default
         keyvals = []
