@@ -189,6 +189,6 @@ def test_simple_xlsform():
              'label::Fr': 'Labradour',
              }
         ],
-    })
+    }, classname='X_Content')
     exp = cc.export()
     assert [tx['name'] for tx in exp['translations']] == ['En', 'Fr']

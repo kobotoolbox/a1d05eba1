@@ -35,10 +35,17 @@ As such, the code is currently focused on:
   validate content on save and report broken forms so that we can fix issues
   during development.
 
+## Using this to migrate forms:
+
+A `Content` object loads in a survey structure and applies "transformers" to
+the content to make sure everything is in the format that the inner code needs.
+
+See `content_variations.py` for some examples of subclasses and transformers.
+
 ## Viewing the SCHEMA
 
-`NotImplemented` yet. However, `build_schemas.py` is the current way to build
-the valid json-schema.
+from a1d05eba1 import MAIN_JSONSCHEMA
+pprint(MAIN_JSONSCHEMA)
 
 ## Changing SCHEMA
 

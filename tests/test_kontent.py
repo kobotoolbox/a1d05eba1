@@ -2,7 +2,7 @@ from a1d05eba1.content_variations import build_content
 from a1d05eba1.content_variations import X_Content
 
 from a1d05eba1.utils.kfrozendict import kfrozendict
-from a1d05eba1.utils.kfrozendict import deepfreeze
+from a1d05eba1.utils.kfrozendict import shallowfreeze
 
 # No anchors
 CONTENT_1 = {
@@ -169,7 +169,7 @@ def test_kfrozendict_utility_methods():
     ex1_unfrozen2 = kfrozendict.unfreeze(ex1)
     assert is_not_frozen(ex1_unfrozen2)
 
-    ex2 = deepfreeze({'abc': 123})
+    ex2 = shallowfreeze({'abc': 123})
     assert is_frozen(ex2)
 
     ex3 = kfrozendict({'abc': {'def': {'ghi': 999}}})

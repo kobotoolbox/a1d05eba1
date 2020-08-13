@@ -90,7 +90,7 @@ def has_missing_fields(row_col, other_anchors):
 def each_row_and_choice(content):
     for row in content['survey']:
         yield row
-    for list_name, choices in content['choices']:
+    for list_name, choices in content['choices'].items():
         for choice in choices:
             yield choice
 

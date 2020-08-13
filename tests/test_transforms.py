@@ -1,6 +1,10 @@
 import pytest
 
-from a1d05eba1.content_variations import build_content
+from a1d05eba1.content_variations import (
+    build_content,
+    V1_Content_Anchors,
+    RemoveEmptiesRW,
+)
 
 from a1d05eba1.utils.kfrozendict import kfrozendict
 from a1d05eba1.utils.kfrozendict import deepfreeze
@@ -215,8 +219,9 @@ def test_split_types():
                 'type': 'select_one dog',
                 '$anchor': 'q1',
             }
-        ]
-    })
+        ],
+        'settings': [],
+    }, classname='X_Content')
     row0 = content.export_to('1')['survey'][0]
     assert row0['type'] == 'select_one'
     assert row0['select_from_list_name'] == 'dog'
@@ -239,8 +244,14 @@ GRP_S1 = deepfreeze({
 })
 
 
+class V1_Content_NoValidate(V1_Content_Anchors):
+    input_schema = None
+    def __init__(self, *args, **kwargs):
+        self.transformers = self.transformers + (RemoveEmptiesRW,)
+        super().__init__(*args, **kwargs)
+
 def test_remove_empties():
-    cc = build_content({
+    cc = V1_Content_NoValidate({
         'survey': [
             {'type': 'text', '$anchor': 'anchor'},
             {},
@@ -260,6 +271,7 @@ def test_remove_empties():
                 'value': 'aac'},
         ],
         # 'settings': [],
+        'translations': [None],
     })
     result = cc.export_to('xlsform')
     assert len(result['survey']) == 3
@@ -267,7 +279,7 @@ def test_remove_empties():
 
 def test_create_single_translation():
     cc = build_content({
-        # 'schema': '1+xlsform_translations',
+        'schema': '1',
         'survey': [
             {'type': 'text', '$anchor': 'x', 'label': 'q1'},
         ],
@@ -275,7 +287,8 @@ def test_create_single_translation():
             {'list_name': 'xx', 'value': 'l1v1', '$anchor': 'y', 'label': 'label 1'},
             {'list_name': 'xx', 'value': 'l1v2', '$anchor': 'z', 'label': 'label 2'},
         ],
-    })
+        'translations': [None],
+    }, classname='V1_Content_Anchors')
     result = cc.export_to('2')
     assert len(result['translations']) == 1
     result = cc.export_to('1')

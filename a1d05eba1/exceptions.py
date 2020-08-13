@@ -53,8 +53,7 @@ class DuplicateAnchorError(BaseValueError):
     - {row2}
     '''
 
-
-from jsonschema.exceptions import ValidationError
-
-class SchemaValidationError(ValidationError):
-    pass
+class ContentValidationError(BaseValueError):
+    '''
+    a1d05eba1.ContentValidationError
+    '''

@@ -1,7 +1,7 @@
 from ..utils.kfrozendict import kfrozendict
 from ..utils.kfrozendict import assertfrozen
 from ..utils import kassertfrozen
-from ..utils.kfrozendict import deepfreeze
+from ..utils.kfrozendict import shallowfreeze
 from ..utils.yparse import yload_file
 
 from ..fields import TranslatedVal, UntranslatedVal
@@ -73,10 +73,10 @@ class Row(SurveyComponentWithOrderedDict, Parented):
             for sfield in Field.pull_from_row(item, self.content):
                 self.set(Field.EXPORT_KEY, sfield)
 
-        self._additionals = deepfreeze(_additionals)
+        self._additionals = shallowfreeze(_additionals)
 
     def load_from_1(self, **kwargs):
-        self._data = deepfreeze(kwargs.get('row'))
+        self._data = shallowfreeze(kwargs.get('row'))
         item = self._popout_anchor(self._data)
 
         skip_keys = SPECIAL_KEYS['1']

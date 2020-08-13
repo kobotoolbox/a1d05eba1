@@ -1,8 +1,6 @@
-import json
 from pprint import pformat
 
-from ..utils.kfrozendict import kfrozendict, deepfreeze
-from ..exceptions import DirectionalTransformerError
+from ..utils.kfrozendict import deepfreeze
 
 
 def indented_pprint(cc, indent=4):
@@ -30,6 +28,7 @@ class TransformerList:
         return hasattr(tfn, 'rw') and hasattr(tfn, 'fw')
 
     def _apply_transformers(self, content, direction, stack=(), debug=None):
+        assert content['schema'] in ['1', '2']
         if debug is not None:
             self.debug = debug
         if self.debug:

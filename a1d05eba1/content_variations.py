@@ -1,24 +1,27 @@
-from jsonschema import validate as jsonschema_validate
 from jsonschema.exceptions import ValidationError
 
 from .content import Content
 from .utils.yparse import yload_file as yload
 from .build_schema import MAIN_JSONSCHEMA
 
-from .utils.kfrozendict import unfreeze
+from .utils.validate import jsonschema_validate
 
-from .transformations import AnchorsFromNameOrRandom
-from .transformations import XlsformTranslations
-from .transformations import XlsformRenames
-from .transformations import RemoveEmptiesRW
-from .transformations import MetasToSurveyRootRW
-from .transformations import ChoicesByListNameRW
-from .transformations import ReplaceTruthyStrings
-from .transformations import V1RenamesRW
-from .transformations import EnsureTranslationListRW
-from .transformations import RenameKuidToAnchor
-from .transformations import UnwrapSettingsFromListRW
-from .transformations import XlsformChoicesRW
+from .exceptions import ContentValidationError
+
+from .transformations import (
+    AnchorsFromNameOrRandom,
+    RenameKuidToAnchor,
+    ReplaceTruthyStrings,
+    XlsformRenames,
+    XlsformTranslations,
+    ChoicesByListNameRW,
+    EnsureTranslationListRW,
+    MetasToSurveyRootRW,
+    RemoveEmptiesRW,
+    UnwrapSettingsFromListRW,
+    V1RenamesRW,
+    XlsformChoicesRW,
+)
 
 
 def load_input_schema(cname):
@@ -94,12 +97,16 @@ _register_variation(V2_Content)
 
 
 def build_content(content, **kwargs):
-    content = unfreeze(content)
+    classname = kwargs.pop('classname', None)
+    if classname:
+        kls = VARIATIONS[classname]
+        return kls(content, **kwargs)
+
     for kls in VARIATIONS.values():
         try:
             jsonschema_validate(content, kls.input_schema)
             return kls(content, **kwargs)
-        except ValidationError:
+        except (ContentValidationError, ValidationError):
             continue
     # no alt schema recognized, falling back to validation errors on main schema
     jsonschema_validate(content, MAIN_JSONSCHEMA)

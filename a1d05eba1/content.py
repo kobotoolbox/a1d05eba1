@@ -1,7 +1,7 @@
-from jsonschema import validate as jsonschema_validate
-
+from .utils.validate import jsonschema_validate
 from .utils.kfrozendict import kfrozendict
-from .utils.kfrozendict import unfreeze, deepfreeze
+from .utils.kfrozendict import unfreeze
+from .utils.kfrozendict import deepfreeze
 from .utils.kfrozendict import assertfrozen
 from .utils import kassertfrozen
 
@@ -41,13 +41,21 @@ def _sans_empty_values(obj):
     return obj
 
 
-class Content:
+class BaseContent:
     # can be overridden in subclasses
     schema_string = None            # e.g. '2'
     input_schema = None             # A valid jsonschema
     strip_unknown_values = True     # Ignore unknown properties
+    txs = None
+    metas = None
+    survey = None
+    choices = None
+    settings = None
+    anchored_components = kfrozendict()
+    _known_columns = ()
 
     # survey attributes pulled from settings
+    _data_settings = None
     initial_tx = False     # "default_translation" pulled from settings
     fallback_tx = False
 
@@ -60,6 +68,10 @@ class Content:
 
     export_configs = None
 
+    @property
+    def schema_version(self):
+        return self.data['schema']
+
     def __init__(self,
                  content,
                  validate=False,
@@ -67,74 +79,57 @@ class Content:
                  debug=False,
                  strip_unknown=None,
                  ):
-
-        self._known_columns = tuple()
-        self._anchored_components = {}
-
-        perform_validation = validate
-        if self.schema_string:
-            if isinstance(content, kfrozendict):
-                content = content.copy(schema=self.schema_string)
-            else:
-                content['schema'] = self.schema_string
-        self.validate_required_properties(content)
-        if content['schema'] == '2' and perform_validation:
-            jsonschema_validate(unfreeze(content), MAIN_JSONSCHEMA)
-
-        content = deepfreeze(content)
-
         self.perform_renames = True
         self.perform_transformations = True
-
         self.strip_unknown_values = strip_unknown
-        self.perform_validation = perform_validation
+        self.perform_validation = validate
 
-        try:
-            initial_schema = content['schema']
-        except KeyError:
-            raise ValueError('content.schema not found')
+        content = deepfreeze(content)
+        # if 'schema' not in content and not self.schema_string:
+
+        # schema_string is an optional class-specified schema
+        if self.schema_string:
+            if 'schema' in content:
+                assert content['schema'] == self.schema_string
+            content = content.copy(schema=self.schema_string)
+        elif 'schema' not in content:
+            raise ValueError('No fallback schema_string set')
+        elif content['schema'] not in ['1', '2']:
+            _schema = content['schema']
+            raise ValueError(f'Unrecognized schema: {_schema}')
+
+        if self.input_schema:
+            jsonschema_validate(content, self.input_schema)
+
+        if 'survey' not in content or not isinstance(content['survey'], tuple):
+            raise ValueError('content.survey must be a list')
+
+        if validate and content['schema'] == '2':
+            jsonschema_validate(content, MAIN_JSONSCHEMA)
 
         # "transformations" represent changes that need to be made to a survey
         # to load it into this "Content" object. They are described in the schema
         #  * The "rw" function is called on load
         #  * The "fw" function is called on export
-        schema = initial_schema
-        if schema == '1' and 'translations' in content and \
-                len(content['translations']) > 0:
-            tx1 = content['translations'][0]
-            if isinstance(tx1, (dict, kfrozendict)):
-                raise ValueError('schema is 1 so translation should be a string or None')
-        self._load_content(content.copy(schema=schema),
-                           schema,
-                           debug,
-                           )
-        if extra_validate:
-            self.validate_export()
-
-    def _load_content(self, content,
-                      schema,
-                      debug,
-                      ):
         content = TransformerList(self.transformers,
                                   debug=debug,
                                   name=self.__class__.__name__,
                                   ).rw(content)
-
         if 'choices' not in content:
             content = content.copy(choices=kfrozendict())
-
-        # if this assertion fails then the content has not been transformed
-        # properly
-        assert isinstance(content['choices'], (dict, kfrozendict))
-
-        self.schema_version = schema
-        self.data = deepfreeze(content)
+        self.data = content
 
         if self.schema_version == '1':
             self.load_content_schema_1()
         elif self.schema_version == '2':
             self.load_content_schema_2()
-
+        else:
+            raise ValueError(f'unknown schema: {self.schema_version}')
+        # if this assertion fails then the content has not been transformed
+        # properly
+        assert isinstance(content['choices'], (dict, kfrozendict))
+        if extra_validate:
+            self.validate_export()
 
     def validate_required_properties(self, content):
         # initial, very basic test of structure
@@ -142,13 +137,6 @@ class Content:
             raise ValueError('content.schema must be a string')
         if 'survey' not in content:
             raise ValueError('content.survey[] is required')
-
-        # if class has an "input_schema"
-        if self.input_schema:
-            cdict = content
-            if isinstance(content, kfrozendict):
-                cdict = content.unfreeze()
-            self.__class__.validate_input_schema(cdict)
 
     @classmethod
     def validate_input_schema(kls, content):
@@ -270,6 +258,8 @@ class Content:
         return self.txs.index(self.fallback_tx)
 
     def load_content_schema_1(self):
+        if 'translations' not in self.data:
+            self.data = self.data.copy(translations=(None,))
         (self._data_settings, _initial_tx) = \
             self.data.get('settings').popout('default_language', False)
         self.metas = Metas(content=self)
@@ -290,3 +280,7 @@ class Content:
             'choices': self.choices.to_old_tuple(),
             'settings': self.settings.to_frozen_dict(export_configs),
         })
+
+class Content(BaseContent):
+    schema_string = '2'
+    input_schema = MAIN_JSONSCHEMA

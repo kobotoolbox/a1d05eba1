@@ -99,6 +99,19 @@ def unfreeze(val):
     else:
         return val
 
+def shallowfreeze(val):
+    '''
+    shallowfreeze does not go deep into the object.
+    it might save some time in the long run if we don't keep
+    calling (effectively) "deepcopy" everywhere.
+    '''
+    if isinstance(val, dict):
+        return kfrozendict(val)
+    elif isinstance(val, list):
+        return tuple(val)
+    else:
+        return val
+
 def deepfreeze(val):
     if isinstance(val, (kfrozendict, dict)):
         return kfrozendict([
@@ -111,15 +124,10 @@ def deepfreeze(val):
         return val
 
 
-
 class NotFrozenError(ValueError):
-    def __init__(self, inner, outer):
-        self.inner = inner
-        self.outer = outer
-        super().__init__(f'''
-        {repr(self.inner)}
-        {repr(self.outer)}
-        ''')
+    def __init__(self, inner, outer=None):
+        msg = (inner, outer) if outer else (inner,)
+        super().__init__('\n'.join(msg))
 
 class NotFrozenInnerError(ValueError):
     def __init__(self, inner, arg2=None):
@@ -129,11 +137,15 @@ class NotFrozenInnerError(ValueError):
         ''')
 
 def assertfrozen(val):
-    # return True
     try:
-        _assertfrozen(val)
+        # _assertfrozen(val)
+        _shallowassertfrozen(val)
     except NotFrozenInnerError as err:
         raise NotFrozenError(err.inner, outer=val)
+
+def _shallowassertfrozen(val):
+    if isinstance(val, (dict, list)):
+        raise NotFrozenError(val)
 
 def _assertfrozen(val):
     if isinstance(val, (dict, list)):

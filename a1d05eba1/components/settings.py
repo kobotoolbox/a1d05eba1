@@ -1,6 +1,6 @@
 from ..utils.kfrozendict import kfrozendict
 from ..utils import kassertfrozen
-from ..utils.kfrozendict import deepfreeze
+from ..utils.kfrozendict import shallowfreeze
 from ..utils.yparse import yload_file
 from ..schema_properties import SETTINGS_PROPERTIES
 
@@ -40,7 +40,7 @@ class Settings(SurveyComponentWithDict):
         if self._pubkey:
             self._pubkey = _standardize_public_key(self._pubkey)
 
-        self._d = deepfreeze(save)
+        self._d = shallowfreeze(save)
 
     @kassertfrozen
     def to_frozen_dict(self, export_configs):

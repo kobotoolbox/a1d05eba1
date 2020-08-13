@@ -1,5 +1,5 @@
 from ..utils.kfrozendict import kfrozendict
-from ..utils.kfrozendict import deepfreeze
+from ..utils.kfrozendict import shallowfreeze
 from ..utils import kassertfrozen
 from ..utils.yparse import yload_file
 
@@ -45,7 +45,7 @@ class Choice(SurveyComponentWithOrderedDict):
             else:
                 self.set_untranslated(key, val, original=original)
             self.content.add_col(key, 'choices')
-        self._additionals = deepfreeze(_additionals)
+        self._additionals = shallowfreeze(_additionals)
 
     def load_from_new_dict(self, item, list_name):
         self._data = item
@@ -110,7 +110,7 @@ class ChoiceLists(SurveyComponentWithDict):
         self._d = {}
 
     def postload(self):
-        self._d = deepfreeze(self._d)
+        self._d = shallowfreeze(self._d)
 
     def _append_choice_to_list(self, list_name, choice):
         cur = self._d.get(list_name, tuple())

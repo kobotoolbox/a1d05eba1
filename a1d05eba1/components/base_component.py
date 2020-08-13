@@ -128,16 +128,20 @@ class SurveyComponentWithOrderedDict(SurveyComponentBase):
         return row
 
     def register_component_by_anchor(self, anchor, initial_row):
+        _acs = self.content.anchored_components
+
         self._anchor = anchor
-        if self._anchor in self.content._anchored_components:
-            other = self.content._anchored_components[self._anchor]
+        ac_updates = {anchor: self}
+
+        if self._anchor in _acs:
+            other = _acs[self._anchor]
             raise DuplicateAnchorError(
                 klass=self.__class__.__name__,
                 key=self.FALLBACK_ANCHOR_KEY,
                 row1=other._data.unfreeze(),
                 row2=self._data.unfreeze(),
             )
-        self.content._anchored_components[self._anchor] = self
+        self.content.anchored_components = _acs.copy(**ac_updates)
 
 
     def set(self, key, value):

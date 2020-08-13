@@ -7,12 +7,14 @@ class Transformer:
     classes:
 
     - rw
+    - rw__{n}               # where {n} is the schema number
     - rw__each_row
     - rw__each_choice
-    - rw__{n}__each_row     # where {n} is the schema number
+    - rw__{n}__each_row
     - rw__{n}__each_choice
 
     - fw
+    - fw__{n}
     - fw__each_row
     - fw__each_choice
     - fw__{n}__each_row
