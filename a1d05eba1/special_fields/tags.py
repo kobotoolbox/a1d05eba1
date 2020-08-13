@@ -1,6 +1,7 @@
 import re
 
 from ..utils.kfrozendict import kfrozendict
+from ..utils import kassertfrozen
 
 TAG_COLS = ['hxl']
 
@@ -61,5 +62,6 @@ class TagsField:
         if len(tags['hxl']) > 0:
             yield ('hxl', ' '.join(tags['hxl']))
 
+    @kassertfrozen
     def dict_key_vals_new(self):
         return ('tags', self.tags)

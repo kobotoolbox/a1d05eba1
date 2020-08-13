@@ -1,0 +1,1 @@
+from .kfrozendict import kassertfrozen

@@ -1,4 +1,5 @@
 from ..utils.kfrozendict import kfrozendict
+from ..utils import kassertfrozen
 from ..utils.kfrozendict import deepfreeze
 from ..utils.yparse import yload_file
 from ..schema_properties import SETTINGS_PROPERTIES
@@ -41,7 +42,8 @@ class Settings(SurveyComponentWithDict):
 
         self._d = deepfreeze(save)
 
-    def to_dict(self, export_configs):
+    @kassertfrozen
+    def to_frozen_dict(self, export_configs):
         out = self._d
         if self._pubkey:
             out = out.copy(public_key=self._pubkey)
@@ -50,4 +52,4 @@ class Settings(SurveyComponentWithDict):
             out = out.copy(default_language=txname)
         if export_configs.default_settings:
             out = out.copy(**export_configs.default_settings)
-        return out.unfreeze()
+        return out

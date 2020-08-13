@@ -14,6 +14,9 @@ as this value:
 }
 '''
 
+from ..utils.kfrozendict import kfrozendict
+from ..utils import kassertfrozen
+
 
 class Params:
     ROW_KEYS = {
@@ -50,11 +53,13 @@ class Params:
     def dict_key_vals_old(self, renames=None):
         yield ('parameters', _params_to_string(self.val))
 
+    @kassertfrozen
     def dict_key_vals_new(self, renames=None):
         params = self.val
         return ('params', params)
 
 
+@kassertfrozen
 def _parse_parameters_string(parameters_string):
     '''
     converts string like this:
@@ -67,7 +72,7 @@ def _parse_parameters_string(parameters_string):
     for section in parameters_string.split(' '):
         (key, val) = section.split('=')
         out[key] = val
-    return out
+    return kfrozendict(out)
 
 def _params_to_string(params):
     '''

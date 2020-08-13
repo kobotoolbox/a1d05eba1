@@ -2,6 +2,8 @@ import re
 import string
 
 from .base_component import SurveyComponentWithTuple
+from ..utils.kfrozendict import kfrozendict
+from ..utils import kassertfrozen
 
 from ..exceptions import TranslationImportError
 
@@ -53,12 +55,13 @@ class Translation:
             return None
         return self._name_plus_locale
 
-    def as_object(self):
+    @kassertfrozen
+    def as_frozen_dict(self):
         obj = {'$anchor': self.anchor,}
         obj['name'] = '' if self.name is NULL_TRANSLATION else self.name
         if self.locale:
             obj['locale'] = self.locale
-        return obj
+        return kfrozendict(obj)
 
 
 class TxList(SurveyComponentWithTuple):
@@ -80,6 +83,12 @@ class TxList(SurveyComponentWithTuple):
     def to_v1_strings(self):
         return [tx.as_string_or_null() for tx in self._tuple]
 
+    def to_v1_strings_tuple(self):
+        out = ()
+        for tx in self._tuple:
+            out = out + (tx.as_string_or_null(),)
+        return out
+
     def set_first(self, first):
         assert isinstance(first, Translation) and first in self
         others = (tx for tx in self if tx is not first)
@@ -88,6 +97,10 @@ class TxList(SurveyComponentWithTuple):
     @property
     def names(self):
         return [tx.name for tx in self]
+
+    @property
+    def anchors(self):
+        return (tx.anchor for tx in self)
 
     def _load_from_strings(self):
         self._tx_strings = self.content.data.get('translations', [])
@@ -142,8 +155,5 @@ class TxList(SurveyComponentWithTuple):
         if bump_to_first:
             self.set_first(bump_to_first)
 
-    def to_list(self, schema):
-        objs = []
-        for tx in self._tuple:
-            objs.append(tx.as_object())
-        return objs
+    def to_tuple(self, schema):
+        return tuple(tx.as_frozen_dict() for tx in self._tuple)

@@ -1,3 +1,6 @@
+from ..utils import kassertfrozen
+from ..utils.kfrozendict import kfrozendict
+from ..utils.kfrozendict import assertfrozen
 from ..fields import TranslatedVal, RawValue
 
 
@@ -77,11 +80,12 @@ class ConstraintVal:
             for (k, val) in self.msg_txd.dict_key_vals_old(renames=renames):
                 yield ('constraint_message', val,)
 
+    @kassertfrozen
     def dict_key_vals_new(self, renames=None):
-        val = {'string': self.val.get('string')}
+        val = kfrozendict(string=self.val.get('string'))
         if self.msg_txd:
-            (k, message) = self.msg_txd.dict_key_vals_new()
-            val['message'] = message
+            message = self.msg_txd.dict_key_vals_new()[1]
+            val = val.copy(message=message)
         return ('constraint', val)
 
 
@@ -94,12 +98,8 @@ class ConstraintMessage(TranslatedVal):
     def load_from_old_vals(self, txvals):
         _data = {}
         if isinstance(txvals, str):
-            # if no translation exists, load it in as the defualt tx
-            raise NotImplementedError('possible to reach?')
-            # default_index = self.content.txs.default_index
-            # txstr = txvals
-            # txvals = [None] * len(self.content.txs)
-            # txvals[default_index] = txstr
+            raise NotImplementedError('Values should not be strings'
+                                      ' at this stage')
         for (ii, tx) in enumerate(self.content.txs):
             anchor = tx.anchor
             value = txvals[ii]
@@ -112,18 +112,21 @@ class ConstraintMessage(TranslatedVal):
             _data[tx] = RawValue(self, string)
         self._val = _data
 
+    @kassertfrozen
     def dict_key_vals_new(self):
-        _oldvals = {}
-        dvals = dict(self._val)
-        for tx in self.content.txs:
-            anchor = tx.anchor
-            _oldvals[anchor] = dvals[tx.anchor].to_dict()
-        return (self.key, _oldvals)
+        vals = {}
+        _vals = dict(self._val)
+        for anchor in self.content.txs.anchors:
+            vals[anchor] = _vals[anchor].to_dict()
+            assertfrozen(vals[anchor])
+        return (self.key, kfrozendict(vals))
 
     def dict_key_vals_old(self, renames=None):
-        _oldvals = []
-        dd = dict(self._val)
+        _vals = dict(self._val)
+        vals = ()
         for tx in self.content.txs:
-            _oldvals.append(dd[tx.anchor].to_string())
+            vals = vals + (
+                _vals[tx.anchor].to_string(),
+            )
         key = 'constraint_message'
-        yield (key, _oldvals)
+        yield (key, vals)

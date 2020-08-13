@@ -6,6 +6,7 @@ from .row import (
 )
 
 from ..schema_properties import GROUPABLE_TYPES
+from ..utils.kfrozendict import assertfrozen
 
 from ..exceptions import MismatchedBeginEndGroupError, UnclosedGroupError
 
@@ -74,19 +75,26 @@ class Surv(SurveyComponentWithTuple):
                 yield subrow
         yield (ROW_END_SECTION, group)
 
-    def to_list(self, schema, flat=FLAT_DEFAULT):
-        out = []
+    def to_tuple(self, schema, flat=FLAT_DEFAULT):
+        out = ()
         if schema == '1':
-            for meta_row in self.content.metas.items_schema1():
-                out.append(meta_row)
+            for meta_row in self.content.metas.items_schema_1():
+                assertfrozen(meta_row)
+                out = out + (
+                    meta_row,
+                )
 
         if flat:
             for row in self:
-                out.append(row.flat_export(schema=schema))
+                rr = row.flat_export(schema=schema)
+                out = out + (
+                    row.flat_export(schema=schema),
+                )
         else:
             for row in self.rows:
                 for _row in row.nested_export(schema=schema):
-                    out.append(_row)
-
-
+                    assertfrozen(_row)
+                    out = out + (
+                        _row,
+                    )
         return out

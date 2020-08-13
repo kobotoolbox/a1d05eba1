@@ -1,3 +1,6 @@
+from ..utils.kfrozendict import kfrozendict
+from ..utils.kfrozendict import kassertfrozen
+
 class ChoiceFilter:
     ROW_KEYS = {
         '1': ['choice_filter'],
@@ -33,7 +36,9 @@ class ChoiceFilter:
         # print(('choice_filter', self._string,))
         yield ('choice_filter', self._string,)
 
+    @kassertfrozen
     def dict_key_vals_new(self, renames=None):
-        val = {'raw': self.val.get('raw')}
-        # print(('choice_filter', val))
-        return ('choice_filter', val)
+        return (
+            'choice_filter',
+            kfrozendict(raw=self.val.get('raw')),
+        )

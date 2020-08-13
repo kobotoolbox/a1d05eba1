@@ -25,16 +25,16 @@ class UnwrapSettingsFromListRW(TransformerRW):
     '''
     def rw__2(self, content):
         if 'settings' not in content:
-            return content.copy(settings=kfrozendict({}))
+            return content.copy(settings=kfrozendict())
         return content
 
     def rw__1(self, content):
-        if 'settings' in content:
-            settings = content['settings']
-            if isinstance(settings, (list, tuple)):
-                if len(settings) > 0:
-                    settings = settings[0]
-                else:
-                    settings = {}
-            return content.copy(settings=settings)
-        return content.copy(settings=kfrozendict())
+        if 'settings' not in content:
+            return content.copy(settings=kfrozendict())
+        settings = content['settings']
+        if isinstance(settings, (list, tuple)):
+            if len(settings) > 0:
+                settings = settings[0]
+            else:
+                settings = kfrozendict()
+        return content.copy(settings=settings)

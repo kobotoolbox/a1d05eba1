@@ -6,8 +6,8 @@ sheet
 '''
 
 from ..utils.yparse import yload_file
+from ..utils.kfrozendict import kfrozendict
 from .transformer import TransformerRW
-
 
 from ..schema_properties import META_PROPERTIES
 
@@ -21,7 +21,6 @@ class MetasToSurveyRootRW(TransformerRW):
         metas = tuple()
         for row in content.get('survey', []):
             (row, is_meta) = self.rw__each_row_extract_metas(row)
-
             if is_meta:
                 metas = metas + (row,)
             else:
@@ -33,7 +32,7 @@ class MetasToSurveyRootRW(TransformerRW):
             for meta in metas:
                 (meta, _type) = meta.popout('type')
                 metas_dict[_type] = meta
-            updates['metas'] = metas_dict
+            updates['metas'] = kfrozendict(metas_dict)
 
         return content.copy(**updates)
 

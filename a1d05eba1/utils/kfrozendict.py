@@ -106,8 +106,6 @@ def deepfreeze(val):
             for (ikey, ival) in val.items()
         ])
     elif isinstance(val, (list, tuple)):
-        return tuple([
-            deepfreeze(ival) for ival in val
-        ])
+        return tuple(deepfreeze(ival) for ival in val)
     else:
         return val

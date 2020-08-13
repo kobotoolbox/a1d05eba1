@@ -2,8 +2,9 @@ from jsonschema import validate as jsonschema_validate
 
 from .utils.kfrozendict import kfrozendict
 from .utils.kfrozendict import unfreeze, deepfreeze
+from .utils.kfrozendict import assertfrozen
+from .utils import kassertfrozen
 
-# components
 from .components import Surv
 from .components import ChoiceLists
 from .components import TxList
@@ -27,10 +28,16 @@ SCHEMAS = [
     '2',
 ]
 
+
+@kassertfrozen
 def _sans_empty_values(obj):
     # remove keys with 'None' as a value in the returned dict
-    for delete_key in [k for (k, v) in obj.items() if v is None]:
-        del obj[delete_key]
+    delete_keys = []
+    for key, val in obj.items():
+        if val is None:
+            delete_keys.append(key)
+    for delete_key in delete_keys:
+        obj = obj.without(delete_key)
     return obj
 
 
@@ -183,7 +190,7 @@ class Content:
             result = self.to_v1_structure(export_configs)
         else:
             result = self.to_structure(export_configs)
-        result = deepfreeze(result)
+        assertfrozen(result)
         result = result.copy(schema=schema)
 
         if _ec.remove_nulls:
@@ -232,16 +239,17 @@ class Content:
             )
         )
 
+    @kassertfrozen
     def to_structure(self, export_configs):
         flat = export_configs.flat
         schema = export_configs.schema
-        return _sans_empty_values(unfreeze({
+        return _sans_empty_values(kfrozendict({
             'schema': schema,
-            'translations': self.txs.to_list(schema=schema),
-            'survey': self.survey.to_list(schema=schema, flat=flat),
-            'choices': self.choices.to_dict(schema=schema),
-            'settings': self.settings.to_dict(export_configs),
-            'metas': self.metas.to_dict(schema=schema),
+            'translations': self.txs.to_tuple(schema=schema),
+            'survey': self.survey.to_tuple(schema=schema, flat=flat),
+            'choices': self.choices.to_frozen_dict(schema=schema),
+            'settings': self.settings.to_frozen_dict(export_configs),
+            'metas': self.metas.to_frozen_dict(schema=schema),
         }))
 
     def load_content_schema_2(self):
@@ -272,12 +280,13 @@ class Content:
         if _initial_tx:
             self.txs.set_initial_by_string(_initial_tx)
 
+    @kassertfrozen
     def to_v1_structure(self, export_configs):
-        return unfreeze({
+        return kfrozendict({
             'schema': '1',
-            'translated': sorted(self._tx_columns),
-            'translations': self.txs.to_v1_strings(),
-            'survey': self.survey.to_list(schema='1', flat=True),
-            'choices': self.choices.to_old_arr(),
-            'settings': self.settings.to_dict(export_configs),
+            'translated': tuple(sorted(self._tx_columns)),
+            'translations': self.txs.to_v1_strings_tuple(),
+            'survey': self.survey.to_tuple(schema='1', flat=True),
+            'choices': self.choices.to_old_tuple(),
+            'settings': self.settings.to_frozen_dict(export_configs),
         })

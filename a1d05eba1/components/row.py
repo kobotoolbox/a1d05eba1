@@ -1,4 +1,6 @@
 from ..utils.kfrozendict import kfrozendict
+from ..utils.kfrozendict import assertfrozen
+from ..utils import kassertfrozen
 from ..utils.kfrozendict import deepfreeze
 from ..utils.yparse import yload_file
 
@@ -123,6 +125,7 @@ class Row(SurveyComponentWithOrderedDict, Parented):
             if not isinstance(item, TypeField):
                 yield item
 
+    @kassertfrozen
     def flat_export(self, schema='2'):
         type_val = self.typefield.val
         if hasattr(self.typefield, 'flat_val'):
@@ -137,9 +140,9 @@ class Row(SurveyComponentWithOrderedDict, Parented):
                 out.append(colval.dict_key_vals_new())
             elif schema == '1':
                 for kvs in colval.dict_key_vals_old(renames=self.renames_to_v1):
+                    assertfrozen(kvs)
                     out.append(kvs)
-        outbound = dict(out)
-        return outbound
+        return kfrozendict(dict(out))
 
     def nested_export(self, schema='2'):
         if not self.is_end:
@@ -150,14 +153,16 @@ class Row(SurveyComponentWithOrderedDict, Parented):
             for colval in self.non_type_fields:
                 out.append(colval.dict_key_vals_new())
             if len(self.rows) > 0:
-                subrows = []
+                sub_rows = ()
                 for sbrow in self.rows:
                     for deets in sbrow.nested_export(schema=schema):
-                        subrows.append(deets)
+                        sub_rows = sub_rows + (
+                            deets,
+                        )
                 out.append(
-                    ('rows', subrows)
+                    ('rows', sub_rows)
                 )
-            yield dict(out)
+            yield kfrozendict(out)
 
 
 class OpeningRow(Row):
@@ -181,8 +186,10 @@ class ClosingRow(Parented):
         if kwargs.get('include_group_ends'):
             yield self
 
+    @kassertfrozen
     def flat_export(self, schema='2'):
-        return {'type': self.type, '$anchor': self.compiled_anchor()}
+        return kfrozendict({'type': self.type,
+                            '$anchor': self.compiled_anchor()})
 
     @property
     def type(self):
@@ -192,4 +199,4 @@ class ClosingRow(Parented):
         return key in [ANCHOR_KEY, 'type']
 
     def compiled_anchor(self):
-        return '/' + self._parent._anchor
+        return f'/{self._parent._anchor}'

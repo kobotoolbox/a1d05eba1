@@ -1,4 +1,7 @@
 from .utils.kfrozendict import kfrozendict
+from .utils.kfrozendict import assertfrozen
+from .utils import kassertfrozen
+
 
 
 class RawValue:
@@ -59,30 +62,34 @@ class TranslatedVal:
             )
         return vals
 
+    @kassertfrozen
     def dict_key_vals_new(self):
-        _oldvals = {}
+        vals = {}
         dvals = dict(self.vals)
         for tx in self.content.txs:
             tx_anchor = tx.anchor
             value = dvals[tx_anchor].to_dict()
             assert not isinstance(value, (list, tuple))
             if value is not None:
-                _oldvals[tx_anchor] = value
-        return (self.key, _oldvals)
+                vals[tx_anchor] = value
+        return (self.key, kfrozendict(vals))
 
     def dict_key_vals_old(self, renames=None):
         if renames is None:
             renames = {}
-        _oldvals = []
-        dd = dict(self.vals)
+        ovals = ()
+        dvals = dict(self.vals)
         for tx in self.content.txs:
-            value = dd[tx.anchor].to_string()
+            value = dvals[tx.anchor].to_string()
+            assertfrozen(value)
             assert not isinstance(value, (list, tuple))
-            _oldvals.append(value)
+            ovals = ovals + (
+                value,
+            )
         key = self.key
         if key in renames:
             key = renames[key]
-        yield (key, _oldvals)
+        yield (key, ovals)
 
 class UntranslatedVal:
     def __init__(self, content, key, val):
@@ -96,6 +103,10 @@ class UntranslatedVal:
             self.val,
         )
 
+    @kassertfrozen
+    def dict_key_vals_new(self):
+        return (self.key, self.val)
+
     def dict_key_vals_old(self, renames=None):
         if renames is None:
             renames = {}
@@ -103,6 +114,3 @@ class UntranslatedVal:
         if key in renames:
             key = renames[key]
         yield (key, self.val)
-
-    def dict_key_vals_new(self):
-        return (self.key, self.val)

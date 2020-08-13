@@ -1,5 +1,6 @@
 from ..utils.kfrozendict import kfrozendict
 from ..utils.kfrozendict import deepfreeze
+from ..utils import kassertfrozen
 from ..utils.yparse import yload_file
 
 from ..schema_properties import CHOICE_PROPERTIES, TRANSLATABLE_CHOICES_COLS
@@ -67,6 +68,7 @@ class Choice(SurveyComponentWithOrderedDict):
         if _filters:
             self._additionals = _filters
 
+    @kassertfrozen
     def to_dict(self):
         out = [
             ('$anchor', self._anchor),
@@ -77,8 +79,9 @@ class Choice(SurveyComponentWithOrderedDict):
             out.append(
                 ('filters', self._additionals),
             )
-        return dict(out)
+        return kfrozendict(out)
 
+    @kassertfrozen
     def to_old_dict(self, list_name):
         dict_out = [
             ('$anchor', self._anchor),
@@ -99,7 +102,7 @@ class Choice(SurveyComponentWithOrderedDict):
                 dict_out.append(
                     (okey, oval,)
                 )
-        return dict(dict_out)
+        return kfrozendict(dict_out)
 
 
 class ChoiceLists(SurveyComponentWithDict):
@@ -124,22 +127,25 @@ class ChoiceLists(SurveyComponentWithDict):
                            list_name=list_name)
                     )
 
-    def to_old_arr(self):
+    @kassertfrozen
+    def to_old_tuple(self):
         out = {}
         for (key, vals) in self._d.items():
-            out[key] = []
+            out[key] = ()
             for val in vals:
-                out[key].append(
-                    val.to_old_dict(list_name=key)
+                out[key] = out[key] + (
+                    val.to_old_dict(list_name=key),
                 )
-        return out
+        return kfrozendict(out)
 
-    def to_dict(self, schema):
+    @kassertfrozen
+    def to_frozen_dict(self, schema):
         out = {}
         for (key, vals) in self._d.items():
-            out[key] = []
+            by_key = ()
             for val in vals:
-                out[key].append(
-                    val.to_dict()
+                by_key = by_key + (
+                    val.to_dict(),
                 )
-        return out
+            out[key] = by_key
+        return kfrozendict(**out)

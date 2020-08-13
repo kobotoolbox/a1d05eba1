@@ -116,7 +116,6 @@ def rw_mutate_content(content, context, strict=True):
         label = row.get('label')
         if strict and isinstance(label, (list, tuple)):
             raise ValueError('must be not a list')
-        overrides = {}
         dests = {}
         for key in row.keys():
             if key in context.tx_colnames:
@@ -125,7 +124,7 @@ def rw_mutate_content(content, context, strict=True):
                 if destination not in dests:
                     dests[destination] = [None] * context.tx_count
                 dests[destination][index] = val
-        row = row.copy(**dests)
+        row = row.copy_in(**dests)
         return row
 
     survey_sheet = tuple()
@@ -148,20 +147,16 @@ def rw_mutate_content(content, context, strict=True):
     else:
         content = content.copy(choices=kfrozendict())
 
-    translations = []
+    translations = ()
     for tx in context.translations:
-        translations.append(
-            NULL_TRANSLATION
-            if tx == context.NULL_TRANSLATION
-            else tx
-        )
-    translated = sorted(context.translated)
-    changes = {
-        'translations': translations,
-        'translated': translated,
-        'schema': '1',
-    }
-    return content.copy(**changes)
+        if tx == context.NULL_TRANSLATION:
+            translations = translations + (NULL_TRANSLATION,)
+        else:
+            translations = translations + (tx,)
+    translated = tuple(sorted(context.translated))
+    return content.copy(schema='1',
+                        translations=translations,
+                        translated=translated)
 
 
 class XlsformTranslations(Transformer):

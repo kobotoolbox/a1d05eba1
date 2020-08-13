@@ -1,7 +1,11 @@
-from ..utils.kfrozendict import kfrozendict
 import re
 
 from .base_component import SurveyComponentWithDict
+
+from ..utils.kfrozendict import kfrozendict
+from ..utils import kassertfrozen
+from ..special_fields.tags import _expand_tags
+
 
 class Meta:
     def __init__(self, key, name=None, tags=None, **kwargs):
@@ -10,21 +14,18 @@ class Meta:
         self.type = key
         self._kwargs = kwargs
         self.name = name or self.type
-        self.name_specified = self.name != self.type
+        self._name_is_specified = self.name != self.type
         self.tags = tags
 
-    def tag_string(self):
-        return ''
-
+    @kassertfrozen
     def to_key_values(self):
-        # schema='2'
         if len(self.tags) == 0:
-            if self.name_specified:
+            if self._name_is_specified:
                 return (self.type, self.name)
             else:
                 return (self.type, True)
-        val = {'tags': self.tags}
-        if self.name_specified:
+        val = kfrozendict({'tags': self.tags})
+        if self._name_is_specified:
             val['name'] = self.name
         return (self.type, val)
 
@@ -40,15 +41,16 @@ class Meta:
             if len(vals) > 0:
                 yield (key, ' '.join(vals))
 
+    @kassertfrozen
     def to_dict_schema_1(self):
-        out = {
-            'name': self.name,
-            'type': self.type,
-        }
-        if len(self.tags) > 0:
-            for (tag_key, tag_string) in self._tag_strings_schema_1():
-                out[tag_key] = tag_string
-        return out
+        out = kfrozendict(name=self.name,
+                          type=self.type)
+        if len(self.tags) == 0:
+            return out
+        tags = {}
+        for (tag_key, tag_string) in self._tag_strings_schema_1():
+            tags[tag_key] = tag_string
+        return out.copy(**tags)
 
 def load_meta(key, val):
     if val is True:
@@ -58,8 +60,6 @@ def load_meta(key, val):
     elif isinstance(val, (dict, kfrozendict)):
         return Meta(key=key, **val)
     raise ValueError('unhandled meta')
-
-from ..special_fields.tags import _expand_tags
 
 class Metas(SurveyComponentWithDict):
     _metas = ()
@@ -93,7 +93,7 @@ class Metas(SurveyComponentWithDict):
     def items(self):
         return self._metas
 
-    def items_schema1(self):
+    def items_schema_1(self):
         for meta in self._metas:
             row = meta.to_dict_schema_1()
             if row:
@@ -102,12 +102,14 @@ class Metas(SurveyComponentWithDict):
     def any(self):
         return len(self._metas) > 0
 
-    def to_dict(self, schema='2'):
-        out = {}
+    @kassertfrozen
+    def to_frozen_dict(self, schema='2'):
+        out = ()
         for meta in ordered_(self._metas):
-            (key, value) = meta.to_key_values()
-            out[key] = value
-        return out
+            out = out + (
+                meta.to_key_values(),
+            )
+        return kfrozendict(**dict(out))
 
 def ordered_(metas):
     # exports (xml) depend on metas being in order.

@@ -1,4 +1,5 @@
 from ..utils.kfrozendict import kfrozendict
+from ..utils import kassertfrozen
 
 class RelevantVal:
     ROW_KEYS = {
@@ -25,10 +26,11 @@ class RelevantVal:
             self.string = val
         elif isinstance(val, (dict, kfrozendict)):
             self.string = val.get('raw')
-        self.val = {'raw': self.string}
+        self.val = kfrozendict(raw=self.string)
 
     def dict_key_vals_old(self, renames=None):
         yield ('relevant', self.string)
 
+    @kassertfrozen
     def dict_key_vals_new(self):
         return ('relevant', self.val)

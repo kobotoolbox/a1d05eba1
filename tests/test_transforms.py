@@ -98,8 +98,8 @@ def test_reverser_weird_col():
     row0 = mut['survey'][0]
     row1 = mut['survey'][1]
     # row1 and row0 should evaluate to the same translation
-    assert row0['label'] == ['aa']
-    assert row1['label'] == ['bb']
+    assert row0['label'][0] == 'aa'
+    assert row1['label'][0] == 'bb'
 
 def test_colons_forward_empty_tx():
     cc = {'schema': '2',
