@@ -109,3 +109,50 @@ def deepfreeze(val):
         return tuple(deepfreeze(ival) for ival in val)
     else:
         return val
+
+
+
+class NotFrozenError(ValueError):
+    def __init__(self, inner, outer):
+        self.inner = inner
+        self.outer = outer
+        super().__init__(f'''
+        {repr(self.inner)}
+        {repr(self.outer)}
+        ''')
+
+class NotFrozenInnerError(ValueError):
+    def __init__(self, inner, arg2=None):
+        self.inner = inner
+        super().__init__(f'''
+        {repr(inner)}
+        ''')
+
+def assertfrozen(val):
+    # return True
+    try:
+        _assertfrozen(val)
+    except NotFrozenInnerError as err:
+        raise NotFrozenError(err.inner, outer=val)
+
+def _assertfrozen(val):
+    if isinstance(val, (dict, list)):
+        raise NotFrozenInnerError(val)
+    if isinstance(val, kfrozendict):
+        for ival in val.values():
+            _assertfrozen(ival)
+    elif isinstance(val, tuple):
+        for ival in val:
+            _assertfrozen(ival)
+    else:
+        # at this point, the value should at least be hashable
+        hash(val)
+        return val
+
+def kassertfrozen(func):
+    # return func
+    def inner(*args, **kwargs):
+        response = func(*args, **kwargs)
+        # assertfrozen(response)
+        return response
+    return inner
