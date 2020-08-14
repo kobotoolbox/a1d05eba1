@@ -14,13 +14,17 @@ from .transformations import (
 
 class ExportConfigs(TransformerList):
     schema = '2'
+    flat = False
+    immutable = False
+    remove_nulls = False
     transformers = ()
+    default_settings = ()
 
     def __init__(self, **kwargs):
-        self.flat = kwargs.pop('flat', True)
-        self.immutable = kwargs.pop('immutable', False)
-        self.remove_nulls = kwargs.pop('remove_nulls', False)
-        self.default_settings = kwargs.pop('default_settings', {})
+        for key in list(kwargs):
+            if hasattr(self, key):
+                val = kwargs.pop(key)
+                setattr(self, key, val)
         super().__init__(**kwargs)
 
     def fw(self, content, **kwargs):

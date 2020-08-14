@@ -78,7 +78,7 @@ def test_tagged_metas():
         },
         'settings': {},
         'translations': [],
-    }, validate=True)
+    }, validate=True, classname='V2_Content')
     res = cc.export_to('1')
     assert cc.metas.any()
     assert 'metas' not in res['settings']
@@ -96,7 +96,7 @@ def test_tagged_metas():
             }
         },
         'translations': [],
-    }, validate=True)
+    }, validate=True, classname='V2_Content')
     row0 = cc.export_to('1')['survey'][0]
     assert row0['type'] == 'start'
     assert row0['name'] == 'start'

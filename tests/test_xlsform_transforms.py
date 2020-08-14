@@ -3,7 +3,7 @@ from a1d05eba1.content_variations import build_content
 
 def test_list_space_name():
     cc = build_content({
-        'schema': 'xlsform',
+        'schema': '1',
         'survey': [],
         'choices': [
             {'list name': 'xx',
@@ -21,7 +21,7 @@ def test_list_space_name():
 
 def test_metas_and_settings():
     cc = build_content({
-        'schema': 'xlsform',
+        'schema': '1',
         'settings': [
             {'formid': 'mynewform'}
         ],

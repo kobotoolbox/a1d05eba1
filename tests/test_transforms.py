@@ -118,7 +118,7 @@ def test_colons_forward_empty_tx():
     assert 'label' in row0
 
 def test_additional():
-    cc = {'schema': '1+xlsform',
+    cc = {'schema': '1',
      'settings': [{'default_language': None}],
      'survey': [{'name': 'start', 'type': 'start'},
                 {'name': 'end', 'type': 'end'},
@@ -197,7 +197,7 @@ def test_1_plus_colons():
 
 def test_alternative_colon_configs():
     content = build_content({
-        'schema': '1+xlsform',
+        'schema': '1',
         'survey': [
             {'type': 'text',
                 'name': 'book',
@@ -365,7 +365,7 @@ def test_formpack_schema_to_lists():
              'name': 'brand_of_coffee_machine',
              'required': False,
              'type': 'text'}],
-             'schema': '1+formpack'}
+             'schema': '1'}
     cc = build_content(kontent)
     result = cc.export_to('2')
     s0, s1 = result['survey']
