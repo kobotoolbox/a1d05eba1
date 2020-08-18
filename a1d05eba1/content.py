@@ -11,6 +11,8 @@ from .components import TxList
 from .components import Settings
 from .components import Metas
 
+from .exceptions import ContentValidationError
+
 from .build_schema import MAIN_JSONSCHEMA
 
 from .transformations import TransformerList
@@ -43,6 +45,7 @@ def _sans_empty_values(obj):
 
 class BaseContent:
     # can be overridden in subclasses
+    from_schema_string = None       # to import a schema from a specific string
     schema_string = None            # e.g. '2'
     input_schema = None             # A valid jsonschema
     strip_unknown_values = True     # Ignore unknown properties
@@ -85,7 +88,15 @@ class BaseContent:
         self.perform_validation = validate
 
         content = deepfreeze(content)
-        # if 'schema' not in content and not self.schema_string:
+
+        if self.from_schema_string:
+            if self.from_schema_string != content['schema']:
+                msg = 'from_schema_string does not match'
+                raise ContentValidationError(msg)
+            if not self.schema_string:
+                msg = 'from_schema_string is set but not schema_string'
+                raise ValueError(msg)
+            content = content.copy(schema=self.schema_string)
 
         # schema_string is an optional class-specified schema
         if self.schema_string:
