@@ -116,7 +116,7 @@ class FillMissingLabelsRW(TransformerRW):
 
         def ensure_n_values(row_col):
             if not isinstance(row_col, (list, tuple)):
-                raise Exception('should be a list')
+                raise ValueError('should be a list')
             while len(row_col) < tx_count:
                 row_col = row_col + ('',)
             return row_col
