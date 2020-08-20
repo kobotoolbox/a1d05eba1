@@ -1,6 +1,12 @@
 type: object
 $comment: 'Translatable fields have keys {tx0, tx1}'
 additionalProperties: false
+properties:
+  '*':
+    anyOf:
+    - $ref: '#/$defs/xpath'
+    - $ref: '#/$defs/type--string'
+    - $ref: '#/$defs/type--null'
 patternProperties:
   TXCODE_REGEX:
     anyOf:

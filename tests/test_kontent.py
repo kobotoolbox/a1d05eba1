@@ -1,5 +1,5 @@
 from a1d05eba1.content_variations import build_content
-from a1d05eba1.content_variations import X_Content
+from a1d05eba1.content_variations import X_Content, V2_Content
 
 from a1d05eba1.utils.kfrozendict import kfrozendict
 from a1d05eba1.utils.kfrozendict import shallowfreeze
@@ -198,3 +198,35 @@ def test_image_alias_imports_translations():
     ex = cc.export_to('2')
     assert ex['survey'][0]['image'] == {'tx0': 'my_image_nolang.jpg',
                                         'tx1': 'my_image_aa.jpg'}
+
+def test_asterisk_tx():
+    cc = V2_Content({
+        'survey': [
+            {'type': 'text',
+                'label': {
+                    'tx0': 'tx0',
+                    '*': 'tx1+2'
+                },
+                '$anchor': 'xx',
+                'name': 'q1'},
+            {'type': 'text',
+                'label': {
+                    '*': 'tx0+1+2'
+                },
+                '$anchor': 'yy',
+                'name': 'q2'},
+        ],
+        'choices': {},
+        'settings': {},
+        'translations': [
+            {'$anchor': 'tx0',
+             'name': 'T0'},
+            {'$anchor': 'tx1',
+             'name': 'T1'},
+            {'$anchor': 'tx2',
+             'name': 'T2'},
+        ],
+    }).export_to('1')
+    (q0, q1) = cc['survey']
+    assert q0['label'] == ['tx0', 'tx1+2', 'tx1+2']
+    assert q1['label'] == ['tx0+1+2', 'tx0+1+2', 'tx0+1+2']

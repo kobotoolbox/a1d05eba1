@@ -22,6 +22,8 @@ class RawValue:
         return self.value
 
 class TranslatedVal:
+    fallback_value = None
+
     def __init__(self, content, key, val):
         self.content = content
         assert isinstance(key, str)
@@ -33,6 +35,9 @@ class TranslatedVal:
             self.vals = self.load_from_old_vals(val)
         elif self.content.schema_version == '2':
             self.vals = self.load_from_new_vals(val)
+        assert isinstance(self.vals, (kfrozendict, type(None)))
+        if isinstance(self.vals, kfrozendict) and '*' in self.vals:
+            self.fallback_value = self.vals['*']
 
     def __repr__(self):
         return '<Tx {}={}>'.format(
@@ -40,6 +45,7 @@ class TranslatedVal:
             self.vals,
         )
 
+    @kassertfrozen
     def load_from_new_vals(self, txvals):
         vals = kfrozendict()
         if isinstance(txvals, str):
@@ -48,6 +54,7 @@ class TranslatedVal:
             vals = vals.copy(**{tx_anchor: RawValue(self, val)})
         return vals
 
+    @kassertfrozen
     def load_from_old_vals(self, txvals):
         vals = tuple()
         if isinstance(txvals, str):
@@ -60,18 +67,20 @@ class TranslatedVal:
             vals = vals + (
                 (tx.anchor, RawValue(self, val)),
             )
-        return vals
+        return kfrozendict(vals)
+
+    def value_for_tx(self, tx):
+        return self.vals.get(tx.anchor, self.fallback_value)
 
     @kassertfrozen
     def dict_key_vals_new(self):
         vals = {}
         dvals = dict(self.vals)
         for tx in self.content.txs:
-            tx_anchor = tx.anchor
-            value = dvals[tx_anchor].to_dict()
+            value = self.value_for_tx(tx).to_dict()
             assert not isinstance(value, (list, tuple))
             if value is not None:
-                vals[tx_anchor] = value
+                vals[tx.anchor] = value
         return (self.key, kfrozendict(vals))
 
     def dict_key_vals_old(self, renames=None):
@@ -80,7 +89,7 @@ class TranslatedVal:
         ovals = ()
         dvals = dict(self.vals)
         for tx in self.content.txs:
-            value = dvals[tx.anchor].to_string()
+            value = self.value_for_tx(tx).to_dict()
             assertfrozen(value)
             assert not isinstance(value, (list, tuple))
             ovals = ovals + (

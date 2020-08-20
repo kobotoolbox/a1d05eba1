@@ -1,4 +1,10 @@
 type: object
+properties:
+  '*':
+    anyOf:
+    - $ref: '#/$defs/type--string'
+    - $ref: '#/$defs/type--filecode'
+    - $ref: '#/$defs/type--url'
 patternProperties:
   TXCODE_REGEX:
     anyOf:
