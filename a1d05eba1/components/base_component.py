@@ -86,6 +86,10 @@ class SurveyComponentWithOrderedDict(SurveyComponentBase):
     def set_untranslated(self, key, val, original=None):
         self.set(key, UntranslatedVal(self.content, key, val))
 
+    def __getitem__(self, key):
+        _index = self._keys.index(key)
+        return self._values[_index]
+
     def __iter__(self):
         return iter(self._values)
 

@@ -30,6 +30,11 @@ class TranslatedVal:
         self.key = key
         self.load(val)
 
+    def values(self):
+        return (
+            v.to_string() for v in self.vals.values()
+        )
+
     def load(self, val):
         if self.content.schema_version == '1':
             self.vals = self.load_from_old_vals(val)

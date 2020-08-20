@@ -22,6 +22,7 @@ from .export_configs import DefaultExportConfigs
 from .export_configs import DefaultExportConfigsSchema1
 
 from .schema_properties import TRANSLATABLE_SURVEY_COLS
+from .schema_properties import TRANSLATABLE_MEDIA_COLS
 
 METAS = MAIN_JSONSCHEMA['$defs']['metas']
 
@@ -59,6 +60,7 @@ class BaseContent:
 
     # survey attributes pulled from settings
     _data_settings = None
+    _media_files = None
     initial_tx = False     # "default_translation" pulled from settings
     fallback_tx = False
 
@@ -153,6 +155,24 @@ class BaseContent:
     def validate_input_schema(kls, content):
         if kls.input_schema:
             jsonschema_validate(content, kls.input_schema)
+
+    @property
+    def media_files(self):
+        if self._media_files is None:
+            files = []
+            def pull_files(row, cols):
+                keys = set(row._keys)
+                for col in keys.intersection(cols):
+                    vals = row[col]
+                    for value in vals.values():
+                        files.append(value)
+            for row in self.survey:
+                pull_files(row, TRANSLATABLE_MEDIA_COLS['survey'])
+            for choices in self.choices.values():
+                for choice in choices:
+                    pull_files(choice, TRANSLATABLE_MEDIA_COLS['choices'])
+            self._media_files = tuple(files)
+        return self._media_files
 
     def validate_export(self):
         jsonschema_validate(self.export(), MAIN_JSONSCHEMA)

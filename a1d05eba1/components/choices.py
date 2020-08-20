@@ -106,6 +106,9 @@ class Choice(SurveyComponentWithOrderedDict):
 
 
 class ChoiceLists(SurveyComponentWithDict):
+    def values(self):
+        return self._d.values()
+
     def preload(self):
         self._d = {}
 

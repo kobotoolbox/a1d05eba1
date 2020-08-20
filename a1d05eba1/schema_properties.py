@@ -6,8 +6,14 @@ _translatable_refs = [
 ]
 
 def _get_translatable_props(defname):
-    for (prop, vals) in MAIN_JSONSCHEMA['$defs'][defname]['properties'].items():
-        if vals.get('$ref', '') in _translatable_refs:
+    return list(_get_props_by_refs(defname, _translatable_refs))
+
+def _get_translatable_media_prop_set(defname):
+    return set(_get_props_by_refs(defname, ['#/$defs/translatableMedia']))
+
+def _get_props_by_refs(defname, _refs):
+    for (prop, vals) in _props_for(defname).items():
+        if vals.get('$ref', '') in _refs:
             yield prop
 
 def _props_for(defname):
@@ -17,8 +23,13 @@ def _props_set_for(defname):
     # returns a tuple (immutable)
     return tuple(set(_props_for(defname).keys()))
 
-TRANSLATABLE_SURVEY_COLS = list(_get_translatable_props('surveyRow'))
-TRANSLATABLE_CHOICES_COLS = list(_get_translatable_props('choice'))
+TRANSLATABLE_SURVEY_COLS = _get_translatable_props('surveyRow')
+TRANSLATABLE_CHOICES_COLS = _get_translatable_props('choice')
+
+TRANSLATABLE_MEDIA_COLS = {
+    'survey': _get_translatable_media_prop_set('surveyRow'),
+    'choices': _get_translatable_media_prop_set('choice'),
+}
 
 ROW_PROPERTIES = _props_set_for('surveyRow')
 CHOICE_PROPERTIES = _props_set_for('choice')

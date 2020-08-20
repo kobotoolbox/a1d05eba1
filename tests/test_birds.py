@@ -160,3 +160,9 @@ def test_birds():
     cc = X_Content(BIRDS, validate=True)
     result = cc.export_to('2')
     assert result['choices']['humidity'][0]['$anchor'] == 'humidity.low'
+    assert cc.media_files == ('question.wav', 'eagle.png', 'kingfisher.png',
+        'pigeon.png', 'nuthatch.png', 'european-robin.png', 'tit.png',
+        'sparrow.png', 'starling.png', 'hawfinch.png', 'bluethroat.png',
+        'wren.png', 'knot.png', 'jay.png', 'woodpecker.png', 'blackbird.png',
+        'carrioncrow.png', 'gull.png', 'yellowgull.png', 'shag.png',
+        'pelican.png', 'heron.png', 'egret.png', 'goose.png')

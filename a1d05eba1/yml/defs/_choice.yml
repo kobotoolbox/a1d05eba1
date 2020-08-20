@@ -9,9 +9,9 @@ properties:
   label:
     $ref: '#/$defs/translatable'
   image:
-    $ref: '#/$defs/translatable'
+    $ref: '#/$defs/translatableMedia'
   audio:
-    $ref: '#/$defs/translatable'
+    $ref: '#/$defs/translatableMedia'
   value:
     type: string
     minLength: 1

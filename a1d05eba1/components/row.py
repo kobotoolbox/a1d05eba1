@@ -181,6 +181,7 @@ class ClosingRow(Parented):
     ClosingRow is only exported on "flat" exports
     '''
     is_end = True
+    _keys = ()
 
     def nested_export(self, **kwargs):
         if kwargs.get('include_group_ends'):
