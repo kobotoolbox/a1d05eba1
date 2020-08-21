@@ -28,6 +28,7 @@ On export (fw): # PLANNED
 '''
 
 from .transformer import TransformerRW
+from ..utils.kfrozendict import kfrozendict
 
 TRANSLATABLE_COLS = ['label', 'hint', 'guidance_hint', 'constraint_message']
 FALLBACK_TX_STRING = ''
@@ -133,7 +134,6 @@ class FillMissingLabelsRW(TransformerRW):
         # do we need to do this for choices too?
         return content.copy(survey=survey)
 
-
     def rw__2(self, content):
         translations = content.get('translations', [])
         if len(translations) < 2:
@@ -153,13 +153,13 @@ class FillMissingLabelsRW(TransformerRW):
             TRANSLATABLE_COLS,
             other_anchors,
         )
-        choices = {}
+        choices = kfrozendict()
         for list_name, choice_list in content['choices'].items():
             clist = ()
             for choice in choice_list:
                 choice = fill_missing(choice, other_anchors)
                 clist = clist + (choice,)
-            choices[list_name] = clist
+            choices = choices.copy(**{list_name: clist})
 
         updates = {
             'survey': survey,

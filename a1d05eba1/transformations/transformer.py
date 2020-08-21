@@ -1,4 +1,4 @@
-from ..utils.kfrozendict import kfrozendict
+from ..utils.kfrozendict import kfrozendict, assertfrozen
 from ..exceptions import DirectionalTransformerError
 
 class Transformer:
@@ -31,9 +31,11 @@ class Transformer:
     def rwfw(self, content, direction, stack, debug):
         # has the same interface as transformer_list.rwfw
         if direction == 'rw':
-            return self.rw(content)
+            val = self.rw(content)
         else:
-            return self.fw(content)
+            val = self.fw(content)
+        assertfrozen(val)
+        return val
 
     def rw(self, content):
         return self._first_defined_subclassed_function((
@@ -86,7 +88,7 @@ class Transformer:
             updates['choices'] = choice_updates = {}
             if not isinstance(content['choices'], kfrozendict):
                 raise ValueError('content.choices cannot be a list. '
-                                 'See: transformers.ChoicesByListNameRW')
+                                 'Try with debug=true')
             for (list_name, clist) in content['choices'].items():
                 choices = ()
                 for choice in clist:
