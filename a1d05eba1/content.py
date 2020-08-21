@@ -17,6 +17,7 @@ from .build_schema import MAIN_JSONSCHEMA
 
 from .transformations import TransformerList
 
+from .export_configs import ExportConfigs
 from .export_configs import XlsformExport, KoboXlsformExport
 from .export_configs import DefaultExportConfigs
 from .export_configs import DefaultExportConfigsSchema1
@@ -180,16 +181,20 @@ class BaseContent:
     def export(self, schema='2', **kwargs):
         return self.export_to(schema, **kwargs)
 
-    def export_to(self, schema, **kwargs):
-        if schema == 'xlsform':
-            return self.export_by_config(XlsformExport(**kwargs))
-        elif schema == 'koboxlsform':
-            return self.export_by_config(KoboXlsformExport(**kwargs))
-        elif schema == '2':
-            return self.export_by_config(self.EXPORT_CONFIGS(**kwargs))
-        elif schema == '1':
-            return self.export_by_config(self.EXPORT_CONFIGS_SCHEMA_1(**kwargs))
-        raise ValueError('Unknown export schema')
+    def export_to(self, schema_or_configs, **kwargs):
+        if isinstance(schema_or_configs, str):
+            schema = schema_or_configs
+            export_configs = {
+                'xlsform': XlsformExport,
+                'koboxlsform': KoboXlsformExport,
+                '1': self.EXPORT_CONFIGS_SCHEMA_1,
+                '2': self.EXPORT_CONFIGS,
+            }[schema](**kwargs)
+        else:
+            configs_kls = schema_or_configs
+            assert issubclass(configs_kls, ExportConfigs)
+            export_configs = configs_kls(**kwargs)
+        return self.export_by_config(export_configs)
 
     def export_by_config(self, export_configs):
         result = self._export(export_configs)
