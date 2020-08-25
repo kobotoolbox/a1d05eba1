@@ -1,3 +1,4 @@
 anyOf:
+- $ref: '#/$defs/ignoredRow'
 - $ref: '#/$defs/surveyRow'
 - $ref: '#/$defs/grouping'

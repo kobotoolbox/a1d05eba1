@@ -86,10 +86,10 @@ class Surv(SurveyComponentWithTuple):
 
         if flat:
             for row in self:
-                rr = row.flat_export(schema=schema)
-                out = out + (
-                    row.flat_export(schema=schema),
-                )
+                exp = row.flat_export(schema=schema)
+                if exp is None:
+                    continue
+                out = out + (exp,)
         else:
             for row in self.rows:
                 for _row in row.nested_export(schema=schema):

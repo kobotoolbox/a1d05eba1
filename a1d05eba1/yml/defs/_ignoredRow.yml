@@ -1,0 +1,8 @@
+type: object
+additionalProperties: true
+required:
+- 'type'
+properties:
+  type:
+    type: string
+    pattern: "^#\\w+$"

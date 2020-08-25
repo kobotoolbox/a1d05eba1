@@ -39,7 +39,12 @@ class Row(SurveyComponentWithOrderedDict, Parented):
     renames_to_v1 = yload_file('renames/to1/column')
     renames_from_v1 = yload_file('renames/from1/column', invert=True)
     rows = tuple()
+    ignored = False
     _anchor = False
+
+    def postload(self, row):
+        if self.type.startswith('#'):
+            self.ignored = True
 
     def load_from_2(self, **kwargs):
         self._data = kfrozendict(kwargs.get('row'))
@@ -128,6 +133,8 @@ class Row(SurveyComponentWithOrderedDict, Parented):
     @kassertfrozen
     def flat_export(self, schema='2'):
         type_val = self.typefield.val
+        if self.ignored:
+            return None
         if hasattr(self.typefield, 'flat_val'):
             type_val = self.typefield.flat_val
         anchor_key = '$anchor'
@@ -189,6 +196,8 @@ class ClosingRow(Parented):
 
     @kassertfrozen
     def flat_export(self, schema='2'):
+        if self._parent.ignored:
+            return None
         return kfrozendict({'type': self.type,
                             '$anchor': self.compiled_anchor()})
 
