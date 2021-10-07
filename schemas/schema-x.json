@@ -80,7 +80,7 @@
       "type": "object"
     },
     "choices": {
-      "$description": "a collection of choice lists used in the form",
+      "description": "a collection of choice lists used in the form",
       "patternProperties": {
         ".*": {
           "items": {
@@ -154,7 +154,7 @@
     },
     "metas": {
       "additionalProperties": false,
-      "$description": "meta values to be collected with the survey",
+      "description": "meta values to be collected with the survey",
       "properties": {
         "audit": {
           "$ref": "#/definitions/booleanOrTaggedMeta"
@@ -195,7 +195,7 @@
     },
     "notFalseyBooleanString": {
       "not": {
-        "$description": "Some fields like \"required\", for example are best represented as a boolean (true or false) and this schema prevents these fields from being saved as a boolean-like string\n",
+        "description": "Some fields like \"required\", for example are best represented as a boolean (true or false) and this schema prevents these fields from being saved as a boolean-like string\n",
         "enum": [
           "true",
           "TRUE",
@@ -218,7 +218,7 @@
       }
     },
     "settings": {
-      "$description": "parameters for how a survey is conducted and how the responses are saved",
+      "description": "parameters for how a survey is conducted and how the responses are saved",
       "additionalProperties": false,
       "properties": {
         "auto_delete": {
@@ -288,7 +288,7 @@
       "type": "object"
     },
     "survey": {
-      "$description": "the list of fields and groups that comprise a survey",
+      "description": "the list of fields and groups that comprise a survey",
       "items": {
         "$ref": "#/definitions/groupingOrRow"
       },
@@ -538,7 +538,7 @@
       "type": "object"
     },
     "translations": {
-      "$description": "the list of translations in the survey",
+      "description": "the list of translations in the survey",
       "items": {
         "$ref": "#/definitions/translationsItem"
       },
