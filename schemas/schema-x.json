@@ -1,0 +1,686 @@
+{
+  "definitions": {
+    "booleanOrTaggedMeta": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/type--string"
+        },
+        {
+          "$ref": "#/definitions/type--boolean"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "$ref": "#/definitions/nameString"
+            },
+            "tags": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "booleanOrXpath": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/type--boolean"
+        },
+        {
+          "$ref": "#/definitions/xpath"
+        }
+      ]
+    },
+    "choice": {
+      "additionalProperties": false,
+      "properties": {
+        "$anchor": {
+          "type": "string"
+        },
+        "audio": {
+          "$ref": "#/definitions/translatable"
+        },
+        "filters": {
+          "type": "object"
+        },
+        "image": {
+          "$ref": "#/definitions/translatable"
+        },
+        "label": {
+          "$ref": "#/definitions/translatable"
+        },
+        "value": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "type": "object"
+    },
+    "choiceFilter": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "raw": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "raw"
+          ]
+        }
+      ],
+      "type": "object"
+    },
+    "choices": {
+      "$description": "a collection of choice lists used in the form",
+      "patternProperties": {
+        ".*": {
+          "items": {
+            "$ref": "#/definitions/choice"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "grouping": {
+      "additionalProperties": false,
+      "properties": {
+        "$anchor": {
+          "type": "string"
+        },
+        "appearance": {
+          "type": "string"
+        },
+        "guidance_hint": {
+          "$ref": "#/definitions/translatable"
+        },
+        "hint": {
+          "$ref": "#/definitions/translatable"
+        },
+        "label": {
+          "$ref": "#/definitions/translatable"
+        },
+        "name": {
+          "type": "string"
+        },
+        "repeat_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/definitions/groupingOrRow"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "group",
+            "repeat"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "$anchor"
+      ],
+      "type": "object"
+    },
+    "groupingOrRow": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/surveyRow"
+        },
+        {
+          "$ref": "#/definitions/grouping"
+        }
+      ]
+    },
+    "metas": {
+      "additionalProperties": false,
+      "$description": "meta values to be collected with the survey",
+      "properties": {
+        "audit": {
+          "$ref": "#/definitions/booleanOrTaggedMeta"
+        },
+        "deviceid": {
+          "$ref": "#/definitions/booleanOrTaggedMeta"
+        },
+        "email": {
+          "$ref": "#/definitions/booleanOrTaggedMeta"
+        },
+        "end": {
+          "$ref": "#/definitions/booleanOrTaggedMeta"
+        },
+        "phonenumber": {
+          "$ref": "#/definitions/booleanOrTaggedMeta"
+        },
+        "simserial": {
+          "$ref": "#/definitions/booleanOrTaggedMeta"
+        },
+        "start": {
+          "$ref": "#/definitions/booleanOrTaggedMeta"
+        },
+        "subscriberid": {
+          "$ref": "#/definitions/booleanOrTaggedMeta"
+        },
+        "today": {
+          "$ref": "#/definitions/booleanOrTaggedMeta"
+        },
+        "username": {
+          "$ref": "#/definitions/booleanOrTaggedMeta"
+        }
+      },
+      "type": "object"
+    },
+    "nameString": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "notFalseyBooleanString": {
+      "not": {
+        "$description": "Some fields like \"required\", for example are best represented as a boolean (true or false) and this schema prevents these fields from being saved as a boolean-like string\n",
+        "enum": [
+          "true",
+          "TRUE",
+          "true()",
+          "True",
+          "TRUE()",
+          "false",
+          "FALSE",
+          "FALSE()",
+          "false()",
+          "False",
+          "YES",
+          "Yes",
+          "yes",
+          "NO",
+          "No",
+          "no"
+        ],
+        "type": "string"
+      }
+    },
+    "settings": {
+      "$description": "parameters for how a survey is conducted and how the responses are saved",
+      "additionalProperties": false,
+      "properties": {
+        "auto_delete": {
+          "type": "boolean"
+        },
+        "auto_send": {
+          "type": "boolean"
+        },
+        "delimiter": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "instance_name": {
+          "type": "string"
+        },
+        "namespaces": {
+          "type": "object"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "public_key": {
+          "anyOf": [
+            {
+              "pattern": "^[^\n]+$",
+              "type": "string"
+            },
+            {
+              "properties": {
+                "$ref": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        },
+        "root": {
+          "type": "string"
+        },
+        "style": {
+          "items": {
+            "enum": [
+              "theme-grid",
+              "pages",
+              "no-text-transform"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "submission_url": {
+          "$ref": "#/definitions/type--url"
+        },
+        "title": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "survey": {
+      "$description": "the list of fields and groups that comprise a survey",
+      "items": {
+        "$ref": "#/definitions/groupingOrRow"
+      },
+      "type": "array"
+    },
+    "surveyRow": {
+      "additionalProperties": false,
+      "properties": {
+        "$anchor": {
+          "type": "string"
+        },
+        "appearance": {
+          "enum": [
+            "field-list",
+            "horizontal-compact",
+            "label",
+            "rating",
+            "likert",
+            "list-nolabel",
+            "minimal",
+            "multiline",
+            "no-calendar",
+            "month-year",
+            "year",
+            "literacy"
+          ],
+          "type": "string"
+        },
+        "audio": {
+          "$ref": "#/definitions/translatableMedia"
+        },
+        "bind": {
+          "type": "object"
+        },
+        "body_kb_flash": {
+          "type": "string"
+        },
+        "calculation": {
+          "$ref": "#/definitions/type--string"
+        },
+        "choice_filter": {
+          "$ref": "#/definitions/choiceFilter"
+        },
+        "compact_tag": {
+          "$ref": "#/definitions/type--string"
+        },
+        "constraint": {
+          "properties": {
+            "message": {
+              "$ref": "#/definitions/translatable"
+            }
+          },
+          "type": "object"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/type--string"
+            },
+            {
+              "$ref": "#/definitions/booleanOrXpath"
+            }
+          ]
+        },
+        "guidance_hint": {
+          "$ref": "#/definitions/translatable"
+        },
+        "hint": {
+          "$ref": "#/definitions/translatable"
+        },
+        "image": {
+          "$ref": "#/definitions/translatableMedia"
+        },
+        "intent": {
+          "type": "string"
+        },
+        "kobo--matrix_list": {
+          "type": "string"
+        },
+        "kobo--rank-constraint-message": {
+          "type": "string"
+        },
+        "kobo--rank-items": {
+          "pattern": ".*",
+          "type": "string"
+        },
+        "kobo--score-choices": {
+          "type": "string"
+        },
+        "label": {
+          "$ref": "#/definitions/translatable"
+        },
+        "name": {
+          "$ref": "#/definitions/nameString"
+        },
+        "params": {
+          "additionalProperties": false,
+          "patternProperties": {
+            ".+": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          },
+          "type": "object"
+        },
+        "read_only": {
+          "$ref": "#/definitions/booleanOrXpath"
+        },
+        "relevant": {
+          "$ref": "#/definitions/xpath"
+        },
+        "required": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/booleanOrXpath"
+            },
+            {
+              "$ref": "#/definitions/notFalseyBooleanString"
+            }
+          ]
+        },
+        "select_from": {
+          "pattern": ".*",
+          "type": "string"
+        },
+        "select_from_external": {
+          "type": "string"
+        },
+        "select_from_file": {
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "$ref": "#/definitions/surveyRowType"
+        },
+        "video": {
+          "$ref": "#/definitions/translatableMedia"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "surveyRowType": {
+      "enum": [
+        "integer",
+        "decimal",
+        "range",
+        "text",
+        "select_one",
+        "select_multiple",
+        "select_one_from_file",
+        "select_multiple_from_file",
+        "select_one_external",
+        "rank",
+        "note",
+        "geopoint",
+        "geotrace",
+        "geoshape",
+        "osm",
+        "xml-external",
+        "audit",
+        "date",
+        "time",
+        "datetime",
+        "image",
+        "audio",
+        "video",
+        "file",
+        "barcode",
+        "calculate",
+        "acknowledge",
+        "hidden",
+        "xmlexternal",
+        "begin_group",
+        "end_group",
+        "begin_repeat",
+        "end_repeat",
+        "begin_kobomatrix",
+        "end_kobomatrix",
+        "begin_score",
+        "score__row",
+        "end_score",
+        "begin_koborank",
+        "begin_rank",
+        "rank__level",
+        "koborank__level",
+        "end_koborank",
+        "end_rank",
+        "osm",
+        "osm_buildingtags",
+        "xmlexternal"
+      ],
+      "type": "string"
+    },
+    "translatable": {
+      "$comment": "Translatable fields have keys {tx0, tx1}",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-zA-Z0-9_]{2,6}$": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/xpath"
+            },
+            {
+              "$ref": "#/definitions/type--string"
+            },
+            {
+              "$ref": "#/definitions/type--null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "translatableMedia": {
+      "patternProperties": {
+        "^[a-zA-Z0-9_]{2,6}$": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/type--string"
+            },
+            {
+              "$ref": "#/definitions/type--filecode"
+            },
+            {
+              "$ref": "#/definitions/type--url"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "translations": {
+      "$description": "the list of translations in the survey",
+      "items": {
+        "$ref": "#/definitions/translationsItem"
+      },
+      "type": "array"
+    },
+    "translationsItem": {
+      "additionalProperties": false,
+      "properties": {
+        "$anchor": {
+          "minLength": 2,
+          "pattern": "^[a-zA-Z0-9_]{2,6}$",
+          "type": "string"
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "locale": {
+          "minLength": 2,
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "$anchor"
+      ],
+      "type": "object"
+    },
+    "type--boolean": {
+      "type": "boolean"
+    },
+    "type--filecode": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "pattern": "^\\w",
+              "type": "string"
+            }
+          },
+          "required": [
+            "file"
+          ],
+          "type": "object"
+        },
+        {
+          "match": "/.*\\.\\w{3}/",
+          "type": "string"
+        }
+      ]
+    },
+    "type--null": {
+      "type": "null"
+    },
+    "type--string": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "type--url": {
+      "type": "string"
+    },
+    "xpath": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/type--string"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "raw": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "raw"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "compile": {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/type--string"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "$path": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "compile"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "$id": "https://dorey.github.io/a1d05eba1/schemas/schema-2020-07-20-58884fea.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "choices": {
+      "$ref": "#/definitions/choices"
+    },
+    "metas": {
+      "$ref": "#/definitions/metas"
+    },
+    "schema": {
+      "$comment": "schema string says which version of a jsonschema it follows",
+      "type": "string"
+    },
+    "settings": {
+      "$ref": "#/definitions/settings"
+    },
+    "survey": {
+      "$ref": "#/definitions/survey"
+    },
+    "translations": {
+      "$ref": "#/definitions/translations"
+    }
+  },
+  "type": "object"
+}
