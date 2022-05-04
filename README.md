@@ -68,8 +68,10 @@ jsonschema_validated = Content(my_asset_content).export(schema='2')
 
 ## Running tests
 
+1. Create and activate a new virtualenv, then:
+
 ```
-cd path_to_a1d05eba1
+pip install -r dev-requirements.txt
 py.test -sx
 # or generate coverage report:
 pytest --cov=a1d05eba1 tests/ --cov-report=html
