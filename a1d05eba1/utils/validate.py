@@ -30,7 +30,7 @@ def _spath(path):
             items.append(f'[{item}]')
         else:
             items.append(f'{item}')
-    return re.sub('\.\[', '[', '.'.join(items))
+    return re.sub(r'\.\[', '[', '.'.join(items))
 
 def jsonschema_validate(content, schema):
     try:
