@@ -26,14 +26,14 @@ setuptools.setup(
     },
     install_requires=[
         'oyaml==0.9',
-        'jsonschema==3.2.0',
+        'jsonschema==4.4.0',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
 )
 
 # pytest --cov=a1d05eba1 tests/ --cov-report=html
